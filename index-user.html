@@ -57,6 +57,7 @@
       width: 100%;
       max-width: 400px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
     }
 
     .login-title {
@@ -68,6 +69,7 @@
 
     .form-group {
       margin-bottom: 1.5rem;
+      position: relative;
     }
 
     .form-group label {
@@ -156,6 +158,14 @@
 
     .main-container-client {
       padding: 1rem;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
     }
 
     .card {
@@ -279,6 +289,59 @@
       color: white;
     }
 
+    /* Sección de perfil */
+    .profile-info {
+      margin-top: 1rem;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-label {
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .info-value {
+      text-align: right;
+    }
+
+    /* Sección de documentos */
+    .document-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .document-item {
+      background-color: var(--background-color);
+      padding: 1rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .document-icon {
+      font-size: 1.5rem;
+      margin-right: 1rem;
+      color: var(--primary-color);
+    }
+
+    .document-name {
+      flex: 1;
+    }
+
+    .document-action {
+      color: var(--primary-color);
+      cursor: pointer;
+    }
+
     /* Menú inferior */
     .bottom-nav {
       position: fixed;
@@ -301,6 +364,7 @@
       text-decoration: none;
       font-size: 0.8rem;
       padding: 0.5rem;
+      cursor: pointer;
     }
 
     .nav-item i {
@@ -363,6 +427,10 @@
       background-color: var(--warning-color);
     }
 
+    .btn-info {
+      background-color: var(--info-color);
+    }
+
     /* Alertas */
     .alert {
       padding: 1rem;
@@ -382,8 +450,45 @@
       border-left: 4px solid var(--danger-color);
     }
 
+    .alert-success {
+      background-color: rgba(46, 204, 113, 0.2);
+      border-left: 4px solid var(--success-color);
+    }
+
     .alert i {
       margin-right: 0.5rem;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      z-index: 10;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .spinner.active {
+      display: flex;
+    }
+
+    .spinner-icon {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     /* Responsive */
@@ -403,6 +508,9 @@
   <!-- Sección de Login -->
   <section id="login-section">
     <div class="login-container">
+      <div class="spinner" id="loginSpinner">
+        <div class="spinner-icon"></div>
+      </div>
       <h1 class="login-title">Iniciar Sesión</h1>
       <form id="loginForm">
         <div class="form-group">
@@ -433,119 +541,198 @@
     </div>
 
     <div class="main-container-client">
-      <!-- Resumen del Préstamo -->
-      <div class="card">
-        <h3 class="card-title">Resumen de tu Préstamo</h3>
-        <div class="loan-summary-item">
-          <span class="loan-detail-label">Monto original:</span>
-          <span id="loanOriginalAmount">$0.00</span>
+      <!-- Sección de Resumen -->
+      <div id="summary-section" class="section active">
+        <div class="card">
+          <h3 class="card-title">Resumen de tu Préstamo</h3>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Monto original:</span>
+            <span id="loanOriginalAmount">$0.00</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Saldo pendiente:</span>
+            <span id="loanBalance">$0.00</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Próximo pago:</span>
+            <span id="nextPaymentDate">--/--/----</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Monto a pagar:</span>
+            <span id="nextPaymentAmount">$0.00</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Pagos realizados:</span>
+            <span id="paymentsMade">0</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Pagos pendientes:</span>
+            <span id="paymentsPending">0</span>
+          </div>
         </div>
-        <div class="loan-summary-item">
-          <span class="loan-detail-label">Saldo pendiente:</span>
-          <span id="loanBalance">$0.00</span>
-        </div>
-        <div class="loan-summary-item">
-          <span class="loan-detail-label">Próximo pago:</span>
-          <span id="nextPaymentDate">--/--/----</span>
-        </div>
-        <div class="loan-summary-item">
-          <span class="loan-detail-label">Monto a pagar:</span>
-          <span id="nextPaymentAmount">$0.00</span>
-        </div>
-        <div class="loan-summary-item">
-          <span class="loan-detail-label">Pagos realizados:</span>
-          <span id="paymentsMade">0</span>
-        </div>
-        <div class="loan-summary-item">
-          <span class="loan-detail-label">Pagos pendientes:</span>
-          <span id="paymentsPending">0</span>
+
+        <div class="card">
+          <h3 class="card-title">Estado de tu Cuenta</h3>
+          <div id="accountStatus">
+            <p>Cargando estado de cuenta...</p>
+          </div>
         </div>
       </div>
 
-      <!-- Historial de Pagos -->
-      <div class="card">
-        <h3 class="card-title">Historial de Pagos</h3>
-        <div class="payment-history" id="paymentHistory">
-          <p>Cargando historial de pagos...</p>
+      <!-- Sección de Historial -->
+      <div id="history-section" class="section">
+        <div class="card">
+          <h3 class="card-title">Historial de Pagos</h3>
+          <div class="payment-history" id="paymentHistory">
+            <p>Cargando historial de pagos...</p>
+          </div>
         </div>
       </div>
 
-      <!-- Formulario de Pago -->
-      <div class="card">
-        <h3 class="card-title">Realizar Pago</h3>
-        <div id="paymentAlert" class="alert alert-warning" style="display: none;">
-          <i class="fas fa-exclamation-circle"></i>
-          <span id="paymentAlertMessage"></span>
-        </div>
-        
-        <form id="paymentForm" class="payment-form">
-          <input type="hidden" id="loanId">
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="paymentAmount">Monto a pagar</label>
-              <input type="number" id="paymentAmount" class="form-control" min="1" required>
-            </div>
-            <div class="form-group">
-              <label for="paymentDate">Fecha</label>
-              <input type="date" id="paymentDate" class="form-control" required>
-            </div>
+      <!-- Sección de Pagos -->
+      <div id="payment-section" class="section">
+        <div class="card">
+          <h3 class="card-title">Realizar Pago</h3>
+          <div id="paymentAlert" class="alert alert-warning" style="display: none;">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="paymentAlertMessage"></span>
           </div>
           
-          <div class="form-group">
-            <label>Tipo de Pago</label>
-            <div class="payment-options">
-              <div class="payment-option">
-                <input type="radio" id="paymentTypeFull" name="paymentType" value="full" checked>
-                <label for="paymentTypeFull">Completo</label>
-              </div>
-              <div class="payment-option">
-                <input type="radio" id="paymentTypeCapital" name="paymentType" value="capital">
-                <label for="paymentTypeCapital">Capital</label>
-              </div>
-              <div class="payment-option">
-                <input type="radio" id="paymentTypeInterest" name="paymentType" value="interest">
-                <label for="paymentTypeInterest">Interés</label>
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-group" id="lateFeeContainer" style="display: none;">
-            <label>
-              <input type="checkbox" id="applyLateFee"> Incluir mora
-            </label>
-            <div id="lateFeeDetails" style="display: none; margin-top: 0.5rem;">
+          <form id="paymentForm" class="payment-form">
+            <input type="hidden" id="loanId">
+            
+            <div class="form-row">
               <div class="form-group">
-                <label for="lateFeeAmount">Monto de mora</label>
-                <input type="number" id="lateFeeAmount" class="form-control" min="0" step="0.01" value="0">
+                <label for="paymentAmount">Monto a pagar</label>
+                <input type="number" id="paymentAmount" class="form-control" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="paymentDate">Fecha</label>
+                <input type="date" id="paymentDate" class="form-control" required>
               </div>
             </div>
+            
+            <div class="form-group">
+              <label>Tipo de Pago</label>
+              <div class="payment-options">
+                <div class="payment-option">
+                  <input type="radio" id="paymentTypeFull" name="paymentType" value="full" checked>
+                  <label for="paymentTypeFull">Completo</label>
+                </div>
+                <div class="payment-option">
+                  <input type="radio" id="paymentTypeCapital" name="paymentType" value="capital">
+                  <label for="paymentTypeCapital">Capital</label>
+                </div>
+                <div class="payment-option">
+                  <input type="radio" id="paymentTypeInterest" name="paymentType" value="interest">
+                  <label for="paymentTypeInterest">Interés</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group" id="lateFeeContainer" style="display: none;">
+              <label>
+                <input type="checkbox" id="applyLateFee"> Incluir mora
+              </label>
+              <div id="lateFeeDetails" style="display: none; margin-top: 0.5rem;">
+                <div class="form-group">
+                  <label for="lateFeeAmount">Monto de mora</label>
+                  <input type="number" id="lateFeeAmount" class="form-control" min="0" step="0.01" value="0">
+                </div>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn btn-success">
+              <i class="fas fa-money-bill-wave"></i> Registrar Pago
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Sección de Perfil -->
+      <div id="profile-section" class="section">
+        <div class="card">
+          <h3 class="card-title">Mi Perfil</h3>
+          <div class="profile-info">
+            <div class="info-item">
+              <span class="info-label">Nombre completo:</span>
+              <span class="info-value" id="profileName">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Identificación:</span>
+              <span class="info-value" id="profileId">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Teléfono:</span>
+              <span class="info-value" id="profilePhone">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Dirección:</span>
+              <span class="info-value" id="profileAddress">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Nacionalidad:</span>
+              <span class="info-value" id="profileNationality">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Referencia personal:</span>
+              <span class="info-value" id="profileReference">-</span>
+            </div>
           </div>
-          
-          <button type="submit" class="btn btn-success">
-            <i class="fas fa-money-bill-wave"></i> Registrar Pago
-          </button>
-        </form>
+        </div>
+      </div>
+
+      <!-- Sección de Documentos -->
+      <div id="documents-section" class="section">
+        <div class="card">
+          <h3 class="card-title">Mis Documentos</h3>
+          <div class="document-list">
+            <div class="document-item">
+              <i class="fas fa-file-contract document-icon"></i>
+              <span class="document-name">Contrato de Préstamo</span>
+              <i class="fas fa-download document-action" onclick="downloadDocument('contract')"></i>
+            </div>
+            <div class="document-item">
+              <i class="fas fa-file-invoice-dollar document-icon"></i>
+              <span class="document-name">Estado de Cuenta</span>
+              <i class="fas fa-download document-action" onclick="downloadDocument('statement')"></i>
+            </div>
+            <div class="document-item">
+              <i class="fas fa-file-alt document-icon"></i>
+              <span class="document-name">Carta de Recomendación</span>
+              <i class="fas fa-download document-action" onclick="downloadDocument('recommendation')"></i>
+            </div>
+            <div class="document-item">
+              <i class="fas fa-receipt document-icon"></i>
+              <span class="document-name">Recibos de Pago</span>
+              <i class="fas fa-download document-action" onclick="downloadDocument('receipts')"></i>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Menú Inferior -->
     <div class="bottom-nav">
-      <a href="#" class="nav-item active" data-section="summary">
+      <a class="nav-item active" data-section="summary">
         <i class="fas fa-home"></i>
         <span>Resumen</span>
       </a>
-      <a href="#" class="nav-item" data-section="history">
+      <a class="nav-item" data-section="history">
         <i class="fas fa-history"></i>
         <span>Historial</span>
       </a>
-      <a href="#" class="nav-item" data-section="payment">
+      <a class="nav-item" data-section="payment">
         <i class="fas fa-hand-holding-usd"></i>
         <span>Pagar</span>
       </a>
-      <a href="#" class="nav-item" id="logoutBtn">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Salir</span>
+      <a class="nav-item" data-section="profile">
+        <i class="fas fa-user"></i>
+        <span>Perfil</span>
+      </a>
+      <a class="nav-item" data-section="documents">
+        <i class="fas fa-file-alt"></i>
+        <span>Documentos</span>
       </a>
     </div>
   </section>
@@ -632,16 +819,11 @@
       
       // Menú inferior
       document.querySelectorAll('.nav-item').forEach(item => {
-        if (!item.id) { // Excluir el botón de logout
-          item.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigateToSection(item.dataset.section);
-          });
-        }
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          navigateToSection(item.dataset.section);
+        });
       });
-      
-      // Botón de logout
-      document.getElementById('logoutBtn').addEventListener('click', logout);
       
       // Modal de confirmación
       document.getElementById('confirmPaymentBtn').addEventListener('click', confirmPayment);
@@ -658,6 +840,9 @@
       const username = document.getElementById('loginUsername').value.trim();
       const pin = document.getElementById('loginPin').value.trim();
       
+      // Mostrar spinner de carga
+      document.getElementById('loginSpinner').classList.add('active');
+      
       try {
         // Buscar usuario en la colección LoanUsers
         const q = query(collection(db, "LoanUsers"), where("username", "==", username), where("pin", "==", pin));
@@ -665,6 +850,7 @@
         
         if (querySnapshot.empty) {
           showAlert('Credenciales incorrectas', 'danger');
+          document.getElementById('loginSpinner').classList.remove('active');
           return;
         }
         
@@ -676,29 +862,36 @@
         };
         
         // Obtener el préstamo del usuario (asumimos solo un préstamo por usuario)
-        const loanId = currentUser.loanIds[0];
-        const loanRef = doc(db, "Loans", loanId);
-        const loanSnap = await getDoc(loanRef);
-        
-        if (!loanSnap.exists()) {
-          showAlert('No se encontró información del préstamo', 'danger');
-          return;
+        if (currentUser.loanIds && currentUser.loanIds.length > 0) {
+          const loanId = currentUser.loanIds[0];
+          const loanRef = doc(db, "Loans", loanId);
+          const loanSnap = await getDoc(loanRef);
+          
+          if (!loanSnap.exists()) {
+            showAlert('No se encontró información del préstamo', 'danger');
+            document.getElementById('loginSpinner').classList.remove('active');
+            return;
+          }
+          
+          currentLoan = {
+            id: loanSnap.id,
+            ...loanSnap.data()
+          };
+          
+          // Mostrar sección del cliente
+          showClientSection();
+          
+          // Cargar datos del cliente y préstamo
+          loadClientData();
+        } else {
+          showAlert('No se encontró préstamo asociado a este usuario', 'danger');
         }
-        
-        currentLoan = {
-          id: loanSnap.id,
-          ...loanSnap.data()
-        };
-        
-        // Mostrar sección del cliente
-        showClientSection();
-        
-        // Cargar datos del cliente y préstamo
-        loadClientData();
         
       } catch (error) {
         console.error("Error al iniciar sesión: ", error);
         showAlert('Ocurrió un error al iniciar sesión', 'danger');
+      } finally {
+        document.getElementById('loginSpinner').classList.remove('active');
       }
     }
 
@@ -738,11 +931,80 @@
         document.getElementById('paymentAmount').value = nextPayment.amount.toFixed(2);
       }
       
+      // Cargar estado de cuenta
+      loadAccountStatus();
+      
       // Cargar historial de pagos
       loadPaymentHistory();
       
+      // Cargar perfil del usuario
+      loadProfileData();
+      
       // Actualizar formulario de pago
       updatePaymentForm();
+    }
+
+    // Cargar estado de cuenta
+    function loadAccountStatus() {
+      const container = document.getElementById('accountStatus');
+      const today = new Date();
+      const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
+      
+      let statusHTML = '';
+      let statusClass = '';
+      
+      if (currentLoan.balance <= 0) {
+        statusHTML = `
+          <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span>¡Felicidades! Has completado todos tus pagos.</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Estado:</span>
+            <span>Cuenta Cerrada</span>
+          </div>
+        `;
+      } else if (nextPayment) {
+        const dueDate = new Date(nextPayment.dueDate);
+        const daysLate = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+        
+        if (daysLate > 0) {
+          statusClass = 'alert-danger';
+          statusHTML = `
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>Pago atrasado por ${daysLate} días</span>
+            </div>
+            <div class="loan-summary-item">
+              <span class="loan-detail-label">Estado:</span>
+              <span>En Mora</span>
+            </div>
+            <div class="loan-summary-item">
+              <span class="loan-detail-label">Próximo pago vencido:</span>
+              <span>${dueDate.toLocaleDateString()}</span>
+            </div>
+          `;
+        } else {
+          const daysUntilDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+          statusClass = daysUntilDue <= 5 ? 'alert-warning' : '';
+          statusHTML = `
+            <div class="alert ${statusClass}">
+              <i class="fas fa-clock"></i>
+              <span>Próximo pago en ${daysUntilDue} días</span>
+            </div>
+            <div class="loan-summary-item">
+              <span class="loan-detail-label">Estado:</span>
+              <span>Al día</span>
+            </div>
+            <div class="loan-summary-item">
+              <span class="loan-detail-label">Fecha límite:</span>
+              <span>${dueDate.toLocaleDateString()}</span>
+            </div>
+          `;
+        }
+      }
+      
+      container.innerHTML = statusHTML;
     }
 
     // Cargar historial de pagos
@@ -796,6 +1058,45 @@
         
         container.appendChild(paymentItem);
       });
+    }
+
+    // Cargar datos del perfil
+    function loadProfileData() {
+      document.getElementById('profileName').textContent = currentLoan.client.name;
+      document.getElementById('profileId').textContent = currentLoan.client.id;
+      document.getElementById('profilePhone').textContent = currentLoan.client.phone;
+      document.getElementById('profileAddress').textContent = currentLoan.client.address;
+      document.getElementById('profileNationality').textContent = currentLoan.client.nationality;
+      document.getElementById('profileReference').textContent = 
+        `${currentLoan.client.reference.name} (${currentLoan.client.reference.relation}) - ${currentLoan.client.reference.phone}`;
+    }
+
+    // Descargar documento (simulado)
+    window.downloadDocument = function(type) {
+      let docName = '';
+      let content = '';
+      
+      switch(type) {
+        case 'contract':
+          docName = `Contrato_Prestamo_${currentLoan.id.slice(0, 6)}.pdf`;
+          content = `CONTRATO DE PRÉSTAMO\n\nCliente: ${currentLoan.client.name}\nID: ${currentLoan.client.id}\nMonto: $${currentLoan.amount.toFixed(2)}\nTasa: ${currentLoan.interestRate}%\nPlazo: ${currentLoan.term} meses`;
+          break;
+        case 'statement':
+          docName = `Estado_Cuenta_${currentLoan.id.slice(0, 6)}.pdf`;
+          content = `ESTADO DE CUENTA\n\nCliente: ${currentLoan.client.name}\nSaldo pendiente: $${currentLoan.balance.toFixed(2)}\nPróximo pago: ${document.getElementById('nextPaymentDate').textContent}\nMonto: ${document.getElementById('nextPaymentAmount').textContent}`;
+          break;
+        case 'recommendation':
+          docName = `Carta_Recomendacion_${currentLoan.client.name.replace(/\s+/g, '_')}.pdf`;
+          content = `CARTA DE RECOMENDACIÓN\n\nPor medio de la presente certificamos que el/la señor(a) ${currentLoan.client.name} ha cumplido satisfactoriamente con todas sus obligaciones financieras en nuestra institución.`;
+          break;
+        case 'receipts':
+          docName = `Recibos_Pago_${currentLoan.id.slice(0, 6)}.pdf`;
+          content = `HISTORIAL DE RECIBOS\n\nCliente: ${currentLoan.client.name}\n\n${currentLoan.payments.map(p => `Fecha: ${p.date.toDate().toLocaleDateString()} - Monto: $${p.amount.toFixed(2)}`).join('\n')}`;
+          break;
+      }
+      
+      // Simular descarga (en un sistema real, esto sería un enlace a un archivo real)
+      showInfoModal('Descarga', `Se generó el documento "${docName}" con éxito. En un sistema real, este documento se descargaría automáticamente.`);
     }
 
     // Actualizar formulario de pago según tipo seleccionado
@@ -1011,11 +1312,13 @@
         }
       });
       
-      // Aquí podrías implementar lógica para mostrar/ocultar secciones si es necesario
-      // En este diseño, todo está en la misma página con scroll
-      document.getElementById(section === 'payment' ? 'paymentForm' : section).scrollIntoView({
-        behavior: 'smooth'
+      // Ocultar todas las secciones
+      document.querySelectorAll('.section').forEach(sec => {
+        sec.classList.remove('active');
       });
+      
+      // Mostrar la sección seleccionada
+      document.getElementById(`${section}-section`).classList.add('active');
     }
 
     // Mostrar alerta
