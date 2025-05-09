@@ -2,961 +2,164 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TikiTok</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cliente - Sistema de Préstamos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #fe2c55;
-      --primary-dark: #e61e40;
-      --secondary-color: #25F4EE;
-      --background: #121212;
-      --card-bg: #1e1e1e;
-      --text-light: #ffffff;
-      --text-gray: #a8a8a8;
-      --border-radius: 12px;
-      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: var(--background);
-      color: var(--text-light);
-      line-height: 1.6;
-      padding-bottom: 70px; /* Espacio para el menú inferior */
-      overscroll-behavior-y: contain;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    /* Header */
-    .app-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px;
-      background: var(--card-bg);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      height: 60px;
-    }
-
-    .logo-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-img {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-    }
-
-    .logo-text {
-      font-weight: bold;
-      font-size: 18px;
-    }
-
-    .search-container {
-      position: relative;
-    }
-
-    .search-icon {
-      font-size: 20px;
-      cursor: pointer;
-      color: var(--text-light);
-    }
-
-    .search-input {
-      position: absolute;
-      top: 100%;
-      right: 0;
-      width: 250px;
-      padding: 10px 15px;
-      border: none;
-      border-radius: var(--border-radius);
-      background: var(--card-bg);
-      color: var(--text-light);
-      box-shadow: var(--box-shadow);
-      display: none;
-      z-index: 101;
-    }
-
-    .search-input.active {
-      display: block;
-    }
-
-    .search-results {
-      position: absolute;
-      top: 140%;
-      right: 0;
-      width: 250px;
-      max-height: 300px;
-      overflow-y: auto;
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      display: none;
-      z-index: 102;
-    }
-
-    .search-results.active {
-      display: block;
-    }
-
-    .search-result-item {
-      padding: 10px 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .search-result-item:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .search-result-avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    /* Contenido principal */
-    .container {
-      max-width: 100%;
-      padding: 15px;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .page-title {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .filter-controls {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 5px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .filter-controls::-webkit-scrollbar {
-      display: none;
-    }
-
-    .filter-btn {
-      padding: 8px 12px;
-      border: none;
-      border-radius: var(--border-radius);
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-light);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-      font-size: 14px;
-    }
-
-    .filter-btn.active {
-      background: var(--primary-color);
-    }
-
-    .filter-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .posts-container {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      gap: 20px;
     }
 
-    .post-card {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      box-shadow: var(--box-shadow);
-      transition: transform 0.3s ease;
-    }
-
-    .post-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .post-header {
-      display: flex;
-      align-items: center;
-      padding: 12px;
-      gap: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      cursor: pointer;
-    }
-
-    .user-info {
-      flex: 1;
-    }
-
-    .user-name {
-      font-weight: bold;
-      cursor: pointer;
-      transition: color 0.3s ease;
-      font-size: 15px;
-    }
-
-    .user-name:hover {
-      color: var(--primary-color);
-    }
-
-    .post-time {
-      font-size: 12px;
-      color: var(--text-gray);
-    }
-
-    .follow-btn {
-      padding: 5px 10px;
-      border: none;
-      border-radius: var(--border-radius);
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-follow {
-      background: var(--secondary-color);
-      color: #000;
-    }
-
-    .btn-following {
-      background: transparent;
-      color: var(--text-light);
-      border: 1px solid var(--text-gray);
-    }
-
-    .post-content {
-      padding: 12px;
-    }
-
-    .post-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .post-description {
-      margin-bottom: 12px;
-      color: var(--text-gray);
-      font-size: 14px;
-    }
-
-    .post-media-container {
-      position: relative;
-      width: 100%;
-      margin-bottom: 12px;
-      border-radius: var(--border-radius);
-      overflow: hidden;
-    }
-
-    .post-image {
-      width: 100%;
-      max-height: 300px;
-      object-fit: cover;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      transition: transform 0.3s ease;
-    }
-
-    .post-image:hover {
-      transform: scale(1.02);
-    }
-
-    /* Estilos para videos */
-    .video-container {
-      position: relative;
-      width: 100%;
-      background: #000;
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      touch-action: pan-y;
-    }
-
-    /* Video normal (horizontal) */
-    .video-container.normal video {
-      width: 100%;
-      height: auto;
-      max-height: 500px;
-      display: block;
-    }
-
-    /* Video short (vertical) */
-    .video-container.short video {
-      width: 100%;
-      height: 70vh;
-      max-height: 600px;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* Loading dentro del reproductor */
-    .video-loading {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 10;
-    }
-
-    .video-loading i {
-      font-size: 30px;
-      color: var(--primary-color);
-      animation: spin 1s linear infinite;
-    }
-
-    /* Miniaturas de video */
-    .video-thumbnail {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 5;
-    }
-
-    .post-footer {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 12px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .post-actions {
-      display: flex;
-      gap: 15px;
-    }
-
-    .action-btn {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      background: none;
-      border: none;
-      color: var(--text-light);
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .action-btn i {
-      transition: color 0.3s ease;
-      font-size: 18px;
-    }
-
-    .action-btn:hover i {
-      color: var(--primary-color);
-    }
-
-    .liked {
-      color: var(--primary-color);
-    }
-
-    .post-stats {
-      font-size: 12px;
-      color: var(--text-gray);
-    }
-
-    .comments-section {
-      padding: 0 12px 12px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      display: none;
-    }
-
-    .comments-list {
-      max-height: 200px;
-      overflow-y: auto;
-      margin-bottom: 12px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .comment {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .comment-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .comment-content {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 8px 12px;
-      border-radius: 18px;
-    }
-
-    .comment-user {
-      font-weight: bold;
-      font-size: 13px;
-      margin-bottom: 3px;
-    }
-
-    .comment-text {
-      font-size: 14px;
-    }
-
-    .comment-form {
-      display: flex;
-      gap: 10px;
-    }
-
-    .comment-input {
-      flex: 1;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-light);
-      font-size: 14px;
-    }
-
-    .comment-input:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .comment-submit {
-      padding: 0 15px;
-      border: none;
-      border-radius: 18px;
-      background: var(--primary-color);
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    /* Perfil de usuario */
-    .profile-container {
-      display: none;
-      padding: 15px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-
-    .profile-avatar {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--primary-color);
-    }
-
-    .profile-info {
-      flex: 1;
-    }
-
-    .profile-name {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    .profile-email {
-      color: var(--text-gray);
-      margin-bottom: 10px;
-      font-size: 13px;
-    }
-
-    .profile-stats {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-
-    .profile-stat {
-      text-align: center;
-      cursor: pointer;
-      flex: 1;
-    }
-
-    .stat-number {
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-gray);
-    }
-
-    .profile-posts-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .profile-posts-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    .profile-post {
-      aspect-ratio: 1;
-      border-radius: 5px;
-      overflow: hidden;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .profile-post img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-
-    .profile-post:hover img {
-      transform: scale(1.05);
-    }
-
-    .profile-post video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .video-icon {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-size: 20px;
-      background: rgba(0,0,0,0.5);
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .back-to-posts {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-bottom: 15px;
-      color: var(--primary-color);
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    /* Menú inferior */
-    .bottom-menu {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--card-bg);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 10px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      z-index: 100;
-      height: 60px;
-    }
-
-    .menu-item {
+    /* Estilos para la sección de login */
+    #login-section {
       display: flex;
       flex-direction: column;
       align-items: center;
-      color: var(--text-gray);
-      text-decoration: none;
-      font-size: 10px;
-      transition: color 0.3s ease;
-      padding: 5px;
-      flex: 1;
-      text-align: center;
-    }
-
-    .menu-item:hover {
-      color: var(--primary-color);
-    }
-
-    .menu-item i {
-      font-size: 20px;
-      margin-bottom: 2px;
-    }
-
-    .menu-item.active {
-      color: var(--primary-color);
-    }
-
-    .menu-item.home {
-      background: var(--primary-color);
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: flex;
       justify-content: center;
-      align-items: center;
-      color: white;
-      transform: translateY(-15px);
-      box-shadow: 0 4px 10px rgba(254, 44, 85, 0.3);
-      flex: 0 0 auto;
-      margin: 0 10px;
+      min-height: 100vh;
+      padding: 1rem;
+      background-color: var(--secondary-color);
     }
 
-    .menu-item.home i {
-      font-size: 20px;
-      margin-bottom: 0;
+    .login-container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
     }
 
-    /* Notificación */
-    .notification-badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
+    .login-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      font-size: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .btn {
       background-color: var(--primary-color);
-      color: white;
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 10px;
-      font-weight: bold;
-    }
-
-    /* Modal de imagen ampliada */
-    .image-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      touch-action: none;
-    }
-
-    .image-modal-content {
-      max-width: 100%;
-      max-height: 100%;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .image-modal-content img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    .close-image-modal {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      color: white;
-      font-size: 30px;
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
       cursor: pointer;
-      z-index: 1001;
-    }
-
-    /* Modal de publicación */
-    .post-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 1000;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .post-modal-content {
-      max-width: 100%;
-      width: 100%;
-      padding: 20px;
-      color: white;
-    }
-
-    .post-modal-header {
-      display: flex;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
       align-items: center;
-      margin-bottom: 15px;
+      justify-content: center;
+      width: 100%;
     }
 
-    .post-modal-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 10px;
+    .btn i {
+      margin-right: 8px;
     }
 
-    .post-modal-user {
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    /* Estilos para la sección del cliente (oculta inicialmente) */
+    #client-section {
+      display: none;
       flex: 1;
+      padding-bottom: 70px; /* Espacio para el menú inferior */
     }
 
-    .post-modal-name {
-      font-weight: bold;
+    .header-client {
+      background-color: var(--secondary-color);
+      padding: 1rem;
+      text-align: center;
+      position: relative;
     }
 
-    .post-modal-time {
-      font-size: 12px;
-      color: var(--text-gray);
-    }
-
-    .post-modal-close {
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .post-modal-media {
-      width: 100%;
-      margin-bottom: 15px;
-      border-radius: var(--border-radius);
-      overflow: hidden;
-    }
-
-    .post-modal-image {
-      width: 100%;
-      max-height: 70vh;
-      object-fit: contain;
-    }
-
-    .post-modal-video {
-      width: 100%;
-      max-height: 70vh;
-    }
-
-    .post-modal-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .post-modal-description {
-      margin-bottom: 15px;
-      color: var(--text-gray);
-    }
-
-    .post-modal-footer {
+    .client-profile {
       display: flex;
-      justify-content: space-between;
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid rgba(255,255,255,0.1);
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 1rem;
     }
 
-    .post-modal-actions {
-      display: flex;
-      gap: 15px;
-    }
-
-    .post-modal-stats {
-      font-size: 14px;
-      color: var(--text-gray);
-    }
-
-    .post-modal-comments {
-      margin-top: 20px;
-    }
-
-    .post-modal-comment-form {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    /* Notificación */
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 12px 16px;
-      border-radius: var(--border-radius);
-      background: var(--primary-color);
-      color: white;
-      box-shadow: var(--box-shadow);
-      z-index: 1100;
+    .client-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
       display: flex;
       align-items: center;
-      gap: 10px;
-      transform: translateX(200%);
-      transition: transform 0.3s ease;
-      max-width: 80%;
-    }
-
-    .notification.show {
-      transform: translateX(0);
-    }
-
-    .notification.success {
-      background: #28a745;
-    }
-
-    .notification.error {
-      background: #dc3545;
-    }
-
-    /* Estilos para pantalla completa */
-    .video-container:-webkit-full-screen {
-      width: 100% !important;
-      height: 100% !important;
-      background: #000;
-    }
-
-    .video-container:-moz-full-screen {
-      width: 100% !important;
-      height: 100% !important;
-      background: #000;
-    }
-
-    .video-container:-ms-fullscreen {
-      width: 100% !important;
-      height: 100% !important;
-      background: #000;
-    }
-
-    .video-container:fullscreen {
-      width: 100% !important;
-      height: 100% !important;
-      background: #000;
-    }
-
-    .video-container:-webkit-full-screen video {
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: contain;
-    }
-
-    .video-container:-moz-full-screen video {
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: contain;
-    }
-
-    .video-container:-ms-fullscreen video {
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: contain;
-    }
-
-    .video-container:fullscreen video {
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: contain;
-    }
-
-    /* Swipe indicator for fullscreen videos */
-    .swipe-indicator {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      margin-bottom: 1rem;
+      font-size: 2rem;
       color: white;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 14px;
-      z-index: 10000;
-      display: none;
-      pointer-events: none;
     }
 
-    /* Loading spinner */
-    .loading-spinner {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1000;
+    .client-name {
+      font-size: 1.2rem;
+      font-weight: 500;
     }
 
-    .loading-spinner i {
-      font-size: 30px;
-      color: var(--primary-color);
-      animation: spin 1s linear infinite;
+    .client-id {
+      color: var(--text-light);
+      font-size: 0.9rem;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .main-container-client {
+      padding: 1rem;
     }
 
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-gray);
-    }
-
-    .empty-state i {
-      font-size: 30px;
-      margin-bottom: 15px;
-    }
-
-    /* Secciones */
     .section {
       display: none;
     }
@@ -965,476 +168,614 @@
       display: block;
     }
 
-    /* Media queries para tablets */
-    @media (min-width: 768px) {
-      .container {
-        max-width: 600px;
-        margin: 0 auto;
-      }
-
-      .video-container.short video {
-        height: 75vh;
-        max-height: 700px;
-      }
-
-      .profile-posts-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-      }
-
-      .profile-avatar {
-        width: 90px;
-        height: 90px;
-      }
-
-      .profile-name {
-        font-size: 20px;
-      }
-
-      .post-modal-content {
-        max-width: 600px;
-        margin: 0 auto;
-      }
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
     }
 
-    /* Media queries para pantallas más grandes */
-    @media (min-width: 992px) {
-      .container {
-        max-width: 800px;
-      }
-
-      .bottom-menu {
-        max-width: 800px;
-        margin: 0 auto;
-        left: 50%;
-        transform: translateX(-50%);
-        border-radius: 20px 20px 0 0;
-        bottom: 10px;
-      }
-
-      .post-modal-content {
-        max-width: 700px;
-      }
+    .card-title {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
     }
 
-    /* Nuevos estilos para el formulario de publicación */
-    .create-post-modal {
+    .loan-summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .loan-summary-item:last-child {
+      border-bottom: none;
+    }
+
+    .loan-detail-label {
+      color: var(--text-light);
+    }
+
+    .payment-history {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .payment-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .payment-item:last-child {
+      border-bottom: none;
+    }
+
+    .payment-amount {
+      color: var(--success-color);
+      font-weight: 500;
+    }
+
+    .payment-date {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .payment-type {
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background-color: rgba(52, 152, 219, 0.2);
+    }
+
+    .payment-type.capital {
+      background-color: rgba(46, 204, 113, 0.2);
+    }
+
+    .payment-type.interest {
+      background-color: rgba(241, 196, 15, 0.2);
+    }
+
+    .payment-type.late {
+      background-color: rgba(231, 76, 60, 0.2);
+    }
+
+    /* Formulario de pago */
+    .payment-form {
+      margin-top: 1.5rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .payment-options {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .payment-option {
+      flex: 1;
+    }
+
+    .payment-option input {
+      display: none;
+    }
+
+    .payment-option label {
+      display: block;
+      padding: 0.5rem;
+      background-color: var(--background-color);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .payment-option input:checked + label {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    /* Sección de perfil */
+    .profile-info {
+      margin-top: 1rem;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-label {
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .info-value {
+      text-align: right;
+    }
+
+    /* Sección de documentos */
+    .document-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .document-item {
+      background-color: var(--background-color);
+      padding: 1rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .document-icon {
+      font-size: 1.5rem;
+      margin-right: 1rem;
+      color: var(--primary-color);
+    }
+
+    .document-name {
+      flex: 1;
+    }
+
+    .document-action {
+      color: var(--primary-color);
+      cursor: pointer;
+    }
+
+    /* Menú inferior */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: var(--secondary-color);
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem 0;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 0.8rem;
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+
+    .nav-item i {
+      font-size: 1.2rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .nav-item.active {
+      color: var(--primary-color);
+    }
+
+    /* Modal */
+    .modal {
       display: none;
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 1000;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .create-post-content {
-      max-width: 500px;
-      width: 90%;
-      margin: 20px auto;
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      padding: 20px;
-      color: white;
-    }
-
-    .create-post-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .create-post-title {
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .create-post-close {
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .create-post-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .form-label {
-      font-size: 14px;
-      color: var(--text-gray);
-    }
-
-    .form-input, .form-textarea, .form-select {
-      padding: 10px 15px;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: var(--border-radius);
-      background: rgba(255,255,255,0.05);
-      color: var(--text-light);
-      font-size: 14px;
-    }
-
-    .form-textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    .media-preview {
-      width: 100%;
-      max-height: 300px;
-      object-fit: contain;
-      border-radius: var(--border-radius);
-      display: none;
-    }
-
-    .video-preview {
-      width: 100%;
-      max-height: 300px;
-      border-radius: var(--border-radius);
-      display: none;
-    }
-
-    .upload-btn {
-      display: flex;
-      align-items: center;
+      background-color: rgba(0, 0, 0, 0.8);
       justify-content: center;
-      gap: 10px;
-      padding: 10px 15px;
-      background: rgba(255,255,255,0.1);
-      border: 1px dashed rgba(255,255,255,0.3);
-      border-radius: var(--border-radius);
-      color: var(--text-light);
-      cursor: pointer;
-      transition: all 0.3s ease;
+      align-items: center;
+      z-index: 1000;
     }
 
-    .upload-btn:hover {
-      background: rgba(255,255,255,0.2);
+    .modal.active {
+      display: flex;
     }
 
-    .submit-btn {
-      padding: 12px;
-      border: none;
-      border-radius: var(--border-radius);
-      background: var(--primary-color);
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s ease;
+    .modal-content {
+      background-color: var(--secondary-color);
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
     }
 
-    .submit-btn:hover {
-      background: var(--primary-dark);
+    .modal-title {
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      text-align: center;
     }
 
-    .submit-btn:disabled {
-      background: rgba(254, 44, 85, 0.5);
-      cursor: not-allowed;
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-warning {
+      background-color: var(--warning-color);
+    }
+
+    .btn-info {
+      background-color: var(--info-color);
+    }
+
+    /* Alertas */
+    .alert {
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .alert-warning {
+      background-color: rgba(243, 156, 18, 0.2);
+      border-left: 4px solid var(--warning-color);
+    }
+
+    .alert-danger {
+      background-color: rgba(231, 76, 60, 0.2);
+      border-left: 4px solid var(--danger-color);
+    }
+
+    .alert-success {
+      background-color: rgba(46, 204, 113, 0.2);
+      border-left: 4px solid var(--success-color);
+    }
+
+    .alert i {
+      margin-right: 0.5rem;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      z-index: 10;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .spinner.active {
+      display: flex;
+    }
+
+    .spinner-icon {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 1.5rem;
+      }
+      
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="app-header">
-    <div class="logo-container">
-      <img src="logo.png" alt="Logo" class="logo-img">
-      <span class="logo-text">Tiki Tok</span>
-    </div>
-    
-    <div class="search-container">
-      <i class="fas fa-search search-icon" onclick="toggleSearch()"></i>
-      <input type="text" class="search-input" placeholder="Buscar usuarios..." oninput="searchUsers(this.value)">
-      <div class="search-results" id="searchResults"></div>
-    </div>
-
-    <div class="header-actions">
-      <a href="configuracion.html" class="action-btn">
-        <i class="fas fa-cog"></i>
-      </a>
-      <a href="#" class="action-btn" id="notificationsBtn" onclick="showSection('notificationsSection')">
-        <i class="fas fa-bell"></i>
-        <div class="notification-badge" id="notificationBadge" style="display: none;">0</div>
-      </a>
-    </div>
-  </header>
-
-  <!-- Contenido principal -->
-  <div class="container">
-    <!-- Vista de publicaciones -->
-    <div id="mainContent">
-      <!-- Sección Home -->
-      <div class="section active" id="homeSection">
-        <div class="header">
-          <h1 class="page-title">Publicaciones Recientes</h1>
-          <div class="filter-controls">
-            <button class="filter-btn active" onclick="filterPosts('all')">Todos</button>
-            <button class="filter-btn" onclick="filterPosts('gallos')">Gallos</button>
-            <button class="filter-btn" onclick="filterPosts('entrenamientos')">Entrenamientos</button>
-            <button class="filter-btn" onclick="filterPosts('peleas')">Peleas</button>
-          </div>
-        </div>
-
-        <div class="posts-container" id="postsContainer">
-          <div class="empty-state">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Cargando publicaciones...</p>
-          </div>
-        </div>
+  <!-- Sección de Login -->
+  <section id="login-section">
+    <div class="login-container">
+      <div class="spinner" id="loginSpinner">
+        <div class="spinner-icon"></div>
       </div>
-
-      <!-- Sección Historial -->
-      <div class="section" id="historySection">
-        <div class="header">
-          <h1 class="page-title">Historial de Videos</h1>
-        </div>
-        <div class="posts-container" id="historyContainer">
-          <div class="empty-state">
-            <i class="fas fa-clock"></i>
-            <p>Tu historial de videos aparecerá aquí</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sección Siguiendo -->
-      <div class="section" id="followingSection">
-        <div class="header">
-          <h1 class="page-title">Usuarios que sigues</h1>
-        </div>
-        <div class="posts-container" id="followingContainer">
-          <div class="empty-state">
-            <i class="fas fa-users"></i>
-            <p>Las publicaciones de los usuarios que sigues aparecerán aquí</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sección Notificaciones -->
-      <div class="section" id="notificationsSection">
-        <div class="header">
-          <h1 class="page-title">Notificaciones</h1>
-        </div>
-        <div class="posts-container" id="notificationsContainer">
-          <div class="empty-state">
-            <i class="fas fa-bell"></i>
-            <p>Tus notificaciones aparecerán aquí</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Vista de perfil de usuario -->
-      <div class="profile-container" id="profileContainer">
-        <div class="back-to-posts" onclick="showPostsView()">
-          <i class="fas fa-arrow-left"></i>
-          <span>Volver a publicaciones</span>
-        </div>
-        
-        <div class="profile-header">
-          <img id="profileAvatar" src="img/default-profile.jpg" alt="Perfil" class="profile-avatar">
-          <div class="profile-info">
-            <h2 class="profile-name" id="profileUserName">Usuario</h2>
-            <div class="profile-email" id="profileUserEmail">email@ejemplo.com</div>
-            <button class="follow-btn" id="profileFollowBtn" onclick="toggleFollow(currentProfileUserId, this)">
-              <i class="fas fa-user-plus"></i> Seguir
-            </button>
-          </div>
-        </div>
-        
-        <div class="profile-stats">
-          <div class="profile-stat" onclick="showProfilePosts()">
-            <div class="stat-number" id="profilePostsCount">0</div>
-            <div class="stat-label">Publicaciones</div>
-          </div>
-          <div class="profile-stat" onclick="showProfileFollowers()">
-            <div class="stat-number" id="profileFollowersCount">0</div>
-            <div class="stat-label">Seguidores</div>
-          </div>
-          <div class="profile-stat" onclick="showProfileFollowing()">
-            <div class="stat-number" id="profileFollowingCount">0</div>
-            <div class="stat-label">Seguidos</div>
-          </div>
-        </div>
-        
-        <h3 class="profile-posts-title" id="profileSectionTitle">Publicaciones</h3>
-        
-        <div class="profile-posts-grid" id="profilePostsGrid">
-          <!-- Las publicaciones del usuario se cargarán aquí -->
-        </div>
-        
-        <div id="profileFollowersList" style="display: none;">
-          <!-- Lista de seguidores se cargará aquí -->
-        </div>
-        
-        <div id="profileFollowingList" style="display: none;">
-          <!-- Lista de seguidos se cargará aquí -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Menú inferior -->
-  <nav class="bottom-menu">
-    <a href="#" class="menu-item" onclick="showSection('homeSection')">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
-    </a>
-    <a href="#" class="menu-item" onclick="showSection('historySection')">
-      <i class="fas fa-history"></i>
-      <span>Historial</span>
-    </a>
-    <a href="#" class="menu-item home" onclick="showCreatePostModal()">
-      <i class="fas fa-plus"></i>
-    </a>
-    <a href="#" class="menu-item" onclick="showSection('followingSection')">
-      <i class="fas fa-users"></i>
-      <span>Siguiendo</span>
-    </a>
-    <a href="#" class="menu-item" onclick="showSection('notificationsSection')" id="notificationsMenuItem">
-      <i class="fas fa-bell"></i>
-      <span>Notificaciones</span>
-      <div class="notification-badge" id="notificationBadge" style="display: none;">0</div>
-    </a>
-  </nav>
-
-  <!-- Modal de imagen ampliada -->
-  <div class="image-modal" id="imageModal">
-    <span class="close-image-modal" onclick="closeImageModal()">&times;</span>
-    <div class="image-modal-content">
-      <img id="expandedImage" src="" alt="Imagen ampliada">
-    </div>
-  </div>
-
-  <!-- Modal de publicación -->
-  <div class="post-modal" id="postModal">
-    <div class="post-modal-content">
-      <div class="post-modal-header">
-        <img id="postModalAvatar" src="" alt="Avatar" class="post-modal-avatar">
-        <div class="post-modal-user">
-          <div class="post-modal-name" id="postModalUserName">Usuario</div>
-          <div class="post-modal-time" id="postModalTime">Hace 2 días</div>
-        </div>
-        <div class="post-modal-close" onclick="closePostModal()">
-          <i class="fas fa-times"></i>
-        </div>
-      </div>
-      
-      <h3 class="post-modal-title" id="postModalTitle">Título de la publicación</h3>
-      <p class="post-modal-description" id="postModalDescription">Descripción de la publicación</p>
-      
-      <div class="post-modal-media">
-        <img id="postModalImage" class="post-modal-image" style="display: none;">
-        <video id="postModalVideo" class="post-modal-video" controls style="display: none;"></video>
-      </div>
-      
-      <div class="post-modal-footer">
-        <div class="post-modal-actions">
-          <button class="action-btn" id="postModalLikeBtn" onclick="togglePostModalLike()">
-            <i class="fas fa-heart"></i> Me gusta
-          </button>
-          <button class="action-btn" onclick="togglePostModalComments()">
-            <i class="fas fa-comment"></i> Comentar
-          </button>
-        </div>
-        <div class="post-modal-stats">
-          <span><i class="fas fa-heart"></i> <span id="postModalLikes">0</span> likes</span>
-          <span style="margin-left: 10px;"><i class="fas fa-comment"></i> <span id="postModalComments">0</span> comentarios</span>
-        </div>
-      </div>
-      
-      <div class="post-modal-comments" id="postModalCommentsSection" style="display: none;">
-        <div class="comments-list" id="postModalCommentsList">
-          <!-- Los comentarios se cargarán aquí -->
-        </div>
-        <form class="post-modal-comment-form" onsubmit="postModalComment(event)">
-          <input type="text" class="comment-input" id="postModalCommentInput" placeholder="Escribe un comentario..." required>
-          <button type="submit" class="comment-submit">Publicar</button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal para crear publicación -->
-  <div class="create-post-modal" id="createPostModal">
-    <div class="create-post-content">
-      <div class="create-post-header">
-        <h3 class="create-post-title">Crear nueva publicación</h3>
-        <div class="create-post-close" onclick="closeCreatePostModal()">
-          <i class="fas fa-times"></i>
-        </div>
-      </div>
-      
-      <form class="create-post-form" id="createPostForm">
+      <h1 class="login-title">Iniciar Sesión</h1>
+      <form id="loginForm">
         <div class="form-group">
-          <label for="postType" class="form-label">Tipo de publicación</label>
-          <select id="postType" class="form-select" required>
-            <option value="">Selecciona un tipo</option>
-            <option value="gallos">Gallos</option>
-            <option value="entrenamientos">Entrenamientos</option>
-            <option value="peleas">Peleas</option>
-          </select>
+          <label for="loginUsername">Nombre de Usuario</label>
+          <input type="text" id="loginUsername" class="form-control" required>
         </div>
-        
         <div class="form-group">
-          <label for="postTitle" class="form-label">Título</label>
-          <input type="text" id="postTitle" class="form-input" placeholder="Título de la publicación" required>
+          <label for="loginPin">PIN (4 dígitos)</label>
+          <input type="password" id="loginPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required>
         </div>
-        
-        <div class="form-group">
-          <label for="postDescription" class="form-label">Descripción</label>
-          <textarea id="postDescription" class="form-textarea" placeholder="Descripción de la publicación"></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Multimedia</label>
-          <input type="file" id="mediaUpload" accept="image/*,video/*" style="display: none;">
-          <label for="mediaUpload" class="upload-btn">
-            <i class="fas fa-upload"></i>
-            <span>Seleccionar imagen o video</span>
-          </label>
-          <img id="imagePreview" class="media-preview">
-          <video id="videoPreview" class="video-preview" controls></video>
-        </div>
-        
-        <button type="submit" class="submit-btn" id="submitPostBtn" disabled>
-          <i class="fas fa-paper-plane"></i> Publicar
+        <button type="submit" class="btn">
+          <i class="fas fa-sign-in-alt"></i> Ingresar
         </button>
       </form>
     </div>
+  </section>
+
+  <!-- Sección del Cliente (oculta inicialmente) -->
+  <section id="client-section">
+    <div class="header-client">
+      <div class="client-profile">
+        <div class="client-avatar" id="clientAvatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <h2 class="client-name" id="clientName">Nombre del Cliente</h2>
+        <span class="client-id" id="clientId">ID: 000-0000000-0</span>
+      </div>
+    </div>
+
+    <div class="main-container-client">
+      <!-- Sección de Resumen -->
+      <div id="summary-section" class="section active">
+        <div class="card">
+          <h3 class="card-title">Resumen de tu Préstamo</h3>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Monto original:</span>
+            <span id="loanOriginalAmount">$0.00</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Saldo pendiente:</span>
+            <span id="loanBalance">$0.00</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Próximo pago:</span>
+            <span id="nextPaymentDate">--/--/----</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Monto a pagar:</span>
+            <span id="nextPaymentAmount">$0.00</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Pagos realizados:</span>
+            <span id="paymentsMade">0</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Pagos pendientes:</span>
+            <span id="paymentsPending">0</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Estado de tu Cuenta</h3>
+          <div id="accountStatus">
+            <p>Cargando estado de cuenta...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de Historial -->
+      <div id="history-section" class="section">
+        <div class="card">
+          <h3 class="card-title">Historial de Pagos</h3>
+          <div class="payment-history" id="paymentHistory">
+            <p>Cargando historial de pagos...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de Pagos -->
+      <div id="payment-section" class="section">
+        <div class="card">
+          <h3 class="card-title">Realizar Pago</h3>
+          <div id="paymentAlert" class="alert alert-warning" style="display: none;">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="paymentAlertMessage"></span>
+          </div>
+          
+          <form id="paymentForm" class="payment-form">
+            <input type="hidden" id="loanId">
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="paymentAmount">Monto a pagar</label>
+                <input type="number" id="paymentAmount" class="form-control" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="paymentDate">Fecha</label>
+                <input type="date" id="paymentDate" class="form-control" required>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Tipo de Pago</label>
+              <div class="payment-options">
+                <div class="payment-option">
+                  <input type="radio" id="paymentTypeFull" name="paymentType" value="full" checked>
+                  <label for="paymentTypeFull">Completo</label>
+                </div>
+                <div class="payment-option">
+                  <input type="radio" id="paymentTypeCapital" name="paymentType" value="capital">
+                  <label for="paymentTypeCapital">Capital</label>
+                </div>
+                <div class="payment-option">
+                  <input type="radio" id="paymentTypeInterest" name="paymentType" value="interest">
+                  <label for="paymentTypeInterest">Interés</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group" id="lateFeeContainer" style="display: none;">
+              <label>
+                <input type="checkbox" id="applyLateFee"> Incluir mora
+              </label>
+              <div id="lateFeeDetails" style="display: none; margin-top: 0.5rem;">
+                <div class="form-group">
+                  <label for="lateFeeAmount">Monto de mora</label>
+                  <input type="number" id="lateFeeAmount" class="form-control" min="0" step="0.01" value="0">
+                </div>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn btn-success">
+              <i class="fas fa-money-bill-wave"></i> Registrar Pago
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Sección de Perfil -->
+      <div id="profile-section" class="section">
+        <div class="card">
+          <h3 class="card-title">Mi Perfil</h3>
+          <div class="profile-info">
+            <div class="info-item">
+              <span class="info-label">Nombre completo:</span>
+              <span class="info-value" id="profileName">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Identificación:</span>
+              <span class="info-value" id="profileId">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Teléfono:</span>
+              <span class="info-value" id="profilePhone">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Dirección:</span>
+              <span class="info-value" id="profileAddress">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Nacionalidad:</span>
+              <span class="info-value" id="profileNationality">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Referencia personal:</span>
+              <span class="info-value" id="profileReference">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de Documentos -->
+      <div id="documents-section" class="section">
+        <div class="card">
+          <h3 class="card-title">Mis Documentos</h3>
+          <div class="document-list">
+            <div class="document-item">
+              <i class="fas fa-file-contract document-icon"></i>
+              <span class="document-name">Contrato de Préstamo</span>
+              <i class="fas fa-download document-action" onclick="downloadDocument('contract')"></i>
+            </div>
+            <div class="document-item">
+              <i class="fas fa-file-invoice-dollar document-icon"></i>
+              <span class="document-name">Estado de Cuenta</span>
+              <i class="fas fa-download document-action" onclick="downloadDocument('statement')"></i>
+            </div>
+            <div class="document-item">
+              <i class="fas fa-file-alt document-icon"></i>
+              <span class="document-name">Carta de Recomendación</span>
+              <i class="fas fa-download document-action" onclick="downloadDocument('recommendation')"></i>
+            </div>
+            <div class="document-item">
+              <i class="fas fa-receipt document-icon"></i>
+              <span class="document-name">Recibos de Pago</span>
+              <i class="fas fa-download document-action" onclick="downloadDocument('receipts')"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menú Inferior -->
+    <div class="bottom-nav">
+      <a class="nav-item active" data-section="summary">
+        <i class="fas fa-home"></i>
+        <span>Resumen</span>
+      </a>
+      <a class="nav-item" data-section="history">
+        <i class="fas fa-history"></i>
+        <span>Historial</span>
+      </a>
+      <a class="nav-item" data-section="payment">
+        <i class="fas fa-hand-holding-usd"></i>
+        <span>Pagar</span>
+      </a>
+      <a class="nav-item" data-section="profile">
+        <i class="fas fa-user"></i>
+        <span>Perfil</span>
+      </a>
+      <a class="nav-item" data-section="documents">
+        <i class="fas fa-file-alt"></i>
+        <span>Documentos</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Modal de Confirmación -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="confirmModalTitle">Confirmar Pago</h3>
+      <p id="confirmModalMessage">¿Está seguro que desea registrar este pago?</p>
+      <div class="modal-footer">
+        <button id="confirmPaymentBtn" class="btn btn-success">Confirmar</button>
+        <button id="cancelPaymentBtn" class="btn btn-danger">Cancelar</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Notificación -->
-  <div class="notification" id="notification">
-    <i class="fas fa-check-circle"></i>
-    <span id="notificationText">Operación exitosa</span>
+  <!-- Modal de Información -->
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="infoModalTitle">Información</h3>
+      <p id="infoModalMessage"></p>
+      <div class="modal-footer">
+        <button id="closeInfoModalBtn" class="btn">Aceptar</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Swipe indicator -->
-  <div class="swipe-indicator" id="swipeIndicator">
-    Desliza para cambiar de video
-  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs, 
+      query, 
+      where,
+      doc,
+      getDoc,
+      updateDoc,
+      arrayUnion,
+      Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
-  <!-- Loading spinner -->
-  <div class="loading-spinner" id="loadingSpinner">
-    <i class="fas fa-spinner fa-spin"></i>
-  </div>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-
-  <script>
-    // Configuración de Firebase
+    // Configuración de Firebase (usar la misma del código anterior)
     const firebaseConfig = {
       apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
       authDomain: "inventario-35d6b.firebaseapp.com",
@@ -1446,2354 +787,594 @@
     };
 
     // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     // Variables globales
     let currentUser = null;
-    let allPosts = [];
-    let currentFilter = 'all';
-    let currentProfileUserId = null;
-    let currentProfileUserData = null;
-    let currentVideo = null;
-    let fullscreenVideo = null;
-    let startY = 0;
-    let isSwiping = false;
-    let currentPostIndex = 0;
-    let videoPosts = [];
-    let currentModalPost = null;
-    let likedPosts = new Set();
-    let userCache = {};
-    let newNotifications = 0;
-    let notificationPosts = [];
-    let viewedVideos = new Set();
-    let selectedFile = null;
+    let currentLoan = null;
+    let paymentData = null;
 
-    // Inicializar la aplicación
+    // Inicialización
     document.addEventListener('DOMContentLoaded', () => {
-      auth.onAuthStateChanged(user => {
-        if (user) {
-          currentUser = user;
-          loadAllPosts();
-          loadLikedPosts();
-          loadViewedVideos();
-          loadNewNotifications();
-          
-          // Configurar eventos de video
-          setupVideoControls();
-          setupFullscreenEvents();
-          
-          // Configurar menú activo
-          document.querySelector('.menu-item[onclick="showSection(\'homeSection\')"]').classList.add('active');
-          
-          // Configurar eventos del formulario de publicación
-          setupCreatePostForm();
-        } else {
-          window.location.href = 'login.html';
-        }
-      });
+      setupEventListeners();
+      
+      // Establecer fecha actual como predeterminada
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('paymentDate').value = today;
     });
 
-    // Configurar formulario de creación de publicación
-    function setupCreatePostForm() {
-      const mediaUpload = document.getElementById('mediaUpload');
-      const imagePreview = document.getElementById('imagePreview');
-      const videoPreview = document.getElementById('videoPreview');
-      const submitBtn = document.getElementById('submitPostBtn');
+    // Configurar event listeners
+    function setupEventListeners() {
+      // Formulario de login
+      document.getElementById('loginForm').addEventListener('submit', handleLogin);
       
-      mediaUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        selectedFile = file;
-        
-        if (file.type.startsWith('image/')) {
-          // Es una imagen
-          videoPreview.style.display = 'none';
-          videoPreview.src = '';
-          
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            imagePreview.src = e.target.result;
-            imagePreview.style.display = 'block';
-            checkFormValidity();
-          };
-          reader.readAsDataURL(file);
-        } else if (file.type.startsWith('video/')) {
-          // Es un video
-          imagePreview.style.display = 'none';
-          imagePreview.src = '';
-          
-          videoPreview.src = URL.createObjectURL(file);
-          videoPreview.style.display = 'block';
-          checkFormValidity();
-        }
+      // Formulario de pago
+      document.getElementById('paymentForm').addEventListener('submit', preparePayment);
+      document.getElementById('paymentTypeFull').addEventListener('change', updatePaymentForm);
+      document.getElementById('paymentTypeCapital').addEventListener('change', updatePaymentForm);
+      document.getElementById('paymentTypeInterest').addEventListener('change', updatePaymentForm);
+      document.getElementById('applyLateFee').addEventListener('change', toggleLateFeeDetails);
+      document.getElementById('lateFeeAmount').addEventListener('input', validatePayment);
+      
+      // Menú inferior
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          navigateToSection(item.dataset.section);
+        });
       });
       
-      // Validar formulario cuando cambian los campos
-      document.getElementById('postType').addEventListener('change', checkFormValidity);
-      document.getElementById('postTitle').addEventListener('input', checkFormValidity);
+      // Modal de confirmación
+      document.getElementById('confirmPaymentBtn').addEventListener('click', confirmPayment);
+      document.getElementById('cancelPaymentBtn').addEventListener('click', closeModal);
       
-      // Enviar formulario
-      document.getElementById('createPostForm').addEventListener('submit', createPost);
+      // Modal de información
+      document.getElementById('closeInfoModalBtn').addEventListener('click', closeModal);
     }
-    
-    // Verificar si el formulario es válido
-    function checkFormValidity() {
-      const postType = document.getElementById('postType').value;
-      const postTitle = document.getElementById('postTitle').value.trim();
-      const submitBtn = document.getElementById('submitPostBtn');
+
+    // Manejar login
+    async function handleLogin(e) {
+      e.preventDefault();
       
-      submitBtn.disabled = !(postType && postTitle && selectedFile);
-    }
-    
-    // Mostrar modal para crear publicación
-    function showCreatePostModal() {
-      document.getElementById('createPostModal').style.display = 'block';
-    }
-    
-    // Cerrar modal de creación de publicación
-    function closeCreatePostModal() {
-      document.getElementById('createPostModal').style.display = 'none';
-      resetCreatePostForm();
-    }
-    
-    // Resetear formulario de creación
-    function resetCreatePostForm() {
-      document.getElementById('createPostForm').reset();
-      document.getElementById('imagePreview').style.display = 'none';
-      document.getElementById('imagePreview').src = '';
-      document.getElementById('videoPreview').style.display = 'none';
-      document.getElementById('videoPreview').src = '';
-      document.getElementById('submitPostBtn').disabled = true;
-      selectedFile = null;
-    }
-    
-    // Crear nueva publicación
-    async function createPost(event) {
-      event.preventDefault();
+      const username = document.getElementById('loginUsername').value.trim();
+      const pin = document.getElementById('loginPin').value.trim();
       
-      const postType = document.getElementById('postType').value;
-      const postTitle = document.getElementById('postTitle').value.trim();
-      const postDescription = document.getElementById('postDescription').value.trim();
-      const submitBtn = document.getElementById('submitPostBtn');
+      // Mostrar spinner de carga
+      document.getElementById('loginSpinner').classList.add('active');
       
-      if (!postType || !postTitle || !selectedFile) {
-        showNotification('Completa todos los campos requeridos', 'error');
+      try {
+        // Buscar usuario en la colección LoanUsers
+        const q = query(collection(db, "LoanUsers"), where("username", "==", username), where("pin", "==", pin));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          showAlert('Credenciales incorrectas', 'danger');
+          document.getElementById('loginSpinner').classList.remove('active');
+          return;
+        }
+        
+        // Obtener datos del usuario
+        const userDoc = querySnapshot.docs[0];
+        currentUser = {
+          id: userDoc.id,
+          ...userDoc.data()
+        };
+        
+        // Obtener el préstamo del usuario (asumimos solo un préstamo por usuario)
+        if (currentUser.loanIds && currentUser.loanIds.length > 0) {
+          const loanId = currentUser.loanIds[0];
+          const loanRef = doc(db, "Loans", loanId);
+          const loanSnap = await getDoc(loanRef);
+          
+          if (!loanSnap.exists()) {
+            showAlert('No se encontró información del préstamo', 'danger');
+            document.getElementById('loginSpinner').classList.remove('active');
+            return;
+          }
+          
+          currentLoan = {
+            id: loanSnap.id,
+            ...loanSnap.data()
+          };
+          
+          // Mostrar sección del cliente
+          showClientSection();
+          
+          // Cargar datos del cliente y préstamo
+          loadClientData();
+        } else {
+          showAlert('No se encontró préstamo asociado a este usuario', 'danger');
+        }
+        
+      } catch (error) {
+        console.error("Error al iniciar sesión: ", error);
+        showAlert('Ocurrió un error al iniciar sesión', 'danger');
+      } finally {
+        document.getElementById('loginSpinner').classList.remove('active');
+      }
+    }
+
+    // Mostrar sección del cliente
+    function showClientSection() {
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('client-section').style.display = 'block';
+      navigateToSection('summary');
+    }
+
+    // Cargar datos del cliente y préstamo
+    function loadClientData() {
+      // Mostrar información del cliente
+      document.getElementById('clientName').textContent = currentLoan.client.name;
+      document.getElementById('clientId').textContent = `ID: ${currentLoan.client.id}`;
+      
+      // Mostrar iniciales en el avatar
+      const initials = currentLoan.client.name.split(' ').map(n => n[0]).join('').toUpperCase();
+      document.getElementById('clientAvatar').textContent = initials;
+      
+      // Mostrar información del préstamo
+      document.getElementById('loanOriginalAmount').textContent = `$${currentLoan.amount.toFixed(2)}`;
+      document.getElementById('loanBalance').textContent = `$${currentLoan.balance.toFixed(2)}`;
+      
+      // Calcular pagos realizados y pendientes
+      const paymentsMade = currentLoan.payments ? currentLoan.payments.length : 0;
+      const totalPayments = currentLoan.paymentSchedule.length;
+      
+      document.getElementById('paymentsMade').textContent = paymentsMade;
+      document.getElementById('paymentsPending').textContent = totalPayments - paymentsMade;
+      
+      // Mostrar próximo pago
+      const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
+      if (nextPayment) {
+        document.getElementById('nextPaymentDate').textContent = new Date(nextPayment.dueDate).toLocaleDateString();
+        document.getElementById('nextPaymentAmount').textContent = `$${nextPayment.amount.toFixed(2)}`;
+        document.getElementById('paymentAmount').value = nextPayment.amount.toFixed(2);
+      }
+      
+      // Cargar estado de cuenta
+      loadAccountStatus();
+      
+      // Cargar historial de pagos
+      loadPaymentHistory();
+      
+      // Cargar perfil del usuario
+      loadProfileData();
+      
+      // Actualizar formulario de pago
+      updatePaymentForm();
+    }
+
+    // Cargar estado de cuenta
+    function loadAccountStatus() {
+      const container = document.getElementById('accountStatus');
+      const today = new Date();
+      const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
+      
+      let statusHTML = '';
+      let statusClass = '';
+      
+      if (currentLoan.balance <= 0) {
+        statusHTML = `
+          <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span>¡Felicidades! Has completado todos tus pagos.</span>
+          </div>
+          <div class="loan-summary-item">
+            <span class="loan-detail-label">Estado:</span>
+            <span>Cuenta Cerrada</span>
+          </div>
+        `;
+      } else if (nextPayment) {
+        const dueDate = new Date(nextPayment.dueDate);
+        const daysLate = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+        
+        if (daysLate > 0) {
+          statusClass = 'alert-danger';
+          statusHTML = `
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>Pago atrasado por ${daysLate} días</span>
+            </div>
+            <div class="loan-summary-item">
+              <span class="loan-detail-label">Estado:</span>
+              <span>En Mora</span>
+            </div>
+            <div class="loan-summary-item">
+              <span class="loan-detail-label">Próximo pago vencido:</span>
+              <span>${dueDate.toLocaleDateString()}</span>
+            </div>
+          `;
+        } else {
+          const daysUntilDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+          statusClass = daysUntilDue <= 5 ? 'alert-warning' : '';
+          statusHTML = `
+            <div class="alert ${statusClass}">
+              <i class="fas fa-clock"></i>
+              <span>Próximo pago en ${daysUntilDue} días</span>
+            </div>
+            <div class="loan-summary-item">
+              <span class="loan-detail-label">Estado:</span>
+              <span>Al día</span>
+            </div>
+            <div class="loan-summary-item">
+              <span class="loan-detail-label">Fecha límite:</span>
+              <span>${dueDate.toLocaleDateString()}</span>
+            </div>
+          `;
+        }
+      }
+      
+      container.innerHTML = statusHTML;
+    }
+
+    // Cargar historial de pagos
+    function loadPaymentHistory() {
+      const container = document.getElementById('paymentHistory');
+      container.innerHTML = '';
+      
+      if (!currentLoan.payments || currentLoan.payments.length === 0) {
+        container.innerHTML = '<p>No hay pagos registrados</p>';
         return;
       }
       
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando...';
+      // Ordenar pagos por fecha (más reciente primero)
+      const sortedPayments = [...currentLoan.payments].sort((a, b) => b.date.toDate() - a.date.toDate());
       
-      try {
-        // Subir archivo a Firebase Storage
-        const fileExtension = selectedFile.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExtension}`;
-        const storageRef = storage.ref().child(`posts/${currentUser.uid}/${fileName}`);
-        const uploadTask = storageRef.put(selectedFile);
+      sortedPayments.forEach(payment => {
+        const paymentDate = payment.date.toDate();
+        const paymentItem = document.createElement('div');
+        paymentItem.className = 'payment-item';
         
-        // Esperar a que se complete la subida
-        await uploadTask;
+        let typeClass = '';
+        let typeText = '';
         
-        // Obtener URL del archivo subido
-        const downloadURL = await storageRef.getDownloadURL();
+        switch(payment.type) {
+          case 'capital':
+            typeClass = 'capital';
+            typeText = 'Capital';
+            break;
+          case 'interest':
+            typeClass = 'interest';
+            typeText = 'Interés';
+            break;
+          default:
+            typeClass = '';
+            typeText = 'Completo';
+        }
         
-        // Crear documento en Firestore
-        const collectionName = getCollectionName(postType);
-        const newPost = {
-          userId: currentUser.uid,
-          title: postTitle,
-          description: postDescription,
-          mediaUrl: downloadURL,
-          likes: [],
-          comments: 0,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
+        if (payment.lateFee && payment.lateFee > 0) {
+          typeText += ' + Mora';
+        }
         
-        await db.collection(collectionName).add(newPost);
+        paymentItem.innerHTML = `
+          <div>
+            <div class="payment-amount">$${payment.amount.toFixed(2)}</div>
+            <div class="payment-date">${paymentDate.toLocaleDateString()} ${paymentDate.toLocaleTimeString()}</div>
+          </div>
+          <div>
+            <span class="payment-type ${typeClass}">${typeText}</span>
+          </div>
+        `;
         
-        // Mostrar notificación de éxito
-        showNotification('Publicación creada exitosamente', 'success');
-        
-        // Cerrar modal y resetear formulario
-        closeCreatePostModal();
-        
-        // Recargar publicaciones
-        loadAllPosts();
-        
-        // Enviar notificación a seguidores
-        sendNotificationToFollowers(newPost, postType);
-        
-      } catch (error) {
-        console.error("Error al crear publicación:", error);
-        showNotification('Error al crear publicación', 'error');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Publicar';
-      }
+        container.appendChild(paymentItem);
+      });
     }
-    
-    // Enviar notificación a seguidores
-    async function sendNotificationToFollowers(post, postType) {
-      try {
-        // Obtener lista de seguidores
-        const followersSnapshot = await db.collection('followers')
-          .doc(currentUser.uid)
-          .collection('userFollowers')
-          .get();
+
+    // Cargar datos del perfil
+    function loadProfileData() {
+      document.getElementById('profileName').textContent = currentLoan.client.name;
+      document.getElementById('profileId').textContent = currentLoan.client.id;
+      document.getElementById('profilePhone').textContent = currentLoan.client.phone;
+      document.getElementById('profileAddress').textContent = currentLoan.client.address;
+      document.getElementById('profileNationality').textContent = currentLoan.client.nationality;
+      document.getElementById('profileReference').textContent = 
+        `${currentLoan.client.reference.name} (${currentLoan.client.reference.relation}) - ${currentLoan.client.reference.phone}`;
+    }
+
+    // Descargar documento (simulado)
+    window.downloadDocument = function(type) {
+      let docName = '';
+      let content = '';
+      
+      switch(type) {
+        case 'contract':
+          docName = `Contrato_Prestamo_${currentLoan.id.slice(0, 6)}.pdf`;
+          content = `CONTRATO DE PRÉSTAMO\n\nCliente: ${currentLoan.client.name}\nID: ${currentLoan.client.id}\nMonto: $${currentLoan.amount.toFixed(2)}\nTasa: ${currentLoan.interestRate}%\nPlazo: ${currentLoan.term} meses`;
+          break;
+        case 'statement':
+          docName = `Estado_Cuenta_${currentLoan.id.slice(0, 6)}.pdf`;
+          content = `ESTADO DE CUENTA\n\nCliente: ${currentLoan.client.name}\nSaldo pendiente: $${currentLoan.balance.toFixed(2)}\nPróximo pago: ${document.getElementById('nextPaymentDate').textContent}\nMonto: ${document.getElementById('nextPaymentAmount').textContent}`;
+          break;
+        case 'recommendation':
+          docName = `Carta_Recomendacion_${currentLoan.client.name.replace(/\s+/g, '_')}.pdf`;
+          content = `CARTA DE RECOMENDACIÓN\n\nPor medio de la presente certificamos que el/la señor(a) ${currentLoan.client.name} ha cumplido satisfactoriamente con todas sus obligaciones financieras en nuestra institución.`;
+          break;
+        case 'receipts':
+          docName = `Recibos_Pago_${currentLoan.id.slice(0, 6)}.pdf`;
+          content = `HISTORIAL DE RECIBOS\n\nCliente: ${currentLoan.client.name}\n\n${currentLoan.payments.map(p => `Fecha: ${p.date.toDate().toLocaleDateString()} - Monto: $${p.amount.toFixed(2)}`).join('\n')}`;
+          break;
+      }
+      
+      // Simular descarga (en un sistema real, esto sería un enlace a un archivo real)
+      showInfoModal('Descarga', `Se generó el documento "${docName}" con éxito. En un sistema real, este documento se descargaría automáticamente.`);
+    }
+
+    // Actualizar formulario de pago según tipo seleccionado
+    function updatePaymentForm() {
+      const paymentType = document.querySelector('input[name="paymentType"]:checked').value;
+      const lateFeeContainer = document.getElementById('lateFeeContainer');
+      
+      if (paymentType === 'full') {
+        lateFeeContainer.style.display = 'block';
         
-        if (followersSnapshot.empty) return;
+        // Establecer monto predeterminado para pago completo
+        const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
+        if (nextPayment) {
+          document.getElementById('paymentAmount').value = nextPayment.amount.toFixed(2);
+        }
+      } else {
+        lateFeeContainer.style.display = 'none';
+        document.getElementById('applyLateFee').checked = false;
+        document.getElementById('lateFeeDetails').style.display = 'none';
         
-        const batch = db.batch();
-        const now = new Date();
-        
-        // Crear notificación para cada seguidor
-        followersSnapshot.forEach(doc => {
-          const notificationRef = db.collection('notifications')
-            .doc(doc.id)
-            .collection('userNotifications')
-            .doc();
-          
-          batch.set(notificationRef, {
-            type: 'new_post',
-            postType: postType,
-            postId: post.id,
-            userId: currentUser.uid,
-            title: post.title,
-            message: `${currentUser.displayName || 'Un usuario'} ha publicado nuevo contenido`,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000), // Expira en 24 horas
-            read: false
-          });
-        });
-        
-        await batch.commit();
-        
-      } catch (error) {
-        console.error("Error al enviar notificaciones:", error);
+        // Permitir cualquier monto para pagos parciales
+        document.getElementById('paymentAmount').value = '';
+      }
+      
+      validatePayment();
+    }
+
+    // Mostrar/ocultar detalles de mora
+    function toggleLateFeeDetails() {
+      const applyLateFee = document.getElementById('applyLateFee').checked;
+      document.getElementById('lateFeeDetails').style.display = applyLateFee ? 'block' : 'none';
+      validatePayment();
+    }
+
+    // Validar pago
+    function validatePayment() {
+      const paymentType = document.querySelector('input[name="paymentType"]:checked').value;
+      const paymentAmount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+      const applyLateFee = document.getElementById('applyLateFee').checked;
+      const lateFeeAmount = parseFloat(document.getElementById('lateFeeAmount').value) || 0;
+      const totalPayment = paymentAmount + (applyLateFee ? lateFeeAmount : 0);
+      
+      const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
+      
+      // Mostrar alerta si el pago es menor al esperado (solo para pago completo)
+      if (paymentType === 'full' && nextPayment && totalPayment < nextPayment.amount) {
+        showAlert(`El monto ingresado es menor al pago esperado ($${nextPayment.amount.toFixed(2)}).`, 'warning');
+      } else {
+        hideAlert();
       }
     }
 
-    // Mostrar sección
-    function showSection(sectionId) {
+    // Preparar pago (validar antes de confirmar)
+    function preparePayment(e) {
+      e.preventDefault();
+      
+      const paymentType = document.querySelector('input[name="paymentType"]:checked').value;
+      const paymentAmount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+      const paymentDate = document.getElementById('paymentDate').value;
+      const applyLateFee = document.getElementById('applyLateFee').checked;
+      const lateFeeAmount = parseFloat(document.getElementById('lateFeeAmount').value) || 0;
+      const totalPayment = paymentAmount + (applyLateFee ? lateFeeAmount : 0);
+      
+      const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
+      
+      // Validar monto mínimo
+      if (paymentAmount <= 0) {
+        showAlert('El monto del pago debe ser mayor a cero', 'danger');
+        return;
+      }
+      
+      // Validar pago completo insuficiente
+      if (paymentType === 'full' && nextPayment && totalPayment < nextPayment.amount) {
+        showConfirmModal(
+          'Pago incompleto',
+          `El monto ingresado ($${totalPayment.toFixed(2)}) es menor al pago esperado ($${nextPayment.amount.toFixed(2)}). ¿Desea continuar?`,
+          () => {
+            // Si el usuario confirma, proceder con el pago
+            paymentData = {
+              type: paymentType,
+              amount: paymentAmount,
+              date: paymentDate,
+              lateFee: applyLateFee ? lateFeeAmount : 0,
+              total: totalPayment
+            };
+            
+            processPayment();
+          }
+        );
+      } else {
+        // Si el pago es suficiente o es parcial, proceder directamente
+        paymentData = {
+          type: paymentType,
+          amount: paymentAmount,
+          date: paymentDate,
+          lateFee: applyLateFee ? lateFeeAmount : 0,
+          total: totalPayment
+        };
+        
+        processPayment();
+      }
+    }
+
+    // Procesar pago (registrar en Firebase)
+    async function processPayment() {
+      try {
+        const loanRef = doc(db, "Loans", currentLoan.id);
+        
+        // Crear objeto de pago
+        const payment = {
+          type: paymentData.type,
+          amount: paymentData.amount,
+          date: Timestamp.fromDate(new Date(paymentData.date)),
+          recordedBy: `Cliente: ${currentLoan.client.name}`,
+          timestamp: Timestamp.fromDate(new Date())
+        };
+        
+        if (paymentData.lateFee > 0) {
+          payment.lateFee = paymentData.lateFee;
+        }
+        
+        // Calcular cómo afecta el pago al capital y al interés
+        let capitalPayment = 0;
+        let interestPayment = 0;
+        
+        if (paymentData.type === 'full') {
+          // Pago completo: primero se aplica al interés pendiente, luego al capital
+          const interestDue = currentLoan.totalInterest - (currentLoan.payments || []).reduce((sum, p) => {
+            if (p.type === 'full') {
+              return sum + (p.amount - (p.amount * (currentLoan.interestRate / 100 / currentLoan.term)));
+            } else if (p.type === 'interest') {
+              return sum + p.amount;
+            }
+            return sum;
+          }, 0);
+          
+          interestPayment = Math.min(paymentData.amount, interestDue);
+          capitalPayment = paymentData.amount - interestPayment;
+        } else if (paymentData.type === 'interest') {
+          // Solo interés
+          interestPayment = paymentData.amount;
+        } else if (paymentData.type === 'capital') {
+          // Solo capital
+          capitalPayment = paymentData.amount;
+        }
+        
+        // Aplicar mora si existe
+        if (paymentData.lateFee > 0) {
+          interestPayment += paymentData.lateFee;
+        }
+        
+        // Actualizar saldos
+        const newBalance = currentLoan.balance - paymentData.total;
+        const newRemainingCapital = currentLoan.remainingCapital - capitalPayment;
+        
+        // Marcar el próximo pago como completado si es un pago completo
+        let updatedPaymentSchedule = [...currentLoan.paymentSchedule];
+        if (paymentData.type === 'full') {
+          const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
+          if (nextPayment) {
+            const paymentIndex = updatedPaymentSchedule.findIndex(p => p.number === nextPayment.number);
+            if (paymentIndex !== -1) {
+              updatedPaymentSchedule[paymentIndex].status = 'paid';
+            }
+          }
+        }
+        
+        // Actualizar el documento en Firebase
+        await updateDoc(loanRef, {
+          payments: arrayUnion(payment),
+          balance: newBalance,
+          remainingCapital: newRemainingCapital,
+          paymentSchedule: updatedPaymentSchedule,
+          status: newRemainingCapital <= 0 ? 'completed' : 'active'
+        });
+        
+        // Mostrar mensaje de éxito
+        showInfoModal(
+          'Pago registrado',
+          'Tu pago ha sido registrado exitosamente y será procesado en menos de 24 horas.'
+        );
+        
+        // Actualizar datos locales
+        currentLoan.payments = currentLoan.payments || [];
+        currentLoan.payments.push(payment);
+        currentLoan.balance = newBalance;
+        currentLoan.remainingCapital = newRemainingCapital;
+        currentLoan.paymentSchedule = updatedPaymentSchedule;
+        
+        // Recargar datos
+        loadClientData();
+        
+        // Limpiar formulario
+        document.getElementById('paymentForm').reset();
+        document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('lateFeeDetails').style.display = 'none';
+        document.getElementById('applyLateFee').checked = false;
+        
+      } catch (error) {
+        console.error("Error registrando pago: ", error);
+        showAlert('Ocurrió un error al registrar el pago', 'danger');
+      }
+    }
+
+    // Navegar entre secciones
+    function navigateToSection(section) {
+      // Actualizar menú
+      document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.dataset.section === section) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+      
       // Ocultar todas las secciones
-      document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
+      document.querySelectorAll('.section').forEach(sec => {
+        sec.classList.remove('active');
       });
       
       // Mostrar la sección seleccionada
-      document.getElementById(sectionId).classList.add('active');
-      
-      // Actualizar menú activo
-      document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      event.currentTarget.classList.add('active');
-      
-      // Cargar contenido específico de la sección
-      switch(sectionId) {
-        case 'historySection':
-          loadHistory();
-          break;
-        case 'followingSection':
-          loadFollowingPosts();
-          break;
-        case 'notificationsSection':
-          loadNotifications();
-          break;
-      }
+      document.getElementById(`${section}-section`).classList.add('active');
     }
 
-    // Cargar videos vistos (historial)
-    async function loadViewedVideos() {
-      try {
-        const historyDoc = await db.collection('userHistory').doc(currentUser.uid).get();
-        if (historyDoc.exists) {
-          viewedVideos = new Set(historyDoc.data().viewedPosts || []);
-        }
-      } catch (error) {
-        console.error("Error al cargar historial:", error);
-      }
+    // Mostrar alerta
+    function showAlert(message, type) {
+      const alert = document.getElementById('paymentAlert');
+      alert.style.display = 'flex';
+      alert.className = `alert alert-${type}`;
+      document.getElementById('paymentAlertMessage').textContent = message;
     }
 
-    // Cargar posts que el usuario ha dado like
-    async function loadLikedPosts() {
-      try {
-        // Limpiar el set de likes
-        likedPosts = new Set();
-        
-        // Obtener likes de todas las colecciones
-        const [gallosLikes, entrenamientosLikes, peleasLikes] = await Promise.all([
-          db.collection('PublicGallo').where('likes', 'array-contains', currentUser.uid).get(),
-          db.collection('PublicEntrenamiento').where('likes', 'array-contains', currentUser.uid).get(),
-          db.collection('PublicPelea').where('likes', 'array-contains', currentUser.uid).get()
-        ]);
-        
-        // Agregar IDs de posts con like
-        gallosLikes.forEach(doc => likedPosts.add(`gallos_${doc.id}`));
-        entrenamientosLikes.forEach(doc => likedPosts.add(`entrenamientos_${doc.id}`));
-        peleasLikes.forEach(doc => likedPosts.add(`peleas_${doc.id}`));
-        
-      } catch (error) {
-        console.error("Error al cargar posts con like:", error);
-      }
+    // Ocultar alerta
+    function hideAlert() {
+      document.getElementById('paymentAlert').style.display = 'none';
     }
 
-    // Cargar notificaciones nuevas
-    async function loadNewNotifications() {
-      try {
-        const now = new Date();
-        const twentyFourHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-        
-        const notificationsSnapshot = await db.collection('notifications')
-          .doc(currentUser.uid)
-          .collection('userNotifications')
-          .where('timestamp', '>=', twentyFourHoursAgo)
-          .where('read', '==', false)
-          .get();
-        
-        newNotifications = notificationsSnapshot.size;
-        
-        // Actualizar badge de notificaciones
-        const badge = document.getElementById('notificationBadge');
-        if (newNotifications > 0) {
-          badge.textContent = newNotifications;
-          badge.style.display = 'flex';
-        } else {
-          badge.style.display = 'none';
-        }
-        
-      } catch (error) {
-        console.error("Error al cargar notificaciones:", error);
-      }
+    // Mostrar modal de confirmación
+    function showConfirmModal(title, message, onConfirm) {
+      document.getElementById('confirmModalTitle').textContent = title;
+      document.getElementById('confirmModalMessage').textContent = message;
+      document.getElementById('confirmModal').classList.add('active');
+      
+      // Configurar acción de confirmación
+      const confirmBtn = document.getElementById('confirmPaymentBtn');
+      const handler = () => {
+        confirmBtn.removeEventListener('click', handler);
+        closeModal();
+        onConfirm();
+      };
+      
+      confirmBtn.addEventListener('click', handler);
     }
 
-    // Cargar notificaciones
-    async function loadNotifications() {
-      const container = document.getElementById('notificationsContainer');
-      
-      try {
-        const now = new Date();
-        const twentyFourHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-        
-        const notificationsSnapshot = await db.collection('notifications')
-          .doc(currentUser.uid)
-          .collection('userNotifications')
-          .where('timestamp', '>=', twentyFourHoursAgo)
-          .orderBy('timestamp', 'desc')
-          .get();
-        
-        if (notificationsSnapshot.empty) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-bell-slash"></i>
-              <p>No hay notificaciones nuevas</p>
-            </div>
-          `;
-          return;
-        }
-        
-        container.innerHTML = '';
-        
-        // Procesar cada notificación
-        for (const doc of notificationsSnapshot.docs) {
-          const notification = doc.data();
-          
-          // Obtener datos del usuario que generó la notificación
-          let userData = userCache[notification.userId];
-          if (!userData) {
-            const userDoc = await db.collection('users').doc(notification.userId).get();
-            if (userDoc.exists) {
-              userData = userDoc.data();
-              userCache[notification.userId] = userData;
-            } else {
-              userData = {
-                displayName: 'Usuario',
-                photoURL: 'img/default-profile.jpg',
-                email: ''
-              };
-            }
-          }
-          
-          // Formatear fecha
-          let notificationDate = 'Fecha no disponible';
-          if (notification.timestamp && notification.timestamp.toDate) {
-            try {
-              notificationDate = notification.timestamp.toDate().toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-            } catch (error) {
-              console.error("Error al formatear fecha:", error);
-            }
-          }
-          
-          // Crear elemento de notificación
-          const notificationElement = document.createElement('div');
-          notificationElement.className = 'post-card';
-          notificationElement.innerHTML = `
-            <div class="post-header">
-              <img src="${userData.photoURL}" alt="Avatar" class="user-avatar" 
-                   onclick="viewUserProfile('${notification.userId}')">
-              <div class="user-info">
-                <div class="user-name" onclick="viewUserProfile('${notification.userId}')">${userData.displayName}</div>
-                <div class="post-time">${notificationDate}</div>
-              </div>
-              ${notification.userId !== currentUser.uid ? 
-                `<button class="follow-btn" id="followBtn-${notification.userId}" onclick="toggleFollow('${notification.userId}', this)">
-                  <i class="fas fa-user-plus"></i> Seguir
-                </button>` : ''
-              }
-            </div>
-            <div class="post-content">
-              <h3 class="post-title">${notification.message}</h3>
-              <div style="margin-top: 10px;">
-                <button class="filter-btn" onclick="viewNotificationPost('${notification.postType}', '${notification.postId}')">
-                  Ver publicación
-                </button>
-              </div>
-            </div>
-          `;
-          
-          container.appendChild(notificationElement);
-          
-          // Configurar estado del botón de seguir
-          if (notification.userId !== currentUser.uid) {
-            setupFollowButton(notification.userId);
-          }
-          
-          // Marcar como leída
-          if (!notification.read) {
-            await db.collection('notifications')
-              .doc(currentUser.uid)
-              .collection('userNotifications')
-              .doc(doc.id)
-              .update({
-                read: true
-              });
-          }
-        }
-        
-        // Resetear notificaciones
-        newNotifications = 0;
-        document.getElementById('notificationBadge').style.display = 'none';
-        
-      } catch (error) {
-        console.error("Error al cargar notificaciones:", error);
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-exclamation-triangle"></i>
-            <p>Error al cargar notificaciones</p>
-          </div>
-        `;
-      }
-    }
-    
-    // Ver publicación desde notificación
-    async function viewNotificationPost(postType, postId) {
-      try {
-        const collectionName = getCollectionName(postType);
-        const postDoc = await db.collection(collectionName).doc(postId).get();
-        
-        if (postDoc.exists) {
-          const post = {...postDoc.data(), id: postDoc.id, type: postType};
-          showPostModal(post);
-          showSection('homeSection');
-        } else {
-          showNotification('La publicación ya no está disponible', 'error');
-        }
-      } catch (error) {
-        console.error("Error al cargar publicación:", error);
-        showNotification('Error al cargar publicación', 'error');
-      }
+    // Mostrar modal de información
+    function showInfoModal(title, message) {
+      document.getElementById('infoModalTitle').textContent = title;
+      document.getElementById('infoModalMessage').textContent = message;
+      document.getElementById('infoModal').classList.add('active');
     }
 
-    // Cargar historial de videos vistos
-    async function loadHistory() {
-      const container = document.getElementById('historyContainer');
-      
-      if (viewedVideos.size === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-history"></i>
-            <p>No has visto ningún video todavía</p>
-          </div>
-        `;
-        return;
-      }
-      
-      container.innerHTML = '';
-      
-      // Convertir Set a Array para poder iterar
-      const viewedPostsArray = Array.from(viewedVideos);
-      
-      // Obtener los posts del historial
-      const postsPromises = viewedPostsArray.map(async postKey => {
-        const [type, id] = postKey.split('_');
-        const collectionName = getCollectionName(type);
-        const postDoc = await db.collection(collectionName).doc(id).get();
-        
-        if (postDoc.exists) {
-          return {...postDoc.data(), id: postDoc.id, type: type};
-        }
-        return null;
-      });
-      
-      const posts = (await Promise.all(postsPromises)).filter(post => post !== null);
-      
-      // Ordenar por fecha (más reciente primero)
-      posts.sort((a, b) => {
-        const dateA = a.timestamp?.toDate() || new Date(0);
-        const dateB = b.timestamp?.toDate() || new Date(0);
-        return dateB - dateA;
-      });
-      
-      // Mostrar posts en el historial
-      for (const post of posts) {
-        // Obtener datos del usuario desde caché o Firestore
-        let userData = userCache[post.userId];
-        if (!userData) {
-          const userDoc = await db.collection('users').doc(post.userId).get();
-          if (userDoc.exists) {
-            userData = userDoc.data();
-            userCache[post.userId] = userData;
-          } else {
-            userData = {
-              displayName: 'Usuario',
-              photoURL: 'img/default-profile.jpg',
-              email: ''
-            };
-          }
-        }
-        
-        // Determinar el contenido multimedia según el tipo
-        let mediaContent = '';
-        if (post.type === 'gallos') {
-          mediaContent = `
-            <div class="post-media-container">
-              <img src="${post.mediaUrl}" alt="${post.title}" class="post-image" 
-                   onclick="expandImage('${post.mediaUrl}')" 
-                   onerror="this.onerror=null;this.src='img/default-image.jpg'">
-            </div>
-          `;
-        } else {
-          // Determinar si es un video short (vertical) o normal (horizontal)
-          const isShort = await isVideoShort(post.mediaUrl);
-          
-          mediaContent = `
-            <div class="post-media-container">
-              <div class="video-container ${isShort ? 'short' : 'normal'}">
-                <video controls playsinline>
-                  <source src="${post.mediaUrl}" type="video/mp4">
-                  Tu navegador no soporta videos HTML5.
-                </video>
-              </div>
-            </div>
-          `;
-        }
-        
-        // Crear elemento de historial
-        const historyElement = document.createElement('div');
-        historyElement.className = 'post-card';
-        historyElement.innerHTML = `
-          <div class="post-header">
-            <img src="${userData.photoURL}" alt="Avatar" class="user-avatar" 
-                 onclick="viewUserProfile('${post.userId}')">
-            <div class="user-info">
-              <div class="user-name" onclick="viewUserProfile('${post.userId}')">${userData.displayName}</div>
-              <div class="post-time">${post.timestamp?.toDate().toLocaleDateString('es-ES') || 'Fecha desconocida'}</div>
-            </div>
-            ${post.userId !== currentUser.uid ? 
-              `<button class="follow-btn" id="followBtn-${post.userId}" onclick="toggleFollow('${post.userId}', this)">
-                <i class="fas fa-user-plus"></i> Seguir
-              </button>` : ''
-            }
-          </div>
-          <div class="post-content">
-            <h3 class="post-title">${post.title || 'Sin título'}</h3>
-            <p class="post-description">${post.description || 'Sin descripción'}</p>
-            ${mediaContent}
-          </div>
-          <div class="post-footer">
-            <div class="post-actions">
-              <button class="action-btn" onclick="toggleLike('${post.type}', '${post.id}', this)">
-                <i class="fas fa-heart"></i> Me gusta
-              </button>
-              <button class="action-btn" onclick="toggleComments('${post.type}', '${post.id}', this)">
-                <i class="fas fa-comment"></i> Comentar
-              </button>
-            </div>
-            <div class="post-stats">
-              <span><i class="fas fa-heart"></i> ${post.likes?.length || 0} likes</span>
-              <span style="margin-left: 10px;"><i class="fas fa-comment"></i> ${post.comments || 0} comentarios</span>
-            </div>
-          </div>
-          <div class="comments-section" id="comments-${post.id}">
-            <div class="comments-list" id="commentsList-${post.id}">
-              <!-- Los comentarios se cargarán aquí -->
-            </div>
-            <form class="comment-form" onsubmit="postComment('${post.type}', '${post.id}', event)">
-              <input type="text" class="comment-input" placeholder="Escribe un comentario..." required>
-              <button type="submit" class="comment-submit">Publicar</button>
-            </form>
-          </div>
-        `;
-        
-        container.appendChild(historyElement);
-        
-        // Configurar estado del botón de seguir
-        if (post.userId !== currentUser.uid) {
-          setupFollowButton(post.userId);
-        }
-      }
-    }
-
-    // Cargar publicaciones de usuarios seguidos
-    async function loadFollowingPosts() {
-      const container = document.getElementById('followingContainer');
-      
-      try {
-        // Obtener lista de usuarios seguidos
-        const followingSnapshot = await db.collection('followers')
-          .doc(currentUser.uid)
-          .collection('userFollowing')
-          .get();
-        
-        if (followingSnapshot.empty) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-user-plus"></i>
-              <p>No sigues a ningún usuario todavía</p>
-            </div>
-          `;
-          return;
-        }
-        
-        const followingIds = followingSnapshot.docs.map(doc => doc.id);
-        
-        // Obtener publicaciones de usuarios seguidos
-        const [gallosPosts, entrenamientosPosts, peleasPosts] = await Promise.all([
-          db.collection('PublicGallo')
-            .where('userId', 'in', followingIds)
-            .orderBy('timestamp', 'desc')
-            .get(),
-          db.collection('PublicEntrenamiento')
-            .where('userId', 'in', followingIds)
-            .orderBy('timestamp', 'desc')
-            .get(),
-          db.collection('PublicPelea')
-            .where('userId', 'in', followingIds)
-            .orderBy('timestamp', 'desc')
-            .get()
-        ]);
-        
-        const followingPosts = [];
-        
-        gallosPosts.forEach(doc => {
-          followingPosts.push({...doc.data(), id: doc.id, type: 'gallos'});
-        });
-        
-        entrenamientosPosts.forEach(doc => {
-          followingPosts.push({...doc.data(), id: doc.id, type: 'entrenamientos'});
-        });
-        
-        peleasPosts.forEach(doc => {
-          followingPosts.push({...doc.data(), id: doc.id, type: 'peleas'});
-        });
-        
-        if (followingPosts.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-box-open"></i>
-              <p>Los usuarios que sigues no han publicado nada todavía</p>
-            </div>
-          `;
-          return;
-        }
-        
-        // Ordenar por fecha (más reciente primero)
-        followingPosts.sort((a, b) => {
-          const dateA = a.timestamp?.toDate() || new Date(0);
-          const dateB = b.timestamp?.toDate() || new Date(0);
-          return dateB - dateA;
-        });
-        
-        container.innerHTML = '';
-        
-        // Mostrar publicaciones de usuarios seguidos
-        for (const post of followingPosts) {
-          // Obtener datos del usuario desde caché o Firestore
-          let userData = userCache[post.userId];
-          if (!userData) {
-            const userDoc = await db.collection('users').doc(post.userId).get();
-            if (userDoc.exists) {
-              userData = userDoc.data();
-              userCache[post.userId] = userData;
-            } else {
-              userData = {
-                displayName: 'Usuario',
-                photoURL: 'img/default-profile.jpg',
-                email: ''
-              };
-            }
-          }
-          
-          // Formatear fecha
-          let postDate = 'Fecha no disponible';
-          if (post.timestamp && post.timestamp.toDate) {
-            try {
-              postDate = post.timestamp.toDate().toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-            } catch (error) {
-              console.error("Error al formatear fecha:", error);
-            }
-          }
-          
-          // Determinar si el usuario actual dio like a esta publicación
-          const hasLike = likedPosts.has(`${post.type}_${post.id}`);
-          
-          // Determinar el contenido multimedia según el tipo
-          let mediaContent = '';
-          if (post.type === 'gallos') {
-            mediaContent = `
-              <div class="post-media-container">
-                <img src="${post.mediaUrl}" alt="${post.title}" class="post-image" 
-                     onclick="expandImage('${post.mediaUrl}')" 
-                     onerror="this.onerror=null;this.src='img/default-image.jpg'">
-              </div>
-            `;
-          } else {
-            // Determinar si es un video short (vertical) o normal (horizontal)
-            const isShort = await isVideoShort(post.mediaUrl);
-            
-            mediaContent = `
-              <div class="post-media-container">
-                <div class="video-container ${isShort ? 'short' : 'normal'}">
-                  <video controls playsinline>
-                    <source src="${post.mediaUrl}" type="video/mp4">
-                    Tu navegador no soporta videos HTML5.
-                  </video>
-                </div>
-              </div>
-            `;
-          }
-          
-          // Crear elemento de publicación
-          const postElement = document.createElement('div');
-          postElement.className = 'post-card';
-          postElement.innerHTML = `
-            <div class="post-header">
-              <img src="${userData.photoURL}" alt="Avatar" class="user-avatar" 
-                   onclick="viewUserProfile('${post.userId}')">
-              <div class="user-info">
-                <div class="user-name" onclick="viewUserProfile('${post.userId}')">${userData.displayName}</div>
-                <div class="post-time">${postDate}</div>
-              </div>
-              ${post.userId !== currentUser.uid ? 
-                `<button class="follow-btn" id="followBtn-${post.userId}" onclick="toggleFollow('${post.userId}', this)">
-                  <i class="fas fa-user-plus"></i> Seguir
-                </button>` : ''
-              }
-            </div>
-            <div class="post-content">
-              <h3 class="post-title">${post.title || 'Sin título'}</h3>
-              <p class="post-description">${post.description || 'Sin descripción'}</p>
-              ${mediaContent}
-            </div>
-            <div class="post-footer">
-              <div class="post-actions">
-                <button class="action-btn" onclick="toggleLike('${post.type}', '${post.id}', this)">
-                  <i class="fas fa-heart ${hasLike ? 'liked' : ''}"></i> Me gusta
-                </button>
-                <button class="action-btn" onclick="toggleComments('${post.type}', '${post.id}', this)">
-                  <i class="fas fa-comment"></i> Comentar
-                </button>
-              </div>
-              <div class="post-stats">
-                <span><i class="fas fa-heart"></i> ${post.likes?.length || 0} likes</span>
-                <span style="margin-left: 10px;"><i class="fas fa-comment"></i> ${post.comments || 0} comentarios</span>
-              </div>
-            </div>
-            <div class="comments-section" id="comments-${post.id}">
-              <div class="comments-list" id="commentsList-${post.id}">
-                <!-- Los comentarios se cargarán aquí -->
-              </div>
-              <form class="comment-form" onsubmit="postComment('${post.type}', '${post.id}', event)">
-                <input type="text" class="comment-input" placeholder="Escribe un comentario..." required>
-                <button type="submit" class="comment-submit">Publicar</button>
-              </form>
-            </div>
-          `;
-          
-          container.appendChild(postElement);
-          
-          // Configurar estado del botón de seguir
-          if (post.userId !== currentUser.uid) {
-            setupFollowButton(post.userId);
-          }
-        }
-      } catch (error) {
-        console.error("Error al cargar publicaciones de seguidos:", error);
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-exclamation-triangle"></i>
-            <p>Error al cargar publicaciones</p>
-          </div>
-        `;
-      }
-    }
-
-    // Configurar eventos para pantalla completa
-    function setupFullscreenEvents() {
-      document.addEventListener('fullscreenchange', handleFullscreenChange);
-      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-    }
-
-    // Manejar cambios en pantalla completa
-    function handleFullscreenChange() {
-      const isFullscreen = document.fullscreenElement || 
-                          document.webkitFullscreenElement || 
-                          document.mozFullScreenElement || 
-                          document.msFullscreenElement;
-      
-      if (isFullscreen) {
-        // Entramos en pantalla completa
-        fullscreenVideo = document.fullscreenElement || 
-                         document.webkitFullscreenElement || 
-                         document.mozFullScreenElement || 
-                         document.msFullscreenElement;
-        
-        // Configurar eventos de deslizamiento
-        setupSwipeEvents(fullscreenVideo);
-        
-        // Mostrar indicador de deslizamiento
-        showSwipeIndicator();
-      } else {
-        // Salimos de pantalla completa
-        if (fullscreenVideo) {
-          fullscreenVideo.removeEventListener('touchstart', handleTouchStart);
-          fullscreenVideo.removeEventListener('touchmove', handleTouchMove);
-          fullscreenVideo.removeEventListener('touchend', handleTouchEnd);
-          fullscreenVideo = null;
-        }
-      }
-    }
-
-    // Mostrar indicador de deslizamiento
-    function showSwipeIndicator() {
-      const indicator = document.getElementById('swipeIndicator');
-      indicator.style.display = 'block';
-      
-      setTimeout(() => {
-        indicator.style.opacity = '1';
-      }, 100);
-      
-      setTimeout(() => {
-        indicator.style.opacity = '0';
-        setTimeout(() => {
-          indicator.style.display = 'none';
-        }, 300);
-      }, 3000);
-    }
-
-    // Configurar eventos de deslizamiento
-    function setupSwipeEvents(element) {
-      element.addEventListener('touchstart', handleTouchStart, { passive: false });
-      element.addEventListener('touchmove', handleTouchMove, { passive: false });
-      element.addEventListener('touchend', handleTouchEnd, { passive: true });
-    }
-
-    // Manejar inicio de toque
-    function handleTouchStart(e) {
-      startY = e.touches[0].clientY;
-      isSwiping = false;
-    }
-
-    // Manejar movimiento de toque
-    function handleTouchMove(e) {
-      if (!fullscreenVideo) return;
-      
-      const currentY = e.touches[0].clientY;
-      const diffY = startY - currentY;
-      
-      if (Math.abs(diffY) > 10) {
-        isSwiping = true;
-        e.preventDefault();
-      }
-    }
-
-    // Manejar fin de toque
-    function handleTouchEnd(e) {
-      if (!fullscreenVideo || !isSwiping) return;
-      
-      const endY = e.changedTouches[0].clientY;
-      const diffY = startY - endY;
-      
-      if (Math.abs(diffY) > 50) { // Umbral mínimo para considerar un deslizamiento
-        if (diffY > 0) {
-          // Deslizamiento hacia arriba - siguiente video
-          navigateVideo('next');
-        } else {
-          // Deslizamiento hacia abajo - video anterior
-          navigateVideo('prev');
-        }
-      }
-      
-      isSwiping = false;
-    }
-
-    // Navegar entre videos en pantalla completa
-    function navigateVideo(direction) {
-      if (!videoPosts.length) return;
-      
-      const spinner = document.getElementById('loadingSpinner');
-      spinner.style.display = 'block';
-      
-      // Encontrar el índice del video actual
-      const currentVideoSrc = fullscreenVideo.querySelector('video').src.split('?')[0];
-      currentPostIndex = videoPosts.findIndex(post => post.mediaUrl === currentVideoSrc);
-      
-      if (direction === 'next') {
-        currentPostIndex = (currentPostIndex + 1) % videoPosts.length;
-      } else {
-        currentPostIndex = (currentPostIndex - 1 + videoPosts.length) % videoPosts.length;
-      }
-      
-      // Cargar el nuevo video
-      const nextPost = videoPosts[currentPostIndex];
-      const videoContainer = fullscreenVideo;
-      
-      // Mostrar loading y miniatura mientras carga
-      videoContainer.innerHTML = `
-        <div class="video-loading">
-          <i class="fas fa-spinner fa-spin"></i>
-        </div>
-        <img src="${nextPost.mediaUrl.replace('.mp4', '.jpg') || 'img/default-video.jpg'}" class="video-thumbnail">
-        <video autoplay controls>
-          <source src="${nextPost.mediaUrl}" type="video/mp4">
-          Tu navegador no soporta videos HTML5.
-        </video>
-      `;
-      
-      const video = videoContainer.querySelector('video');
-      video.addEventListener('loadeddata', () => {
-        // Ocultar loading y miniatura cuando el video está listo
-        videoContainer.querySelector('.video-loading').style.display = 'none';
-        videoContainer.querySelector('.video-thumbnail').style.display = 'none';
-        spinner.style.display = 'none';
-        
-        // Asegurarse de que el video sigue en pantalla completa
-        if (!document.fullscreenElement && !document.webkitFullscreenElement && 
-            !document.mozFullScreenElement && !document.msFullscreenElement) {
-          videoContainer.requestFullscreen().catch(err => {
-            console.error('Error al mantener pantalla completa:', err);
-          });
-        }
-        
-        // Registrar como visto
-        addToHistory(nextPost.type, nextPost.id);
-      });
-      
-      video.addEventListener('error', () => {
-        spinner.style.display = 'none';
-        showNotification('Error al cargar el video', 'error');
+    // Cerrar modal
+    function closeModal() {
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.classList.remove('active');
       });
     }
 
-    // Agregar video al historial
-    async function addToHistory(postType, postId) {
-      const postKey = `${postType}_${postId}`;
+    // Cerrar sesión
+    function logout() {
+      currentUser = null;
+      currentLoan = null;
       
-      if (!viewedVideos.has(postKey)) {
-        viewedVideos.add(postKey);
-        
-        try {
-          await db.collection('userHistory').doc(currentUser.uid).set({
-            viewedPosts: Array.from(viewedVideos),
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true });
-        } catch (error) {
-          console.error("Error al guardar historial:", error);
-        }
-      }
-    }
-
-    // Alternar búsqueda
-    function toggleSearch() {
-      const searchInput = document.querySelector('.search-input');
-      const searchResults = document.getElementById('searchResults');
+      document.getElementById('login-section').style.display = 'flex';
+      document.getElementById('client-section').style.display = 'none';
       
-      searchInput.classList.toggle('active');
-      searchResults.classList.remove('active');
-      
-      if (searchInput.classList.contains('active')) {
-        searchInput.focus();
-      }
-    }
-
-    // Buscar usuarios con filtrado en tiempo real
-    async function searchUsers(query) {
-      const searchResults = document.getElementById('searchResults');
-      
-      if (query.length < 2) {
-        searchResults.innerHTML = '';
-        searchResults.classList.remove('active');
-        return;
-      }
-      
-      try {
-        // Primero buscar en caché
-        const cachedResults = Object.values(userCache).filter(user => 
-          user.displayName.toLowerCase().includes(query.toLowerCase()) || 
-          user.email.toLowerCase().includes(query.toLowerCase())
-        );
-        
-        if (cachedResults.length > 0) {
-          displaySearchResults(cachedResults, searchResults);
-          return;
-        }
-        
-        // Si no hay resultados en caché, buscar en Firestore
-        const usersSnapshot = await db.collection('users')
-          .where('keywords', 'array-contains', query.toLowerCase())
-          .limit(10)
-          .get();
-        
-        if (usersSnapshot.empty) {
-          searchResults.innerHTML = '<div class="search-result-item">No se encontraron usuarios</div>';
-          searchResults.classList.add('active');
-          return;
-        }
-        
-        const usersData = [];
-        usersSnapshot.forEach(doc => {
-          const user = doc.data();
-          user.id = doc.id;
-          usersData.push(user);
-          // Almacenar en caché
-          userCache[doc.id] = user;
-        });
-        
-        displaySearchResults(usersData, searchResults);
-        
-      } catch (error) {
-        console.error("Error al buscar usuarios:", error);
-        searchResults.innerHTML = '<div class="search-result-item">Error al buscar usuarios</div>';
-        searchResults.classList.add('active');
-      }
-    }
-
-    // Mostrar resultados de búsqueda
-    function displaySearchResults(users, searchResults) {
-      searchResults.innerHTML = '';
-      
-      users.forEach(user => {
-        if (user.id !== currentUser.uid) {
-          const item = document.createElement('div');
-          item.className = 'search-result-item';
-          item.innerHTML = `
-            <img src="${user.photoURL || 'img/default-profile.jpg'}" class="search-result-avatar">
-            <div>
-              <div>${user.displayName || 'Usuario'}</div>
-              <small>${user.email || ''}</small>
-            </div>
-          `;
-          item.onclick = () => {
-            viewUserProfile(user.id);
-            document.querySelector('.search-input').classList.remove('active');
-            searchResults.classList.remove('active');
-          };
-          searchResults.appendChild(item);
-        }
-      });
-      
-      searchResults.classList.add('active');
-    }
-
-    // Configurar controles de video
-    function setupVideoControls() {
-      document.addEventListener('click', function(e) {
-        // Reproducir/pausar al hacer clic en el video
-        if (e.target.tagName === 'VIDEO') {
-          const video = e.target;
-          if (video.paused) {
-            video.play().catch(err => {
-              console.error("Error al reproducir video:", err);
-            });
-          } else {
-            video.pause();
-          }
-        }
-        
-        // Botón de pantalla completa (ahora se activa al tocar el video)
-        if (e.target.tagName === 'VIDEO' || e.target.classList.contains('video-container')) {
-          const videoContainer = e.target.tagName === 'VIDEO' ? 
-                               e.target.parentElement : e.target;
-          
-          // Solo videos verticales (shorts) tendrán navegación por gestos
-          if (videoContainer.classList.contains('short')) {
-            toggleFullscreen(videoContainer);
-          }
-        }
-      });
-    }
-
-    // Alternar pantalla completa
-    function toggleFullscreen(element) {
-      if (!document.fullscreenElement) {
-        // Guardar referencia a los posts de video para navegación
-        videoPosts = allPosts.filter(post => post.type !== 'gallos');
-        
-        element.requestFullscreen().catch(err => {
-          console.error(`Error al entrar en pantalla completa: ${err.message}`);
-        });
-      } else {
-        document.exitFullscreen();
-      }
-    }
-
-    // Determinar si un video es vertical (short) u horizontal
-    function isVideoShort(videoUrl) {
-      return new Promise((resolve) => {
-        const video = document.createElement('video');
-        video.src = videoUrl + '#t=0.1';
-        
-        video.onloadedmetadata = () => {
-          resolve(video.videoHeight > video.videoWidth);
-        };
-        
-        video.onerror = () => {
-          resolve(false); // Por defecto asumimos que no es short si hay error
-        };
-      });
-    }
-
-    // Cargar todas las publicaciones
-    async function loadAllPosts() {
-      try {
-        console.log("Cargando todas las publicaciones...");
-        
-        // Obtener publicaciones de todas las colecciones
-        const [gallosSnapshot, entrenamientosSnapshot, peleasSnapshot] = await Promise.all([
-          db.collection('PublicGallo').orderBy('timestamp', 'desc').get(),
-          db.collection('PublicEntrenamiento').orderBy('timestamp', 'desc').get(),
-          db.collection('PublicPelea').orderBy('timestamp', 'desc').get()
-        ]);
-        
-        // Procesar todas las publicaciones
-        allPosts = [];
-        
-        gallosSnapshot.forEach(doc => {
-          allPosts.push({...doc.data(), id: doc.id, type: 'gallos'});
-        });
-        
-        entrenamientosSnapshot.forEach(doc => {
-          allPosts.push({...doc.data(), id: doc.id, type: 'entrenamientos'});
-        });
-        
-        peleasSnapshot.forEach(doc => {
-          allPosts.push({...doc.data(), id: doc.id, type: 'peleas'});
-        });
-        
-        console.log(`Se encontraron ${allPosts.length} publicaciones`);
-        
-        // Mostrar publicaciones
-        displayPosts(allPosts);
-      } catch (error) {
-        console.error("Error al cargar publicaciones:", error);
-        showNotification('Error al cargar publicaciones', 'error');
-      }
-    }
-
-    // Mostrar publicaciones en el contenedor
-    async function displayPosts(posts) {
-      const container = document.getElementById('postsContainer');
-      
-      if (posts.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-box-open"></i>
-            <p>No hay publicaciones disponibles</p>
-          </div>
-        `;
-        return;
-      }
-      
-      container.innerHTML = '';
-      
-      // Procesar cada publicación
-      for (const post of posts) {
-        // Obtener datos del usuario desde caché o Firestore
-        let userData = userCache[post.userId];
-        if (!userData) {
-          const userDoc = await db.collection('users').doc(post.userId).get();
-          if (userDoc.exists) {
-            userData = userDoc.data();
-            userCache[post.userId] = userData;
-          } else {
-            userData = {
-              displayName: 'Usuario',
-              photoURL: 'img/default-profile.jpg',
-              email: ''
-            };
-          }
-        }
-        
-        // Formatear fecha
-        let postDate = 'Fecha no disponible';
-        if (post.timestamp && post.timestamp.toDate) {
-          try {
-            postDate = post.timestamp.toDate().toLocaleDateString('es-ES', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-          } catch (error) {
-            console.error("Error al formatear fecha:", error);
-          }
-        }
-        
-        // Determinar si el usuario actual dio like a esta publicación
-        const hasLike = likedPosts.has(`${post.type}_${post.id}`);
-        
-        // Determinar el contenido multimedia según el tipo
-        let mediaContent = '';
-        if (post.type === 'gallos') {
-          mediaContent = `
-            <div class="post-media-container">
-              <img src="${post.mediaUrl}" alt="${post.title}" class="post-image" 
-                   onclick="expandImage('${post.mediaUrl}')" 
-                   onerror="this.onerror=null;this.src='img/default-image.jpg'">
-            </div>
-          `;
-        } else {
-          // Determinar si es un video short (vertical) o normal (horizontal)
-          const isShort = await isVideoShort(post.mediaUrl);
-          
-          mediaContent = `
-            <div class="post-media-container">
-              <div class="video-container ${isShort ? 'short' : 'normal'}">
-                <div class="video-loading">
-                  <i class="fas fa-spinner fa-spin"></i>
-                </div>
-                <img src="${post.mediaUrl.replace('.mp4', '.jpg') || 'img/default-video.jpg'}" class="video-thumbnail">
-                <video controls playsinline>
-                  <source src="${post.mediaUrl}" type="video/mp4">
-                  Tu navegador no soporta videos HTML5.
-                </video>
-              </div>
-            </div>
-          `;
-        }
-        
-        // Crear elemento de publicación
-        const postElement = document.createElement('div');
-        postElement.className = 'post-card';
-        postElement.innerHTML = `
-          <div class="post-header">
-            <img src="${userData.photoURL}" alt="Avatar" class="user-avatar" 
-                 onclick="viewUserProfile('${post.userId}')">
-            <div class="user-info">
-              <div class="user-name" onclick="viewUserProfile('${post.userId}')">${userData.displayName}</div>
-              <div class="post-time">${postDate}</div>
-            </div>
-            ${post.userId !== currentUser.uid ? 
-              `<button class="follow-btn" id="followBtn-${post.userId}" onclick="toggleFollow('${post.userId}', this)">
-                <i class="fas fa-user-plus"></i> Seguir
-              </button>` : ''
-            }
-          </div>
-          <div class="post-content">
-            <h3 class="post-title">${post.title || 'Sin título'}</h3>
-            <p class="post-description">${post.description || 'Sin descripción'}</p>
-            ${mediaContent}
-          </div>
-          <div class="post-footer">
-            <div class="post-actions">
-              <button class="action-btn" onclick="toggleLike('${post.type}', '${post.id}', this)">
-                <i class="fas fa-heart ${hasLike ? 'liked' : ''}"></i> Me gusta
-              </button>
-              <button class="action-btn" onclick="toggleComments('${post.type}', '${post.id}', this)">
-                <i class="fas fa-comment"></i> Comentar
-              </button>
-            </div>
-            <div class="post-stats">
-              <span><i class="fas fa-heart"></i> ${post.likes?.length || 0} likes</span>
-              <span style="margin-left: 10px;"><i class="fas fa-comment"></i> ${post.comments || 0} comentarios</span>
-            </div>
-          </div>
-          <div class="comments-section" id="comments-${post.id}">
-            <div class="comments-list" id="commentsList-${post.id}">
-              <!-- Los comentarios se cargarán aquí -->
-            </div>
-            <form class="comment-form" onsubmit="postComment('${post.type}', '${post.id}', event)">
-              <input type="text" class="comment-input" placeholder="Escribe un comentario..." required>
-              <button type="submit" class="comment-submit">Publicar</button>
-            </form>
-          </div>
-        `;
-        
-        container.appendChild(postElement);
-        
-        // Configurar estado del botón de seguir
-        if (post.userId !== currentUser.uid) {
-          setupFollowButton(post.userId);
-        }
-        
-        // Configurar eventos de video para mostrar loading y miniatura
-        if (post.type !== 'gallos') {
-          const videoContainer = postElement.querySelector('.video-container');
-          const video = videoContainer.querySelector('video');
-          const loading = videoContainer.querySelector('.video-loading');
-          const thumbnail = videoContainer.querySelector('.video-thumbnail');
-          
-          video.addEventListener('loadeddata', () => {
-            loading.style.display = 'none';
-            thumbnail.style.display = 'none';
-          });
-          
-          video.addEventListener('play', () => {
-            // Registrar como visto cuando se reproduce
-            addToHistory(post.type, post.id);
-          });
-        }
-      }
-    }
-
-    // Expandir imagen
-    function expandImage(imageUrl) {
-      const modal = document.getElementById('imageModal');
-      const img = document.getElementById('expandedImage');
-      img.src = imageUrl;
-      modal.style.display = 'flex';
-    }
-
-    // Cerrar modal de imagen
-    function closeImageModal() {
-      document.getElementById('imageModal').style.display = 'none';
-    }
-
-    // Mostrar modal de publicación
-    async function showPostModal(post) {
-      currentModalPost = post;
-      const modal = document.getElementById('postModal');
-      
-      // Obtener datos del usuario
-      let userData = userCache[post.userId];
-      if (!userData) {
-        const userDoc = await db.collection('users').doc(post.userId).get();
-        if (userDoc.exists) {
-          userData = userDoc.data();
-          userCache[post.userId] = userData;
-        } else {
-          userData = {
-            displayName: 'Usuario',
-            photoURL: 'img/default-profile.jpg',
-            email: ''
-          };
-        }
-      }
-      
-      // Configurar datos del usuario
-      document.getElementById('postModalAvatar').src = userData.photoURL;
-      document.getElementById('postModalUserName').textContent = userData.displayName;
-      
-      // Configurar fecha
-      let postDate = 'Fecha no disponible';
-      if (post.timestamp && post.timestamp.toDate) {
-        try {
-          postDate = post.timestamp.toDate().toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-        } catch (error) {
-          console.error("Error al formatear fecha:", error);
-        }
-      }
-      document.getElementById('postModalTime').textContent = postDate;
-      
-      // Configurar título y descripción
-      document.getElementById('postModalTitle').textContent = post.title || 'Sin título';
-      document.getElementById('postModalDescription').textContent = post.description || 'Sin descripción';
-      
-      // Configurar media
-      const imageElement = document.getElementById('postModalImage');
-      const videoElement = document.getElementById('postModalVideo');
-      
-      imageElement.style.display = 'none';
-      videoElement.style.display = 'none';
-      
-      if (post.type === 'gallos') {
-        imageElement.src = post.mediaUrl;
-        imageElement.style.display = 'block';
-        imageElement.onerror = function() {
-          this.src = 'img/default-image.jpg';
-        };
-      } else {
-        videoElement.src = post.mediaUrl;
-        videoElement.style.display = 'block';
-      }
-      
-      // Configurar estadísticas
-      document.getElementById('postModalLikes').textContent = post.likes?.length || 0;
-      document.getElementById('postModalComments').textContent = post.comments || 0;
-      
-      // Configurar botón de like
-      const likeBtn = document.getElementById('postModalLikeBtn');
-      const hasLike = likedPosts.has(`${post.type}_${post.id}`);
-      
-      if (hasLike) {
-        likeBtn.innerHTML = '<i class="fas fa-heart liked"></i> Me gusta';
-      } else {
-        likeBtn.innerHTML = '<i class="fas fa-heart"></i> Me gusta';
-      }
-      
-      // Ocultar sección de comentarios inicialmente
-      document.getElementById('postModalCommentsSection').style.display = 'none';
-      
-      // Mostrar modal
-      modal.style.display = 'block';
-      
-      // Reproducir video automáticamente si es un video
-      if (post.type !== 'gallos') {
-        setTimeout(() => {
-          const video = document.getElementById('postModalVideo');
-          video.play().catch(err => {
-            console.error("Error al reproducir video:", err);
-          });
-          
-          // Registrar como visto
-          addToHistory(post.type, post.id);
-        }, 300);
-      }
-    }
-
-    // Cerrar modal de publicación
-    function closePostModal() {
-      const modal = document.getElementById('postModal');
-      modal.style.display = 'none';
-      
-      // Pausar video si está reproduciendo
-      const video = document.getElementById('postModalVideo');
-      if (video) {
-        video.pause();
-      }
-      
-      currentModalPost = null;
-    }
-
-    // Alternar like en el modal de publicación
-    async function togglePostModalLike() {
-      if (!currentModalPost) return;
-      
-      const post = currentModalPost;
-      const likeBtn = document.getElementById('postModalLikeBtn');
-      const likeIcon = likeBtn.querySelector('i');
-      const likesCount = document.getElementById('postModalLikes');
-      const postKey = `${post.type}_${post.id}`;
-      
-      try {
-        const collectionName = getCollectionName(post.type);
-        const postRef = db.collection(collectionName).doc(post.id);
-        
-        if (likedPosts.has(postKey)) {
-          // Quitar like
-          await postRef.update({
-            likes: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
-          });
-          
-          likedPosts.delete(postKey);
-          likeIcon.classList.remove('liked');
-          likeBtn.innerHTML = '<i class="fas fa-heart"></i> Me gusta';
-          likesCount.textContent = parseInt(likesCount.textContent) - 1;
-        } else {
-          // Dar like
-          await postRef.update({
-            likes: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
-          });
-          
-          likedPosts.add(postKey);
-          likeIcon.classList.add('liked');
-          likeBtn.innerHTML = '<i class="fas fa-heart liked"></i> Me gusta';
-          likesCount.textContent = parseInt(likesCount.textContent) + 1;
-        }
-        
-        // Actualizar like en todas las instancias de esta publicación
-        updateLikeInAllPosts(post.type, post.id, likedPosts.has(postKey));
-        
-      } catch (error) {
-        console.error("Error al actualizar like:", error);
-        showNotification('Error al actualizar like', 'error');
-      }
-    }
-
-    // Actualizar like en todas las instancias de una publicación
-    function updateLikeInAllPosts(postType, postId, hasLike) {
-      // Actualizar en posts principales
-      const likeButtons = document.querySelectorAll(`[onclick="toggleLike('${postType}', '${postId}', this)"]`);
-      likeButtons.forEach(button => {
-        const icon = button.querySelector('i');
-        if (hasLike) {
-          icon.classList.add('liked');
-          button.innerHTML = '<i class="fas fa-heart liked"></i> Me gusta';
-        } else {
-          icon.classList.remove('liked');
-          button.innerHTML = '<i class="fas fa-heart"></i> Me gusta';
-        }
-      });
-      
-      // Actualizar contadores de likes
-      const likeCounters = document.querySelectorAll(`#comments-${postId}`);
-      likeCounters.forEach(container => {
-        const stats = container.previousElementSibling.querySelector('.post-stats');
-        if (stats) {
-          const currentCount = parseInt(stats.textContent.match(/\d+/)[0]);
-          stats.innerHTML = `
-            <span><i class="fas fa-heart"></i> ${hasLike ? currentCount + 1 : currentCount - 1} likes</span>
-            ${stats.innerHTML.includes('comentarios') ? 
-              stats.innerHTML.split('</span>')[1] : ''}
-          `;
-        }
-      });
-    }
-
-    // Alternar sección de comentarios en el modal
-    async function togglePostModalComments() {
-      const commentsSection = document.getElementById('postModalCommentsSection');
-      
-      if (commentsSection.style.display === 'block') {
-        commentsSection.style.display = 'none';
-      } else {
-        commentsSection.style.display = 'block';
-        await loadPostModalComments();
-      }
-    }
-
-    // Cargar comentarios en el modal
-    async function loadPostModalComments() {
-      if (!currentModalPost) return;
-      
-      const post = currentModalPost;
-      const commentsList = document.getElementById('postModalCommentsList');
-      commentsList.innerHTML = '<div style="text-align: center; padding: 10px;"><i class="fas fa-spinner fa-spin"></i></div>';
-      
-      try {
-        const commentsSnapshot = await db.collection(getCollectionName(post.type))
-          .doc(post.id)
-          .collection('comments')
-          .orderBy('timestamp', 'desc')
-          .get();
-        
-        if (commentsSnapshot.empty) {
-          commentsList.innerHTML = '<div style="text-align: center; padding: 10px; color: var(--text-gray);">No hay comentarios</div>';
-          return;
-        }
-        
-        // Obtener datos de los usuarios que comentaron
-        const commentsData = await Promise.all(
-          commentsSnapshot.docs.map(async doc => {
-            const commentData = doc.data();
-            let userData = userCache[commentData.userId];
-            if (!userData) {
-              const userDoc = await db.collection('users').doc(commentData.userId).get();
-              if (userDoc.exists) {
-                userData = userDoc.data();
-                userCache[commentData.userId] = userData;
-              } else {
-                userData = {
-                  displayName: 'Usuario',
-                  photoURL: 'img/default-profile.jpg',
-                  email: ''
-                };
-              }
-            }
-            return {
-              ...commentData,
-              id: doc.id,
-              userData: userData
-            };
-          })
-        );
-        
-        commentsList.innerHTML = commentsData.map(comment => `
-          <div class="comment">
-            <img src="${comment.userData.photoURL}" 
-                 alt="Avatar" 
-                 class="comment-avatar"
-                 onclick="viewUserProfile('${comment.userId}')">
-            <div class="comment-content">
-              <div class="comment-user" onclick="viewUserProfile('${comment.userId}')">
-                ${comment.userData.displayName}
-              </div>
-              <div class="comment-text">${comment.text}</div>
-            </div>
-          </div>
-        `).join('');
-      } catch (error) {
-        console.error("Error al cargar comentarios:", error);
-        commentsList.innerHTML = '<div style="text-align: center; padding: 10px; color: var(--text-gray);">Error al cargar comentarios</div>';
-      }
-    }
-
-    // Publicar comentario en el modal
-    async function postModalComment(event) {
-      event.preventDefault();
-      if (!currentModalPost) return;
-      
-      const post = currentModalPost;
-      const input = document.getElementById('postModalCommentInput');
-      const commentText = input.value.trim();
-      
-      if (!commentText) return;
-      
-      try {
-        // Agregar comentario a Firestore
-        await db.collection(getCollectionName(post.type))
-          .doc(post.id)
-          .collection('comments')
-          .add({
-            userId: currentUser.uid,
-            text: commentText,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        
-        // Incrementar contador de comentarios
-        await db.collection(getCollectionName(post.type))
-          .doc(post.id)
-          .update({
-            comments: firebase.firestore.FieldValue.increment(1)
-          });
-        
-        // Actualizar contador en el modal
-        const commentsCount = document.getElementById('postModalComments');
-        commentsCount.textContent = parseInt(commentsCount.textContent) + 1;
-        
-        // Limpiar input
-        input.value = '';
-        
-        // Recargar comentarios
-        await loadPostModalComments();
-        
-        // Actualizar contador en todas las instancias de esta publicación
-        updateCommentCountInAllPosts(post.type, post.id, parseInt(commentsCount.textContent));
-        
-      } catch (error) {
-        console.error("Error al publicar comentario:", error);
-        showNotification('Error al publicar comentario', 'error');
-      }
-    }
-
-    // Actualizar contador de comentarios en todas las instancias de una publicación
-    function updateCommentCountInAllPosts(postType, postId, count) {
-      // Actualizar en posts principales
-      const commentSections = document.querySelectorAll(`#comments-${postId}`);
-      commentSections.forEach(section => {
-        const stats = section.previousElementSibling.querySelector('.post-stats');
-        if (stats) {
-          stats.innerHTML = stats.innerHTML.replace(
-            /(<i class="fas fa-comment"><\/i> )\d+/,
-            `$1${count}`
-          );
-        }
-      });
-    }
-
-    // Filtrar publicaciones
-    function filterPosts(type) {
-      currentFilter = type;
-      
-      // Actualizar botones de filtro
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      event.target.classList.add('active');
-      
-      // Filtrar publicaciones
-      let filteredPosts = allPosts;
-      if (type !== 'all') {
-        filteredPosts = allPosts.filter(post => post.type === type);
-      }
-      
-      // Mostrar publicaciones filtradas
-      displayPosts(filteredPosts);
-    }
-
-    // Ver perfil de usuario
-    async function viewUserProfile(userId) {
-      currentProfileUserId = userId;
-      
-      try {
-        // Cargar datos del usuario
-        const userDoc = await db.collection('users').doc(userId).get();
-        
-        if (!userDoc.exists) {
-          showNotification('Perfil no encontrado', 'error');
-          return;
-        }
-        
-        currentProfileUserData = userDoc.data();
-        userCache[userId] = currentProfileUserData;
-        
-        // Mostrar datos del usuario
-        document.getElementById('profileUserName').textContent = currentProfileUserData.displayName || 'Usuario';
-        document.getElementById('profileUserEmail').textContent = currentProfileUserData.email || '';
-        document.getElementById('profileAvatar').src = currentProfileUserData.photoURL || 'img/default-profile.jpg';
-        
-        // Ocultar botón de seguir si es el perfil propio
-        if (userId === currentUser.uid) {
-          document.getElementById('profileFollowBtn').style.display = 'none';
-        } else {
-          document.getElementById('profileFollowBtn').style.display = 'block';
-          setupFollowButton(userId, 'profileFollowBtn');
-        }
-        
-        // Cargar estadísticas
-        loadProfileStats(userId);
-        
-        // Cargar publicaciones del usuario
-        loadProfilePosts(userId);
-        
-        // Mostrar vista de perfil
-        showProfileView();
-      } catch (error) {
-        console.error("Error al cargar perfil:", error);
-        showNotification('Error al cargar perfil', 'error');
-      }
-    }
-
-    // Cargar estadísticas del perfil
-    async function loadProfileStats(userId) {
-      try {
-        // Contar publicaciones
-        const [gallosCount, entrenamientosCount, peleasCount] = await Promise.all([
-          db.collection('PublicGallo').where('userId', '==', userId).get(),
-          db.collection('PublicEntrenamiento').where('userId', '==', userId).get(),
-          db.collection('PublicPelea').where('userId', '==', userId).get()
-        ]);
-        
-        const totalPosts = gallosCount.size + entrenamientosCount.size + peleasCount.size;
-        document.getElementById('profilePostsCount').textContent = totalPosts;
-        
-        // Contar seguidores
-        const followersSnapshot = await db.collection('followers')
-          .doc(userId)
-          .collection('userFollowers')
-          .get();
-        document.getElementById('profileFollowersCount').textContent = followersSnapshot.size;
-        
-        // Contar seguidos
-        const followingSnapshot = await db.collection('followers')
-          .doc(userId)
-          .collection('userFollowing')
-          .get();
-        document.getElementById('profileFollowingCount').textContent = followingSnapshot.size;
-      } catch (error) {
-        console.error("Error al cargar estadísticas:", error);
-      }
-    }
-
-    // Cargar publicaciones del perfil
-    async function loadProfilePosts(userId) {
-      try {
-        // Obtener todas las publicaciones del usuario
-        const [gallosSnapshot, entrenamientosSnapshot, peleasSnapshot] = await Promise.all([
-          db.collection('PublicGallo').where('userId', '==', userId).get(),
-          db.collection('PublicEntrenamiento').where('userId', '==', userId).get(),
-          db.collection('PublicPelea').where('userId', '==', userId).get()
-        ]);
-        
-        const postsGrid = document.getElementById('profilePostsGrid');
-        postsGrid.innerHTML = '';
-        
-        // Combinar todas las publicaciones
-        const userPosts = [];
-        
-        gallosSnapshot.forEach(doc => {
-          userPosts.push({...doc.data(), id: doc.id, type: 'gallos'});
-        });
-        
-        entrenamientosSnapshot.forEach(doc => {
-          userPosts.push({...doc.data(), id: doc.id, type: 'entrenamientos'});
-        });
-        
-        peleasSnapshot.forEach(doc => {
-          userPosts.push({...doc.data(), id: doc.id, type: 'peleas'});
-        });
-        
-        if (userPosts.length === 0) {
-          postsGrid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-gray);">
-              <i class="fas fa-box-open" style="font-size: 30px;"></i>
-              <p>No hay publicaciones</p>
-            </div>
-          `;
-          return;
-        }
-        
-        // Ordenar por fecha (más reciente primero)
-        userPosts.sort((a, b) => {
-          const dateA = a.timestamp?.toDate() || new Date(0);
-          const dateB = b.timestamp?.toDate() || new Date(0);
-          return dateB - dateA;
-        });
-        
-        // Mostrar publicaciones en el grid
-        userPosts.forEach(post => {
-          const postKey = `${post.type}_${post.id}`;
-          const hasLike = likedPosts.has(postKey);
-          
-          if (post.type === 'gallos') {
-            postsGrid.innerHTML += `
-              <div class="profile-post" onclick="showPostModal(${JSON.stringify(post).replace(/"/g, '&quot;')})">
-                <img src="${post.mediaUrl}" alt="${post.title}" onerror="this.onerror=null;this.src='img/default-image.jpg'">
-                ${hasLike ? '<div class="like-indicator"><i class="fas fa-heart"></i></div>' : ''}
-              </div>
-            `;
-          } else {
-            postsGrid.innerHTML += `
-              <div class="profile-post" onclick="showPostModal(${JSON.stringify(post).replace(/"/g, '&quot;')})">
-                <video>
-                  <source src="${post.mediaUrl}#t=0.1" type="video/mp4">
-                </video>
-                <div class="video-icon">
-                  <i class="fas fa-play"></i>
-                </div>
-                ${hasLike ? '<div class="like-indicator"><i class="fas fa-heart"></i></div>' : ''}
-              </div>
-            `;
-          }
-        });
-      } catch (error) {
-        console.error("Error al cargar publicaciones del perfil:", error);
-        postsGrid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-gray);">
-            <i class="fas fa-exclamation-triangle" style="font-size: 30px;"></i>
-            <p>Error al cargar publicaciones</p>
-          </div>
-        `;
-      }
-    }
-
-    // Mostrar vista de perfil
-    function showProfileView() {
-      document.getElementById('postsContainer').style.display = 'none';
-      document.getElementById('profileContainer').style.display = 'block';
-      
-      // Mostrar sección de publicaciones por defecto
-      showProfilePosts();
-    }
-
-    // Mostrar vista de publicaciones
-    function showPostsView() {
-      document.getElementById('profileContainer').style.display = 'none';
-      document.getElementById('postsContainer').style.display = 'flex';
-    }
-
-    // Mostrar publicaciones en el perfil
-    function showProfilePosts() {
-      document.getElementById('profilePostsGrid').style.display = 'grid';
-      document.getElementById('profileFollowersList').style.display = 'none';
-      document.getElementById('profileFollowingList').style.display = 'none';
-      document.getElementById('profileSectionTitle').textContent = 'Publicaciones';
-    }
-
-    // Mostrar seguidores en el perfil
-    async function showProfileFollowers() {
-      const followersList = document.getElementById('profileFollowersList');
-      followersList.style.display = 'block';
-      document.getElementById('profilePostsGrid').style.display = 'none';
-      document.getElementById('profileFollowingList').style.display = 'none';
-      document.getElementById('profileSectionTitle').textContent = 'Seguidores';
-      
-      try {
-        const followersSnapshot = await db.collection('followers')
-          .doc(currentProfileUserId)
-          .collection('userFollowers')
-          .get();
-        
-        if (followersSnapshot.empty) {
-          followersList.innerHTML = '<p style="color: var(--text-gray); text-align: center;">No tiene seguidores</p>';
-          return;
-        }
-        
-        // Obtener datos de cada seguidor
-        const followersData = await Promise.all(
-          followersSnapshot.docs.map(async doc => {
-            let userData = userCache[doc.id];
-            if (!userData) {
-              const userDoc = await db.collection('users').doc(doc.id).get();
-              if (userDoc.exists) {
-                userData = userDoc.data();
-                userCache[doc.id] = userData;
-              } else {
-                userData = {
-                  displayName: 'Usuario',
-                  photoURL: 'img/default-profile.jpg',
-                  email: ''
-                };
-              }
-            }
-            return { ...userData, userId: doc.id };
-          })
-        );
-        
-        followersList.innerHTML = followersData.filter(user => user !== null).map(user => `
-          <div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-            <img src="${user.photoURL}" 
-                 alt="Perfil" 
-                 style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer;"
-                 onclick="viewUserProfile('${user.userId}')">
-            <div style="flex: 1; cursor: pointer;" onclick="viewUserProfile('${user.userId}')">
-              <div style="font-weight: bold;">${user.displayName}</div>
-              <div style="font-size: 12px; color: var(--text-gray);">${user.email}</div>
-            </div>
-            ${user.userId !== currentUser.uid ? 
-              `<button class="follow-btn" id="followerFollowBtn-${user.userId}" 
-                onclick="toggleFollow('${user.userId}', this)" style="padding: 5px 10px;">
-                <i class="fas fa-user-plus"></i> Seguir
-              </button>` : ''
-            }
-          </div>
-        `).join('');
-        
-        // Configurar botones de seguir
-        followersData.forEach(user => {
-          if (user && user.userId !== currentUser.uid) {
-            setupFollowButton(user.userId, `followerFollowBtn-${user.userId}`);
-          }
-        });
-      } catch (error) {
-        console.error("Error al cargar seguidores:", error);
-        followersList.innerHTML = '<p style="color: var(--text-gray); text-align: center;">Error al cargar seguidores</p>';
-      }
-    }
-
-    // Mostrar seguidos en el perfil
-    async function showProfileFollowing() {
-      const followingList = document.getElementById('profileFollowingList');
-      followingList.style.display = 'block';
-      document.getElementById('profilePostsGrid').style.display = 'none';
-      document.getElementById('profileFollowersList').style.display = 'none';
-      document.getElementById('profileSectionTitle').textContent = 'Seguidos';
-      
-      try {
-        const followingSnapshot = await db.collection('followers')
-          .doc(currentProfileUserId)
-          .collection('userFollowing')
-          .get();
-        
-        if (followingSnapshot.empty) {
-          followingList.innerHTML = '<p style="color: var(--text-gray); text-align: center;">No sigue a nadie</p>';
-          return;
-        }
-        
-        // Obtener datos de cada usuario seguido
-        const followingData = await Promise.all(
-          followingSnapshot.docs.map(async doc => {
-            let userData = userCache[doc.id];
-            if (!userData) {
-              const userDoc = await db.collection('users').doc(doc.id).get();
-              if (userDoc.exists) {
-                userData = userDoc.data();
-                userCache[doc.id] = userData;
-              } else {
-                userData = {
-                  displayName: 'Usuario',
-                  photoURL: 'img/default-profile.jpg',
-                  email: ''
-                };
-              }
-            }
-            return { ...userData, userId: doc.id };
-          })
-        );
-        
-        followingList.innerHTML = followingData.filter(user => user !== null).map(user => `
-          <div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-            <img src="${user.photoURL}" 
-                 alt="Perfil" 
-                 style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer;"
-                 onclick="viewUserProfile('${user.userId}')">
-            <div style="flex: 1; cursor: pointer;" onclick="viewUserProfile('${user.userId}')">
-              <div style="font-weight: bold;">${user.displayName}</div>
-              <div style="font-size: 12px; color: var(--text-gray);">${user.email}</div>
-            </div>
-            ${user.userId !== currentUser.uid ? 
-              `<button class="follow-btn" id="followingFollowBtn-${user.userId}" 
-                onclick="toggleFollow('${user.userId}', this)" style="padding: 5px 10px;">
-                <i class="fas fa-user-plus"></i> Seguir
-              </button>` : ''
-            }
-          </div>
-        `).join('');
-        
-        // Configurar botones de seguir
-        followingData.forEach(user => {
-          if (user && user.userId !== currentUser.uid) {
-            setupFollowButton(user.userId, `followingFollowBtn-${user.userId}`);
-          }
-        });
-      } catch (error) {
-        console.error("Error al cargar seguidos:", error);
-        followingList.innerHTML = '<p style="color: var(--text-gray); text-align: center;">Error al cargar seguidos</p>';
-      }
-    }
-
-    // Configurar botón de seguir
-    async function setupFollowButton(userId, buttonId = null) {
-      const button = buttonId ? 
-        document.getElementById(buttonId) : 
-        document.getElementById(`followBtn-${userId}`);
-      
-      if (!button) return;
-      
-      // Verificar si ya seguimos a este usuario
-      const followDoc = await db.collection('followers')
-        .doc(userId)
-        .collection('userFollowers')
-        .doc(currentUser.uid)
-        .get();
-      
-      if (followDoc.exists) {
-        // Ya lo seguimos
-        button.innerHTML = '<i class="fas fa-user-check"></i> Siguiendo';
-        button.className = 'follow-btn btn-following';
-      } else {
-        // No lo seguimos
-        button.innerHTML = '<i class="fas fa-user-plus"></i> Seguir';
-        button.className = 'follow-btn btn-follow';
-      }
-    }
-
-    // Alternar seguir/dejar de seguir
-    async function toggleFollow(userId, button) {
-      try {
-        const isFollowing = button.classList.contains('btn-following');
-        
-        if (!isFollowing) {
-          // Seguir al usuario
-          await db.collection('followers')
-            .doc(userId)
-            .collection('userFollowers')
-            .doc(currentUser.uid)
-            .set({
-              userId: currentUser.uid,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-          
-          // Agregar a nuestra lista de seguidos
-          await db.collection('followers')
-            .doc(currentUser.uid)
-            .collection('userFollowing')
-            .doc(userId)
-            .set({
-              userId: userId,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-          
-          // Actualizar UI
-          button.innerHTML = '<i class="fas fa-user-check"></i> Siguiendo';
-          button.className = 'follow-btn btn-following';
-          
-          // Actualizar contador si estamos viendo el perfil
-          if (currentProfileUserId === userId) {
-            const currentCount = parseInt(document.getElementById('profileFollowersCount').textContent);
-            document.getElementById('profileFollowersCount').textContent = currentCount + 1;
-          }
-          
-          showNotification('Ahora sigues a este usuario', 'success');
-        } else {
-          // Dejar de seguir
-          await db.collection('followers')
-            .doc(userId)
-            .collection('userFollowers')
-            .doc(currentUser.uid)
-            .delete();
-            
-          await db.collection('followers')
-            .doc(currentUser.uid)
-            .collection('userFollowing')
-            .doc(userId)
-            .delete();
-          
-          // Actualizar UI
-          button.innerHTML = '<i class="fas fa-user-plus"></i> Seguir';
-          button.className = 'follow-btn btn-follow';
-          
-          // Actualizar contador si estamos viendo el perfil
-          if (currentProfileUserId === userId) {
-            const currentCount = parseInt(document.getElementById('profileFollowersCount').textContent);
-            document.getElementById('profileFollowersCount').textContent = Math.max(0, currentCount - 1);
-          }
-          
-          showNotification('Has dejado de seguir a este usuario', 'success');
-        }
-        
-        // Actualizar botones en todas las publicaciones de este usuario
-        document.querySelectorAll(`#followBtn-${userId}`).forEach(btn => {
-          btn.innerHTML = isFollowing ? 
-            '<i class="fas fa-user-plus"></i> Seguir' : 
-            '<i class="fas fa-user-check"></i> Siguiendo';
-          btn.className = isFollowing ? 
-            'follow-btn btn-follow' : 
-            'follow-btn btn-following';
-        });
-      } catch (error) {
-        console.error("Error al actualizar seguimiento:", error);
-        showNotification('Error al actualizar seguimiento', 'error');
-      }
-    }
-
-    // Alternar like en una publicación
-    async function toggleLike(postType, postId, button) {
-      try {
-        const collectionName = getCollectionName(postType);
-        const postRef = db.collection(collectionName).doc(postId);
-        const postKey = `${postType}_${postId}`;
-        
-        if (likedPosts.has(postKey)) {
-          // Quitar like
-          await postRef.update({
-            likes: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
-          });
-          
-          likedPosts.delete(postKey);
-          button.innerHTML = '<i class="fas fa-heart"></i> Me gusta';
-          button.querySelector('i').classList.remove('liked');
-        } else {
-          // Dar like
-          await postRef.update({
-            likes: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
-          });
-          
-          likedPosts.add(postKey);
-          button.innerHTML = '<i class="fas fa-heart liked"></i> Me gusta';
-          button.querySelector('i').classList.add('liked');
-        }
-        
-        // Actualizar contador
-        const statsElement = button.closest('.post-footer').querySelector('.post-stats');
-        const likesCount = parseInt(statsElement.textContent.match(/\d+/)[0]);
-        statsElement.innerHTML = `
-          <span><i class="fas fa-heart"></i> ${likedPosts.has(postKey) ? likesCount + 1 : likesCount - 1} likes</span>
-          ${statsElement.innerHTML.includes('comentarios') ? 
-            statsElement.innerHTML.split('</span>')[1] : ''}
-        `;
-        
-        // Actualizar en el modal si está abierto
-        if (currentModalPost && currentModalPost.id === postId && currentModalPost.type === postType) {
-          const modalLikeBtn = document.getElementById('postModalLikeBtn');
-          const modalLikesCount = document.getElementById('postModalLikes');
-          
-          if (likedPosts.has(postKey)) {
-            modalLikeBtn.innerHTML = '<i class="fas fa-heart liked"></i> Me gusta';
-            modalLikesCount.textContent = parseInt(modalLikesCount.textContent) + 1;
-          } else {
-            modalLikeBtn.innerHTML = '<i class="fas fa-heart"></i> Me gusta';
-            modalLikesCount.textContent = parseInt(modalLikesCount.textContent) - 1;
-          }
-        }
-        
-        // Actualizar en el perfil si está visible
-        if (currentProfileUserId) {
-          const profilePost = document.querySelector(`.profile-post[onclick*="${postId}"]`);
-          if (profilePost) {
-            if (likedPosts.has(postKey)) {
-              if (!profilePost.querySelector('.like-indicator')) {
-                profilePost.innerHTML += '<div class="like-indicator"><i class="fas fa-heart"></i></div>';
-              }
-            } else {
-              const indicator = profilePost.querySelector('.like-indicator');
-              if (indicator) {
-                indicator.remove();
-              }
-            }
-          }
-        }
-        
-      } catch (error) {
-        console.error("Error al actualizar like:", error);
-        showNotification('Error al actualizar like', 'error');
-      }
-    }
-
-    // Alternar sección de comentarios
-    async function toggleComments(postType, postId, button) {
-      const commentsSection = document.getElementById(`comments-${postId}`);
-      
-      if (commentsSection.style.display === 'block') {
-        commentsSection.style.display = 'none';
-      } else {
-        commentsSection.style.display = 'block';
-        loadComments(postType, postId);
-      }
-    }
-
-    // Cargar comentarios
-    async function loadComments(postType, postId) {
-      const commentsList = document.getElementById(`commentsList-${postId}`);
-      commentsList.innerHTML = '<div style="text-align: center; padding: 10px;"><i class="fas fa-spinner fa-spin"></i></div>';
-      
-      try {
-        const commentsSnapshot = await db.collection(getCollectionName(postType))
-          .doc(postId)
-          .collection('comments')
-          .orderBy('timestamp', 'desc')
-          .get();
-        
-        if (commentsSnapshot.empty) {
-          commentsList.innerHTML = '<div style="text-align: center; padding: 10px; color: var(--text-gray);">No hay comentarios</div>';
-          return;
-        }
-        
-        // Obtener datos de los usuarios que comentaron
-        const commentsData = await Promise.all(
-          commentsSnapshot.docs.map(async doc => {
-            const commentData = doc.data();
-            let userData = userCache[commentData.userId];
-            if (!userData) {
-              const userDoc = await db.collection('users').doc(commentData.userId).get();
-              if (userDoc.exists) {
-                userData = userDoc.data();
-                userCache[commentData.userId] = userData;
-              } else {
-                userData = {
-                  displayName: 'Usuario',
-                  photoURL: 'img/default-profile.jpg',
-                  email: ''
-                };
-              }
-            }
-            return {
-              ...commentData,
-              id: doc.id,
-              userData: userData
-            };
-          })
-        );
-        
-        commentsList.innerHTML = commentsData.map(comment => `
-          <div class="comment">
-            <img src="${comment.userData.photoURL}" 
-                 alt="Avatar" 
-                 class="comment-avatar"
-                 onclick="viewUserProfile('${comment.userId}')">
-            <div class="comment-content">
-              <div class="comment-user" onclick="viewUserProfile('${comment.userId}')">
-                ${comment.userData.displayName}
-              </div>
-              <div class="comment-text">${comment.text}</div>
-            </div>
-          </div>
-        `).join('');
-      } catch (error) {
-        console.error("Error al cargar comentarios:", error);
-        commentsList.innerHTML = '<div style="text-align: center; padding: 10px; color: var(--text-gray);">Error al cargar comentarios</div>';
-      }
-    }
-
-    // Publicar comentario
-    async function postComment(postType, postId, event) {
-      event.preventDefault();
-      const form = event.target;
-      const input = form.querySelector('.comment-input');
-      const commentText = input.value.trim();
-      
-      if (!commentText) return;
-      
-      try {
-        // Agregar comentario a Firestore
-        await db.collection(getCollectionName(postType))
-          .doc(postId)
-          .collection('comments')
-          .add({
-            userId: currentUser.uid,
-            text: commentText,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        
-        // Incrementar contador de comentarios
-        await db.collection(getCollectionName(postType))
-          .doc(postId)
-          .update({
-            comments: firebase.firestore.FieldValue.increment(1)
-          });
-        
-        // Limpiar input
-        input.value = '';
-        
-        // Recargar comentarios
-        loadComments(postType, postId);
-        
-        // Actualizar contador en la interfaz
-        const statsElement = form.closest('.post-card').querySelector('.post-stats');
-        const commentsCount = parseInt(statsElement.textContent.match(/comentarios.*?(\d+)/)[1]);
-        statsElement.innerHTML = statsElement.innerHTML.replace(
-          /(<i class="fas fa-comment"><\/i> )\d+/,
-          `$1${commentsCount + 1}`
-        );
-        
-        // Actualizar en el modal si está abierto
-        if (currentModalPost && currentModalPost.id === postId && currentModalPost.type === postType) {
-          const modalCommentsCount = document.getElementById('postModalComments');
-          modalCommentsCount.textContent = parseInt(modalCommentsCount.textContent) + 1;
-          
-          // Si la sección de comentarios está visible, recargar
-          const commentsSection = document.getElementById('postModalCommentsSection');
-          if (commentsSection.style.display === 'block') {
-            loadPostModalComments();
-          }
-        }
-      } catch (error) {
-        console.error("Error al publicar comentario:", error);
-        showNotification('Error al publicar comentario', 'error');
-      }
-    }
-
-    // Ver detalle de una publicación
-    function viewPostDetail(type, postId) {
-      console.log(`Viendo detalle de publicación ${postId} de tipo ${type}`);
-      window.location.href = `detalle.html?type=${type}&id=${postId}`;
-    }
-
-    // Obtener nombre de colección según tipo
-    function getCollectionName(type) {
-      switch(type) {
-        case 'gallos': return 'PublicGallo';
-        case 'entrenamientos': return 'PublicEntrenamiento';
-        case 'peleas': return 'PublicPelea';
-        default: return '';
-      }
-    }
-
-    // Mostrar notificación
-    function showNotification(message, type) {
-      const notification = document.getElementById('notification');
-      const notificationText = document.getElementById('notificationText');
-      
-      notificationText.textContent = message;
-      notification.className = `notification ${type} show`;
-      
-      setTimeout(() => {
-        notification.classList.remove('show');
-      }, 3000);
+      // Limpiar formulario de login
+      document.getElementById('loginForm').reset();
     }
   </script>
 </body>
