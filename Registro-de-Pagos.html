@@ -184,10 +184,6 @@
       border-left: 4px solid var(--success-color);
     }
 
-    .status-warning {
-      border-left: 4px solid var(--warning-color);
-    }
-
     .payment-history-item {
       display: flex;
       justify-content: space-between;
@@ -261,6 +257,37 @@
 
     .receipt p {
       margin: 0.5rem 0;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     @media (max-width: 768px) {
@@ -401,6 +428,10 @@
     </div>
   </div>
 
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+
   <!-- Modal para confirmación -->
   <div class="modal" id="confirmModal">
     <div class="modal-content">
@@ -533,17 +564,25 @@
       const paymentsMade = loan.payments?.length || 0;
       const totalPayments = loan.paymentSchedule?.length || 0;
       
-      // Calcular próxima fecha de pago quincenal
+      // Calcular detalles del próximo pago
       let nextFortnightPayment = '';
+      let capitalToPay = 0;
+      let interestToPay = 0;
+      let totalToPay = 0;
+      
       if (nextPayment) {
         const dueDate = new Date(nextPayment.dueDate);
         nextFortnightPayment = dueDate.toLocaleDateString();
+        // Suponer que el pago incluye capital e interés
+        capitalToPay = nextPayment.capital || (loan.remainingCapital / (totalPayments - paymentsMade));
+        interestToPay = nextPayment.interest || (loan.totalInterest / totalPayments);
+        totalToPay = nextPayment.amount || (capitalToPay + interestToPay);
       } else {
         const lastPaymentDate = loan.payments && loan.payments.length > 0 
           ? loan.payments[loan.payments.length - 1].date.toDate()
           : new Date(loan.startDate || Date.now());
         const nextDate = new Date(lastPaymentDate);
-        nextDate.setDate(nextDate.getDate() + 15); // Quincenal = 15 días
+        nextDate.setDate(nextDate.getDate() + 15);
         nextFortnightPayment = nextDate.toLocaleDateString();
       }
       
@@ -571,6 +610,18 @@
         <div class="loan-detail">
           <span>Próximo pago quincenal:</span>
           <span>${nextFortnightPayment}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Capital a pagar (próxima quincena):</span>
+          <span>$${capitalToPay.toFixed(2)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Interés a pagar (próxima quincena):</span>
+          <span>$${interestToPay.toFixed(2)}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Total a pagar (próxima quincena):</span>
+          <span>$${totalToPay.toFixed(2)}</span>
         </div>
         <div class="loan-detail">
           <span>Monto pendiente:</span>
@@ -698,6 +749,16 @@
       document.getElementById('lateFeeAmount').value = lateFee.toFixed(2);
     }
 
+    // Mostrar loading
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    // Ocultar loading
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
     // Registrar pago
     async function registerPayment(e) {
       e.preventDefault();
@@ -726,16 +787,21 @@
         return;
       }
       
-      // Crear objeto de pago
-      const paymentData = {
-        amount: paymentAmount,
-        date: Timestamp.fromDate(new Date(paymentDate)),
-        type: paymentType,
-        timestamp: Timestamp.now(),
-        recordedBy: 'Administrador'
-      };
+      // Obtener próximo pago
+      const nextPayment = selectedLoanForPayment.paymentSchedule?.find(p => p.status === 'pending');
+      if (!nextPayment) {
+        showInfoModal('Error', 'No hay pagos pendientes para este préstamo.');
+        return;
+      }
       
-      // Manejar mora
+      // Calcular montos requeridos
+      const paymentsMade = selectedLoanForPayment.payments?.length || 0;
+      const totalPayments = selectedLoanForPayment.paymentSchedule?.length || 0;
+      const capitalToPay = nextPayment.capital || (selectedLoanForPayment.remainingCapital / (totalPayments - paymentsMade));
+      const interestToPay = nextPayment.interest || (selectedLoanForPayment.totalInterest / totalPayments);
+      const totalToPay = nextPayment.amount || (capitalToPay + interestToPay);
+      
+      // Calcular mora
       let lateFee = 0;
       if (applyLateFee && paymentType === 'full') {
         lateFee = parseFloat(document.getElementById('lateFeeAmount').value) || 0;
@@ -748,22 +814,43 @@
       
       const totalPayment = paymentAmount + lateFee;
       
-      // Confirmar pago si es menor al esperado
-      const nextPayment = selectedLoanForPayment.paymentSchedule?.find(p => p.status === 'pending');
-      if (paymentType === 'full' && nextPayment && totalPayment < nextPayment.amount) {
-        const confirm = await showConfirmModal(
-          'Pago Incompleto',
-          `El monto ingresado ($${totalPayment.toFixed(2)}) es menor al esperado ($${nextPayment.amount.toFixed(2)}). ¿Continuar?`
-        );
-        if (!confirm) return;
+      // Validar montos según tipo de pago
+      if (paymentType === 'full' && totalPayment < totalToPay) {
+        showInfoModal('Error', `El monto total ($${totalPayment.toFixed(2)}) es menor al requerido ($${totalToPay.toFixed(2)}) para un pago completo.`);
+        return;
+      }
+      if (paymentType === 'capital' && paymentAmount < capitalToPay) {
+        showInfoModal('Error', `El monto ($${paymentAmount.toFixed(2)}) es menor al capital requerido ($${capitalToPay.toFixed(2)}) para el próximo pago.`);
+        return;
+      }
+      if (paymentType === 'interest' && paymentAmount < interestToPay) {
+        showInfoModal('Error', `El monto ($${paymentAmount.toFixed(2)}) es menor al interés requerido ($${interestToPay.toFixed(2)}) para el próximo pago.`);
+        return;
+      }
+      
+      // Crear objeto de pago
+      const paymentData = {
+        amount: paymentAmount,
+        date: Timestamp.fromDate(new Date(paymentDate)),
+        type: paymentType,
+        timestamp: Timestamp.now(),
+        recordedBy: 'Administrador'
+      };
+      
+      if (lateFee > 0 && paymentType === 'full') {
+        paymentData.lateFee = lateFee;
+        paymentData.lateFeeDays = parseInt(document.getElementById('lateFeeDays').value) || 0;
+        paymentData.lateFeeRate = parseFloat(document.getElementById('lateFeeRate').value) || 0;
       }
       
       try {
+        showLoading();
         const loanRef = doc(db, "Loans", selectedLoanForPayment.id);
         
         // Verificar existencia del documento
         const loanSnap = await getDoc(loanRef);
         if (!loanSnap.exists()) {
+          hideLoading();
           showInfoModal('Error', 'El préstamo no existe en la base de datos.');
           return;
         }
@@ -805,11 +892,10 @@
         
         // Actualizar cronograma
         let updatedPaymentSchedule = [...(selectedLoanForPayment.paymentSchedule || [])];
-        if (paymentType === 'full' && nextPayment && totalPayment >= nextPayment.amount) {
+        if (paymentType === 'full' && totalPayment >= totalToPay) {
           const paymentIndex = updatedPaymentSchedule.findIndex(p => p.number === nextPayment.number);
           if (paymentIndex !== -1) {
             updatedPaymentSchedule[paymentIndex].status = 'paid';
-            // Agregar próximo pago quincenal si es necesario
             if (paymentIndex < updatedPaymentSchedule.length - 1) {
               const nextDueDate = new Date(updatedPaymentSchedule[paymentIndex].dueDate);
               nextDueDate.setDate(nextDueDate.getDate() + 15);
@@ -860,6 +946,8 @@
       } catch (error) {
         console.error("Error registrando pago: ", error);
         showInfoModal('Error', `Error al registrar el pago: ${error.message}. Verifica tu conexión y permisos de Firestore.`);
+      } finally {
+        hideLoading();
       }
     }
 
@@ -964,7 +1052,7 @@
             closeModal();
             resolve(false);
           }
-        }, { once: true });
+        }, { once: true }); 
       });
     }
 
