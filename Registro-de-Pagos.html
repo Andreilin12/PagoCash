@@ -6,6 +6,7 @@
   <title>Pagos - Sistema de Préstamos</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
       --primary-color: #1abc9c;
@@ -164,9 +165,12 @@
       background-color: var(--info-color);
     }
 
-    .btn-sm {
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
     }
 
     .client-status {
@@ -182,10 +186,6 @@
 
     .status-warning {
       border-left: 4px solid var(--warning-color);
-    }
-
-    .status-bad {
-      border-left: 4px solid var(--danger-color);
     }
 
     .payment-history-item {
@@ -205,7 +205,6 @@
       background-color: rgba(231, 76, 60, 0.1);
     }
 
-    /* Modal styles */
     .modal {
       display: none;
       position: fixed;
@@ -246,15 +245,24 @@
       margin-top: 1.5rem;
     }
 
-    .btn-danger {
-      background-color: var(--danger-color);
+    .receipt {
+      background-color: white;
+      color: black;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      display: none;
     }
 
-    .btn-danger:hover {
-      background-color: #c0392b;
+    .receipt h3 {
+      text-align: center;
+      margin-bottom: 1rem;
     }
 
-    /* Responsive styles */
+    .receipt p {
+      margin: 0.5rem 0;
+    }
+
     @media (max-width: 768px) {
       .header-container {
         flex-direction: column;
@@ -295,7 +303,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="payments.html" class="nav-link active">
+          <a href="payment.html" class="nav-link active">
             <i class="fas fa-money-bill-wave"></i> Pagos
           </a>
         </li>
@@ -312,11 +320,9 @@
     <h1 class="section-title">Registro de Pagos</h1>
     
     <div class="card">
-      <div class="filter-container">
-        <div class="form-group">
-          <label for="searchClientPayment">Buscar Cliente:</label>
-          <input type="text" id="searchClientPayment" class="form-control" placeholder="Ingrese nombre o cédula del cliente">
-        </div>
+      <div class="form-group">
+        <label for="searchClientPayment">Buscar Cliente:</label>
+        <input type="text" id="searchClientPayment" class="form-control" placeholder="Ingrese nombre o cédula del cliente">
       </div>
       
       <div id="paymentFormContainer" style="display: none;">
@@ -325,7 +331,7 @@
           <input type="hidden" id="paymentLoanId">
           <div class="form-group">
             <label for="paymentAmount">Monto del Pago</label>
-            <input type="number" id="paymentAmount" class="form-control" min="1" required>
+            <input type="number" id="paymentAmount" class="form-control" min="0.01" step="0.01" required>
           </div>
           <div class="form-group">
             <label for="paymentDate">Fecha del Pago</label>
@@ -346,42 +352,51 @@
             <div id="lateFeeDetails" style="display: none; margin-top: 1rem;">
               <div class="form-group">
                 <label for="lateFeeDays">Días de Atraso</label>
-                <input type="number" id="lateFeeDays" class="form-control" min="1" value="0">
+                <input type="number" id="lateFeeDays" class="form-control" min="0" value="0">
               </div>
               <div class="form-group">
-                <label for="lateFeeRate">Tasa de Mora (%)</label>
-                <input type="number" id="lateFeeRate" class="form-control" min="1" max="100" step="0.1" value="5">
+                <label for="lateFeeRate">Tasa de Mora (% por mes)</label>
+                <input type="number" id="lateFeeRate" class="form-control" min="0" max="100" step="0.1" value="5">
               </div>
               <div class="form-group">
                 <label for="lateFeeAmount">Monto de Mora</label>
-                <input type="number" id="lateFeeAmount" class="form-control" readonly>
+                <input type="number" id="lateFeeAmount" class="form-control" readonly value="0.00">
               </div>
             </div>
           </div>
           <button type="submit" class="btn btn-success">
             <i class="fas fa-money-bill-wave"></i> Registrar Pago
           </button>
-          <a href="reports.html" id="generateReceiptBtn" class="btn btn-info" style="display: none; margin-top: 1rem;">
-            <i class="fas fa-receipt"></i> Generar Recibo
-          </a>
         </form>
+        <button id="generateReceiptBtn" class="btn btn-info" style="display: none; margin-top: 1rem;">
+          <i class="fas fa-receipt"></i> Generar Recibo
+        </button>
+        <button id="shareReceiptBtn" class="btn btn-info" style="display: none; margin-top: 1rem;">
+          <i class="fab fa-whatsapp"></i> Compartir en WhatsApp
+        </button>
       </div>
       
       <div id="clientLoanDetails" style="margin-top: 2rem; display: none;">
         <h3>Detalles del Préstamo</h3>
         <div id="loanDetailsContent"></div>
-        
-        <div id="clientStatusContainer" class="client-status" style="display: none;">
+        <div id="clientStatusContainer" class="client-status status-good" style="display: none;">
           <h3>Estado del Cliente</h3>
           <div id="clientStatusContent"></div>
         </div>
-        
         <h3 style="margin-top: 1.5rem;">Historial de Pagos</h3>
         <div id="paymentHistory"></div>
-        
-        <a href="reports.html" id="generateLetterBtn" class="btn btn-info" style="margin-top: 1rem; display: none;">
-          <i class="fas fa-file-alt"></i> Generar Carta de Recomendación
-        </a>
+      </div>
+      
+      <div id="receiptContainer" class="receipt" style="display: none;">
+        <h3>Recibo de Pago</h3>
+        <p><strong>Cliente:</strong> <span id="receiptClientName"></span></p>
+        <p><strong>Cédula:</strong> <span id="receiptClientId"></span></p>
+        <p><strong>Préstamo ID:</strong> <span id="receiptLoanId"></span></p>
+        <p><strong>Fecha:</strong> <span id="receiptDate"></span></p>
+        <p><strong>Monto:</strong> $<span id="receiptAmount"></span></p>
+        <p><strong>Tipo:</strong> <span id="receiptType"></span></p>
+        <p><strong>Mora:</strong> $<span id="receiptLateFee"></span></p>
+        <p><strong>Registrado por:</strong> <span id="receiptRecordedBy"></span></p>
       </div>
     </div>
   </div>
@@ -437,57 +452,42 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Variables globales
-    let currentUser = "Administrador";
     let selectedLoanForPayment = null;
     let lastPaymentData = null;
 
     // Inicialización
     document.addEventListener('DOMContentLoaded', () => {
-      // Configurar event listeners
       document.getElementById('searchClientPayment').addEventListener('input', searchClientForPayment);
       document.getElementById('paymentForm').addEventListener('submit', registerPayment);
       document.getElementById('paymentType').addEventListener('change', updatePaymentForm);
       document.getElementById('applyLateFee').addEventListener('change', toggleLateFeeDetails);
       document.getElementById('lateFeeDays').addEventListener('input', calculateLateFee);
       document.getElementById('lateFeeRate').addEventListener('input', calculateLateFee);
+      document.getElementById('generateReceiptBtn').addEventListener('click', generateReceipt);
+      document.getElementById('shareReceiptBtn').addEventListener('click', shareReceipt);
       
-      // Establecer fecha actual como predeterminada
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('paymentDate').value = today;
-      
-      // Verificar si hay un préstamo seleccionado en la URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const loanId = urlParams.get('loanId');
-      
-      if (loanId) {
-        loadLoanForPayment(loanId);
-      }
+      document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
     });
 
-    // Buscar cliente para pago
+    // Buscar cliente
     async function searchClientForPayment() {
-      const searchTerm = document.getElementById('searchClientPayment').value.toLowerCase();
+      const searchTerm = document.getElementById('searchClientPayment').value.toLowerCase().trim();
       
       if (!searchTerm) {
         document.getElementById('paymentFormContainer').style.display = 'none';
         document.getElementById('clientLoanDetails').style.display = 'none';
+        document.getElementById('clientStatusContainer').style.display = 'none';
+        document.getElementById('receiptContainer').style.display = 'none';
         return;
       }
       
       try {
-        const q = query(
-          collection(db, "Loans"),
-          where("status", "==", "active")
-        );
-        
+        const q = query(collection(db, "Loans"), where("status", "==", "active"));
         const querySnapshot = await getDocs(q);
         const matchingLoans = [];
         
         querySnapshot.forEach(doc => {
-          const loan = doc.data();
-          loan.id = doc.id;
-          
+          const loan = { id: doc.id, ...doc.data() };
           if (loan.client.name.toLowerCase().includes(searchTerm) || 
               loan.client.id.toLowerCase().includes(searchTerm)) {
             matchingLoans.push(loan);
@@ -497,150 +497,96 @@
         if (matchingLoans.length === 0) {
           document.getElementById('paymentFormContainer').style.display = 'none';
           document.getElementById('clientLoanDetails').style.display = 'block';
-          document.getElementById('loanDetailsContent').innerHTML = '<p>No se encontraron préstamos para este cliente</p>';
+          document.getElementById('loanDetailsContent').innerHTML = '<p>No se encontraron préstamos activos para este cliente.</p>';
           document.getElementById('paymentHistory').innerHTML = '';
           document.getElementById('clientStatusContainer').style.display = 'none';
+          document.getElementById('receiptContainer').style.display = 'none';
           return;
         }
         
-        // Mostrar el primer préstamo encontrado
         selectedLoanForPayment = matchingLoans[0];
         document.getElementById('paymentFormContainer').style.display = 'block';
         document.getElementById('paymentLoanId').value = selectedLoanForPayment.id;
-        displayLoanDetails(selectedLoanForPayment);
         
-        // Configurar monto predeterminado
-        const nextPayment = selectedLoanForPayment.paymentSchedule.find(p => p.status === 'pending');
+        displayLoanDetails(selectedLoanForPayment);
+        evaluateClientStatus(selectedLoanForPayment);
+        displayPaymentHistory(selectedLoanForPayment);
+        
+        const nextPayment = selectedLoanForPayment.paymentSchedule?.find(p => p.status === 'pending');
         if (nextPayment) {
           document.getElementById('paymentAmount').value = nextPayment.amount.toFixed(2);
         }
         
-        // Actualizar formulario de pago
         updatePaymentForm();
+        document.getElementById('generateReceiptBtn').style.display = lastPaymentData ? 'block' : 'none';
+        document.getElementById('shareReceiptBtn').style.display = lastPaymentData ? 'block' : 'none';
       } catch (error) {
         console.error("Error buscando cliente: ", error);
-        showInfoModal('Error', 'Ocurrió un error al buscar el cliente');
-      }
-    }
-
-    // Cargar préstamo para pago desde URL
-    async function loadLoanForPayment(loanId) {
-      try {
-        const loanRef = doc(db, "Loans", loanId);
-        const loanSnap = await getDoc(loanRef);
-        
-        if (loanSnap.exists()) {
-          selectedLoanForPayment = { id: loanSnap.id, ...loanSnap.data() };
-          document.getElementById('paymentFormContainer').style.display = 'block';
-          document.getElementById('paymentLoanId').value = selectedLoanForPayment.id;
-          displayLoanDetails(selectedLoanForPayment);
-          
-          // Configurar monto predeterminado
-          const nextPayment = selectedLoanForPayment.paymentSchedule.find(p => p.status === 'pending');
-          if (nextPayment) {
-            document.getElementById('paymentAmount').value = nextPayment.amount.toFixed(2);
-          }
-          
-          // Actualizar formulario de pago
-          updatePaymentForm();
-        } else {
-          showInfoModal('Error', 'No se encontró el préstamo especificado');
-        }
-      } catch (error) {
-        console.error("Error cargando préstamo: ", error);
-        showInfoModal('Error', 'Ocurrió un error al cargar el préstamo');
+        showInfoModal('Error', 'Error al buscar el cliente. Por favor, intenta de nuevo.');
       }
     }
 
     // Mostrar detalles del préstamo
     function displayLoanDetails(loan) {
       const container = document.getElementById('loanDetailsContent');
-      container.innerHTML = '';
+      const nextPayment = loan.paymentSchedule?.find(p => p.status === 'pending');
+      const paymentsMade = loan.payments?.length || 0;
+      const totalPayments = loan.paymentSchedule?.length || 0;
       
-      // Calcular resumen
-      const paymentsMade = loan.payments ? loan.payments.length : 0;
-      const totalPayments = loan.paymentSchedule.length;
-      const paymentsPending = totalPayments - paymentsMade;
-      const nextPayment = loan.paymentSchedule.find(p => p.status === 'pending');
-      const today = new Date();
-      
-      // Calcular días de atraso si hay pagos pendientes y vencidos
-      let daysOverdue = 0;
+      // Calcular próxima fecha de pago quincenal
+      let nextFortnightPayment = '';
       if (nextPayment) {
         const dueDate = new Date(nextPayment.dueDate);
-        if (dueDate < today) {
-          daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
-        }
+        nextFortnightPayment = dueDate.toLocaleDateString();
+      } else {
+        const lastPaymentDate = loan.payments && loan.payments.length > 0 
+          ? loan.payments[loan.payments.length - 1].date.toDate()
+          : new Date(loan.startDate || Date.now());
+        const nextDate = new Date(lastPaymentDate);
+        nextDate.setDate(nextDate.getDate() + 15); // Quincenal = 15 días
+        nextFortnightPayment = nextDate.toLocaleDateString();
       }
       
-      // Crear HTML
-      const detailsHTML = `
+      container.innerHTML = `
         <div class="loan-detail">
-          <span class="loan-detail-label">Cliente:</span>
+          <span>Cliente:</span>
           <span>${loan.client.name} (${loan.client.id})</span>
         </div>
         <div class="loan-detail">
-          <span class="loan-detail-label">Monto original:</span>
+          <span>Monto original:</span>
           <span>$${loan.amount.toFixed(2)}</span>
         </div>
         <div class="loan-detail">
-          <span class="loan-detail-label">Tasa de interés:</span>
+          <span>Tasa de interés:</span>
           <span>${loan.interestRate}%</span>
         </div>
         <div class="loan-detail">
-          <span class="loan-detail-label">Frecuencia de pago:</span>
-          <span>${loan.frequency === 'monthly' ? 'Mensual' : 'Quincenal'}</span>
+          <span>Frecuencia de pago:</span>
+          <span>${loan.frequency === 'biweekly' ? 'Quincenal' : 'Mensual'}</span>
         </div>
         <div class="loan-detail">
-          <span class="loan-detail-label">Próximo pago:</span>
+          <span>Próximo pago:</span>
           <span>${nextPayment ? new Date(nextPayment.dueDate).toLocaleDateString() : 'N/A'}</span>
         </div>
         <div class="loan-detail">
-          <span class="loan-detail-label">Monto pendiente:</span>
+          <span>Próximo pago quincenal:</span>
+          <span>${nextFortnightPayment}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Monto pendiente:</span>
           <span>$${loan.balance.toFixed(2)}</span>
         </div>
         <div class="loan-detail">
-          <span class="loan-detail-label">Capital pendiente:</span>
+          <span>Capital pendiente:</span>
           <span>$${loan.remainingCapital.toFixed(2)}</span>
         </div>
         <div class="loan-detail">
-          <span class="loan-detail-label">Pagos realizados:</span>
+          <span>Pagos realizados:</span>
           <span>${paymentsMade} de ${totalPayments}</span>
         </div>
-        ${daysOverdue > 0 ? `
-        <div class="alert alert-danger">
-          <i class="fas fa-exclamation-triangle"></i>
-          <span>Pago atrasado por ${daysOverdue} días</span>
-        </div>
-        ` : ''}
       `;
       
-      container.innerHTML = detailsHTML;
-      
-      // Mostrar estado del cliente
-      evaluateClientStatus(loan);
-      
-      // Mostrar historial de pagos
-      displayPaymentHistory(loan);
-      
-      // Mostrar el contenedor
       document.getElementById('clientLoanDetails').style.display = 'block';
-      
-      // Mostrar botón de carta de recomendación si el préstamo está completado
-      document.getElementById('generateLetterBtn').style.display = loan.balance <= 0 ? 'block' : 'none';
-      
-      // Guardar datos para el recibo si hay pagos
-      if (loan.payments && loan.payments.length > 0) {
-        lastPaymentData = {
-          ...loan.payments[loan.payments.length - 1],
-          loanId: loan.id,
-          clientName: loan.client.name,
-          clientId: loan.client.id
-        };
-        document.getElementById('generateReceiptBtn').style.display = 'block';
-      } else {
-        document.getElementById('generateReceiptBtn').style.display = 'none';
-      }
     }
 
     // Evaluar estado del cliente
@@ -651,95 +597,32 @@
       statusContainer.style.display = 'block';
       statusContent.innerHTML = '';
       
-      const today = new Date();
-      const paymentsMade = loan.payments ? loan.payments.length : 0;
-      const totalPayments = loan.paymentSchedule.length;
-      const nextPayment = loan.paymentSchedule.find(p => p.status === 'pending');
-      
-      // Calcular días de atraso si hay pagos pendientes y vencidos
-      let daysOverdue = 0;
-      if (nextPayment) {
-        const dueDate = new Date(nextPayment.dueDate);
-        if (dueDate < today) {
-          daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
-        }
-      }
-      
-      // Calcular porcentaje completado
+      const paymentsMade = loan.payments?.length || 0;
+      const totalPayments = loan.paymentSchedule?.length || 0;
       const completionPercentage = (paymentsMade / totalPayments) * 100;
       
-      // Determinar estado
       let statusClass = 'status-good';
-      let statusHTML = '';
-      let canGetNewLoan = true;
-      let canRenegotiate = true;
-      let statusMessage = '';
-      
-      if (loan.balance <= 0) {
-        statusHTML = `
-          <p><i class="fas fa-check-circle"></i> Préstamo completamente pagado</p>
-          <p><i class="fas fa-thumbs-up"></i> Cliente en buen estado crediticio</p>
-          <p><i class="fas fa-check"></i> Puede solicitar un nuevo préstamo</p>
-        `;
-        statusMessage = 'Excelente pagador';
-      } else if (daysOverdue > 30) {
-        statusClass = 'status-bad';
-        statusHTML = `
-          <p><i class="fas fa-exclamation-triangle"></i> Pago atrasado por más de 30 días</p>
-          <p><i class="fas fa-times-circle"></i> No califica para nuevo préstamo</p>
-          <p><i class="fas fa-exclamation"></i> Se recomienda cobro judicial</p>
-        `;
-        canGetNewLoan = false;
-        canRenegotiate = false;
-        statusMessage = 'Moroso grave';
-      } else if (daysOverdue > 15) {
-        statusClass = 'status-bad';
-        statusHTML = `
-          <p><i class="fas fa-exclamation-triangle"></i> Pago atrasado por ${daysOverdue} días</p>
-          <p><i class="fas fa-times-circle"></i> No califica para nuevo préstamo</p>
-          <p><i class="fas fa-handshake"></i> Puede renegociar con condiciones</p>
-        `;
-        canGetNewLoan = false;
-        statusMessage = 'Moroso moderado';
-      } else if (daysOverdue > 0) {
-        statusClass = 'status-warning';
-        statusHTML = `
-          <p><i class="fas fa-clock"></i> Pago atrasado por ${daysOverdue} días</p>
-          <p><i class="fas fa-check-circle"></i> Puede calificar para nuevo préstamo con condiciones</p>
-          <p><i class="fas fa-handshake"></i> Puede renegociar</p>
-        `;
-        statusMessage = 'Atraso leve';
-      } else if (completionPercentage < 50) {
-        statusClass = 'status-warning';
-        statusHTML = `
-          <p><i class="fas fa-clock"></i> Préstamo en curso (${completionPercentage.toFixed(0)}% completado)</p>
-          <p><i class="fas fa-check-circle"></i> Buen comportamiento de pago</p>
-          <p><i class="fas fa-check"></i> Puede calificar para nuevo préstamo con condiciones</p>
-        `;
-        statusMessage = 'En curso - Buen pagador';
-      } else {
-        statusHTML = `
-          <p><i class="fas fa-clock"></i> Préstamo en curso (${completionPercentage.toFixed(0)}% completado)</p>
-          <p><i class="fas fa-check-circle"></i> Excelente comportamiento de pago</p>
-          <p><i class="fas fa-check"></i> Puede calificar para nuevo préstamo</p>
-        `;
-        statusMessage = 'En curso - Excelente pagador';
-      }
+      let statusMessage = 'En curso - Buen pagador';
+      let statusHTML = `
+        <p><i class="fas fa-clock"></i> Préstamo en curso (${completionPercentage.toFixed(0)}% completado)</p>
+        <p><i class="fas fa-check-circle"></i> Buen comportamiento de pago</p>
+        <p><i class="fas fa-check"></i> Puede calificar para nuevo préstamo con condiciones</p>
+      `;
       
       statusContainer.className = `client-status ${statusClass}`;
       statusContent.innerHTML = `
         <div class="loan-detail">
-          <span class="loan-detail-label">Estado:</span>
+          <span>Estado:</span>
           <span>${statusMessage}</span>
         </div>
         ${statusHTML}
-        <div class="loan-detail" style="margin-top: 1rem;">
-          <span class="loan-detail-label">Puede obtener nuevo préstamo:</span>
-          <span>${canGetNewLoan ? 'Sí' : 'No'}</span>
+        <div class="loan-detail">
+          <span>Puede obtener nuevo préstamo:</span>
+          <span>Sí</span>
         </div>
         <div class="loan-detail">
-          <span class="loan-detail-label">Puede renegociar:</span>
-          <span>${canRenegotiate ? 'Sí' : 'No'}</span>
+          <span>Puede renegociar:</span>
+          <span>Sí</span>
         </div>
       `;
     }
@@ -747,53 +630,48 @@
     // Mostrar historial de pagos
     function displayPaymentHistory(loan) {
       const container = document.getElementById('paymentHistory');
-      container.innerHTML = '';
+      container.innerHTML = '<p>No hay pagos registrados.</p>';
       
-      if (!loan.payments || loan.payments.length === 0) {
-        container.innerHTML = '<p>No hay pagos registrados</p>';
-        return;
-      }
-      
-      // Ordenar pagos por fecha (más reciente primero)
-      const sortedPayments = [...loan.payments].sort((a, b) => b.date.toDate() - a.date.toDate());
-      
-      sortedPayments.forEach(payment => {
-        const paymentDate = payment.date.toDate();
-        const isLate = payment.lateFee && payment.lateFee > 0;
+      if (loan.payments && loan.payments.length > 0) {
+        container.innerHTML = '';
+        const sortedPayments = [...loan.payments].sort((a, b) => b.date.toDate() - a.date.toDate());
         
-        const paymentItem = document.createElement('div');
-        paymentItem.className = `payment-history-item ${isLate ? 'overdue' : 'paid'}`;
-        paymentItem.innerHTML = `
-          <span>${paymentDate.toLocaleDateString()}</span>
-          <span>$${payment.amount.toFixed(2)}</span>
-          <span>${getPaymentTypeText(payment.type)}</span>
-          ${isLate ? `<span>(Mora: $${payment.lateFee.toFixed(2)})</span>` : ''}
-        `;
-        container.appendChild(paymentItem);
-      });
+        sortedPayments.forEach(payment => {
+          const paymentDate = payment.date.toDate();
+          const isLate = payment.lateFee && payment.lateFee > 0;
+          const paymentItem = document.createElement('div');
+          paymentItem.className = `payment-history-item ${isLate ? 'overdue' : 'paid'}`;
+          paymentItem.innerHTML = `
+            <span>${paymentDate.toLocaleDateString()}</span>
+            <span>$${payment.amount.toFixed(2)}</span>
+            <span>${getPaymentTypeText(payment.type)}</span>
+            ${isLate ? `<span>(Mora: $${payment.lateFee.toFixed(2)})</span>` : ''}
+          `;
+          container.appendChild(paymentItem);
+        });
+      }
     }
 
     // Obtener texto para tipo de pago
     function getPaymentTypeText(type) {
       switch (type) {
-        case 'full': return 'Pago completo';
-        case 'interest': return 'Solo interés';
-        case 'capital': return 'Solo capital';
+        case 'full': return 'Pago Completo';
+        case 'interest': return 'Solo Interés';
+        case 'capital': return 'Solo Capital';
         default: return type;
       }
     }
 
-    // Actualizar formulario de pago según tipo seleccionado
+    // Actualizar formulario
     function updatePaymentForm() {
       const paymentType = document.getElementById('paymentType').value;
       const latePaymentContainer = document.getElementById('latePaymentContainer');
       
-      if (paymentType === 'full') {
-        latePaymentContainer.style.display = 'block';
-      } else {
-        latePaymentContainer.style.display = 'none';
+      latePaymentContainer.style.display = paymentType === 'full' ? 'block' : 'none';
+      if (paymentType !== 'full') {
         document.getElementById('applyLateFee').checked = false;
         document.getElementById('lateFeeDetails').style.display = 'none';
+        document.getElementById('lateFeeAmount').value = '0.00';
       }
     }
 
@@ -801,27 +679,23 @@
     function toggleLateFeeDetails() {
       const applyLateFee = document.getElementById('applyLateFee').checked;
       document.getElementById('lateFeeDetails').style.display = applyLateFee ? 'block' : 'none';
-      
-      if (applyLateFee) {
-        calculateLateFee();
-      }
+      calculateLateFee();
     }
 
     // Calcular mora
     function calculateLateFee() {
-      if (!selectedLoanForPayment) return;
+      if (!selectedLoanForPayment) {
+        document.getElementById('lateFeeAmount').value = '0.00';
+        return;
+      }
       
       const daysLate = parseInt(document.getElementById('lateFeeDays').value) || 0;
       const lateFeeRate = parseFloat(document.getElementById('lateFeeRate').value) || 0;
+      const lateFee = daysLate > 0 && lateFeeRate > 0 
+        ? (selectedLoanForPayment.remainingCapital * (lateFeeRate / 100 / 30) * daysLate)
+        : 0;
       
-      if (daysLate > 0 && lateFeeRate > 0) {
-        // Calcular mora sobre el capital pendiente
-        const dailyRate = lateFeeRate / 100 / 30; // Tasa diaria (asumiendo 30 días/mes)
-        const lateFee = selectedLoanForPayment.remainingCapital * dailyRate * daysLate;
-        document.getElementById('lateFeeAmount').value = lateFee.toFixed(2);
-      } else {
-        document.getElementById('lateFeeAmount').value = '0.00';
-      }
+      document.getElementById('lateFeeAmount').value = lateFee.toFixed(2);
     }
 
     // Registrar pago
@@ -829,17 +703,26 @@
       e.preventDefault();
       
       if (!selectedLoanForPayment) {
-        showInfoModal('Error', 'No se ha seleccionado un préstamo para registrar el pago');
+        showInfoModal('Error', 'No se ha seleccionado un préstamo.');
         return;
       }
       
       const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
       const paymentDate = document.getElementById('paymentDate').value;
       const paymentType = document.getElementById('paymentType').value;
+      const applyLateFee = document.getElementById('applyLateFee').checked;
       
-      // Validar monto
-      if (paymentAmount <= 0 || isNaN(paymentAmount)) {
-        showInfoModal('Error', 'El monto del pago debe ser mayor a cero');
+      // Validaciones
+      if (isNaN(paymentAmount) || paymentAmount <= 0) {
+        showInfoModal('Error', 'El monto del pago debe ser mayor a cero.');
+        return;
+      }
+      if (!paymentDate) {
+        showInfoModal('Error', 'Seleccione una fecha de pago válida.');
+        return;
+      }
+      if (!paymentType) {
+        showInfoModal('Error', 'Seleccione un tipo de pago.');
         return;
       }
       
@@ -848,94 +731,106 @@
         amount: paymentAmount,
         date: Timestamp.fromDate(new Date(paymentDate)),
         type: paymentType,
-        recordedBy: currentUser,
-        timestamp: Timestamp.fromDate(new Date())
+        timestamp: Timestamp.now(),
+        recordedBy: 'Administrador'
       };
       
-      // Verificar si se aplica mora
-      const applyLateFee = document.getElementById('applyLateFee').checked;
-      if (applyLateFee) {
-        const lateFee = parseFloat(document.getElementById('lateFeeAmount').value) || 0;
+      // Manejar mora
+      let lateFee = 0;
+      if (applyLateFee && paymentType === 'full') {
+        lateFee = parseFloat(document.getElementById('lateFeeAmount').value) || 0;
         if (lateFee > 0) {
           paymentData.lateFee = lateFee;
-          paymentData.lateFeeDays = parseInt(document.getElementById('lateFeeDays').value);
-          paymentData.lateFeeRate = parseFloat(document.getElementById('lateFeeRate').value);
+          paymentData.lateFeeDays = parseInt(document.getElementById('lateFeeDays').value) || 0;
+          paymentData.lateFeeRate = parseFloat(document.getElementById('lateFeeRate').value) || 0;
         }
       }
       
-      // Calcular total a pagar (incluyendo mora si aplica)
-      const totalPayment = paymentAmount + (paymentData.lateFee || 0);
+      const totalPayment = paymentAmount + lateFee;
       
-      // Confirmar con el usuario si el pago es menor al esperado
-      const nextPayment = selectedLoanForPayment.paymentSchedule.find(p => p.status === 'pending');
-      if (nextPayment && paymentType === 'full' && totalPayment < nextPayment.amount) {
+      // Confirmar pago si es menor al esperado
+      const nextPayment = selectedLoanForPayment.paymentSchedule?.find(p => p.status === 'pending');
+      if (paymentType === 'full' && nextPayment && totalPayment < nextPayment.amount) {
         const confirm = await showConfirmModal(
-          'Pago incompleto', 
-          `El monto ingresado ($${totalPayment.toFixed(2)}) es menor al pago esperado ($${nextPayment.amount.toFixed(2)}). ¿Desea continuar?`
+          'Pago Incompleto',
+          `El monto ingresado ($${totalPayment.toFixed(2)}) es menor al esperado ($${nextPayment.amount.toFixed(2)}). ¿Continuar?`
         );
-        
-        if (!confirm) {
-          return;
-        }
+        if (!confirm) return;
       }
       
       try {
-        // Actualizar el préstamo en Firestore
         const loanRef = doc(db, "Loans", selectedLoanForPayment.id);
         
-        // Calcular cómo afecta el pago al capital y al interés
+        // Verificar existencia del documento
+        const loanSnap = await getDoc(loanRef);
+        if (!loanSnap.exists()) {
+          showInfoModal('Error', 'El préstamo no existe en la base de datos.');
+          return;
+        }
+        
+        // Calcular distribución del pago
         let capitalPayment = 0;
         let interestPayment = 0;
+        let totalLateFees = (selectedLoanForPayment.payments || []).reduce((sum, p) => sum + (p.lateFee || 0), 0) + lateFee;
         
         if (paymentType === 'full') {
-          // Pago completo: primero se aplica al interés pendiente, luego al capital
-          const interestDue = selectedLoanForPayment.totalInterest - (selectedLoanForPayment.payments || []).reduce((sum, p) => {
-            if (p.type === 'full') {
-              return sum + (p.amount - (p.amount * (selectedLoanForPayment.interestRate / 100 / selectedLoanForPayment.term)));
-            } else if (p.type === 'interest') {
-              return sum + p.amount;
-            }
-            return sum;
-          }, 0);
-          
+          const interestDue = (selectedLoanForPayment.totalInterest || 0) - 
+            (selectedLoanForPayment.payments?.reduce((sum, p) => 
+              sum + (p.type === 'interest' || p.type === 'full' ? p.amount - (p.lateFee || 0) : 0), 0) || 0);
           interestPayment = Math.min(paymentAmount, interestDue);
           capitalPayment = paymentAmount - interestPayment;
+          if (lateFee > 0) interestPayment += lateFee;
         } else if (paymentType === 'interest') {
-          // Solo interés
           interestPayment = paymentAmount;
         } else if (paymentType === 'capital') {
-          // Solo capital
           capitalPayment = paymentAmount;
         }
         
-        // Aplicar mora si existe
-        if (paymentData.lateFee) {
-          interestPayment += paymentData.lateFee;
-        }
-        
         // Actualizar saldos
-        const newBalance = selectedLoanForPayment.balance - paymentAmount - (paymentData.lateFee || 0);
-        const newRemainingCapital = selectedLoanForPayment.remainingCapital - capitalPayment;
+        const newBalance = Math.max(0, selectedLoanForPayment.balance - totalPayment);
+        const newRemainingCapital = Math.max(0, selectedLoanForPayment.remainingCapital - capitalPayment);
         
-        // Marcar el próximo pago como completado si es un pago completo
-        let updatedPaymentSchedule = [...selectedLoanForPayment.paymentSchedule];
-        if (paymentType === 'full' && nextPayment) {
+        // Verificar atrasos
+        const today = new Date();
+        let hasOverdue = false;
+        if (nextPayment) {
+          const dueDate = new Date(nextPayment.dueDate);
+          if (dueDate < today) {
+            hasOverdue = true;
+          }
+        }
+        const hasInterestDue = (selectedLoanForPayment.totalInterest || 0) > 
+          (selectedLoanForPayment.payments?.reduce((sum, p) => 
+            sum + (p.type === 'interest' || p.type === 'full' ? p.amount - (p.lateFee || 0) : 0), 0) || 0);
+        
+        // Actualizar cronograma
+        let updatedPaymentSchedule = [...(selectedLoanForPayment.paymentSchedule || [])];
+        if (paymentType === 'full' && nextPayment && totalPayment >= nextPayment.amount) {
           const paymentIndex = updatedPaymentSchedule.findIndex(p => p.number === nextPayment.number);
           if (paymentIndex !== -1) {
             updatedPaymentSchedule[paymentIndex].status = 'paid';
+            // Agregar próximo pago quincenal si es necesario
+            if (paymentIndex < updatedPaymentSchedule.length - 1) {
+              const nextDueDate = new Date(updatedPaymentSchedule[paymentIndex].dueDate);
+              nextDueDate.setDate(nextDueDate.getDate() + 15);
+              updatedPaymentSchedule[paymentIndex + 1].dueDate = nextDueDate.toISOString().split('T')[0];
+            }
           }
         }
         
-        // Actualizar el documento
+        // Determinar estado del préstamo
+        const newStatus = (newRemainingCapital <= 0 && !hasInterestDue && totalLateFees <= 0 && !hasOverdue) ? 'completed' : 'active';
+        
+        // Actualizar Firestore
         await updateDoc(loanRef, {
-          payments: arrayUnion(paymentData),
+          payments: selectedLoanForPayment.payments ? arrayUnion(paymentData) : [paymentData],
           balance: newBalance,
           remainingCapital: newRemainingCapital,
           paymentSchedule: updatedPaymentSchedule,
-          status: newRemainingCapital <= 0 ? 'completed' : 'active'
+          status: newStatus
         });
         
-        // Guardar datos del último pago para generar recibo
+        // Guardar datos del pago
         lastPaymentData = {
           ...paymentData,
           loanId: selectedLoanForPayment.id,
@@ -943,25 +838,109 @@
           clientId: selectedLoanForPayment.client.id
         };
         
-        // Mostrar mensaje de éxito
-        showInfoModal('Éxito', 'Pago registrado correctamente');
+        showInfoModal('Éxito', 'Pago registrado correctamente.');
         
         // Limpiar formulario
         document.getElementById('paymentForm').reset();
+        document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
         document.getElementById('lateFeeDetails').style.display = 'none';
         document.getElementById('applyLateFee').checked = false;
+        document.getElementById('lateFeeAmount').value = '0.00';
         
-        // Mostrar botón para generar recibo
+        // Mostrar botones de recibo
         document.getElementById('generateReceiptBtn').style.display = 'block';
+        document.getElementById('shareReceiptBtn').style.display = 'block';
         
-        // Actualizar detalles del préstamo
-        selectedLoanForPayment = (await getDoc(loanRef)).data();
-        selectedLoanForPayment.id = loanRef.id;
+        // Actualizar detalles
+        const updatedLoanSnap = await getDoc(loanRef);
+        selectedLoanForPayment = { id: loanRef.id, ...updatedLoanSnap.data() };
         displayLoanDetails(selectedLoanForPayment);
+        evaluateClientStatus(selectedLoanForPayment);
+        displayPaymentHistory(selectedLoanForPayment);
       } catch (error) {
         console.error("Error registrando pago: ", error);
-        showInfoModal('Error', 'Ocurrió un error al registrar el pago');
+        showInfoModal('Error', `Error al registrar el pago: ${error.message}. Verifica tu conexión y permisos de Firestore.`);
       }
+    }
+
+    // Generar recibo
+    async function generateReceipt() {
+      if (!lastPaymentData) {
+        showInfoModal('Error', 'No hay datos de pago para generar un recibo.');
+        return;
+      }
+      
+      const receiptContainer = document.getElementById('receiptContainer');
+      document.getElementById('receiptClientName').textContent = lastPaymentData.clientName;
+      document.getElementById('receiptClientId').textContent = lastPaymentData.clientId;
+      document.getElementById('receiptLoanId').textContent = lastPaymentData.loanId;
+      document.getElementById('receiptDate').textContent = lastPaymentData.date.toDate().toLocaleDateString();
+      document.getElementById('receiptAmount').textContent = lastPaymentData.amount.toFixed(2);
+      document.getElementById('receiptType').textContent = getPaymentTypeText(lastPaymentData.type);
+      document.getElementById('receiptLateFee').textContent = (lastPaymentData.lateFee || 0).toFixed(2);
+      document.getElementById('receiptRecordedBy').textContent = lastPaymentData.recordedBy;
+      
+      receiptContainer.style.display = 'block';
+      
+      try {
+        const canvas = await html2canvas(receiptContainer, { backgroundColor: '#ffffff' });
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/jpeg');
+        link.download = `recibo_pago_${lastPaymentData.loanId}_${lastPaymentData.date.toDate().toISOString().split('T')[0]}.jpg`;
+        link.click();
+      } catch (error) {
+        console.error("Error generando recibo: ", error);
+        showInfoModal('Error', 'Error al generar el recibo. Por favor, intenta de nuevo.');
+      }
+      
+      receiptContainer.style.display = 'none';
+    }
+
+    // Compartir recibo en WhatsApp
+    async function shareReceipt() {
+      if (!lastPaymentData) {
+        showInfoModal('Error', 'No hay datos de pago para compartir.');
+        return;
+      }
+      
+      const receiptContainer = document.getElementById('receiptContainer');
+      document.getElementById('receiptClientName').textContent = lastPaymentData.clientName;
+      document.getElementById('receiptClientId').textContent = lastPaymentData.clientId;
+      document.getElementById('receiptLoanId').textContent = lastPaymentData.loanId;
+      document.getElementById('receiptDate').textContent = lastPaymentData.date.toDate().toLocaleDateString();
+      document.getElementById('receiptAmount').textContent = lastPaymentData.amount.toFixed(2);
+      document.getElementById('receiptType').textContent = getPaymentTypeText(lastPaymentData.type);
+      document.getElementById('receiptLateFee').textContent = (lastPaymentData.lateFee || 0).toFixed(2);
+      document.getElementById('receiptRecordedBy').textContent = lastPaymentData.recordedBy;
+      
+      receiptContainer.style.display = 'block';
+      
+      try {
+        const canvas = await html2canvas(receiptContainer, { backgroundColor: '#ffffff' });
+        const dataUrl = canvas.toDataURL('image/jpeg');
+        
+        if (navigator.share) {
+          const blob = await (await fetch(dataUrl)).blob();
+          const file = new File([blob], `recibo_pago_${lastPaymentData.loanId}.jpg`, { type: 'image/jpeg' });
+          
+          await navigator.share({
+            files: [file],
+            title: 'Recibo de Pago',
+            text: `Recibo de pago para ${lastPaymentData.clientName}\nPréstamo: ${lastPaymentData.loanId}\nMonto: $${lastPaymentData.amount.toFixed(2)}\nFecha: ${lastPaymentData.date.toDate().toLocaleDateString()}`
+          });
+        } else {
+          showInfoModal('Advertencia', 'La función de compartir no está disponible. El recibo se descargará.');
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = `recibo_pago_${lastPaymentData.loanId}.jpg`;
+          link.click();
+        }
+      } catch (error) {
+        console.error("Error compartiendo recibo: ", error);
+        showInfoModal('Error', 'Error al compartir el recibo. Por favor, intenta de nuevo.');
+      }
+      
+      receiptContainer.style.display = 'none';
     }
 
     // Mostrar modal de confirmación
@@ -980,9 +959,8 @@
         
         confirmButton.addEventListener('click', handler);
         
-        // También resolver como false si se cierra el modal
         document.getElementById('confirmModal').addEventListener('click', (e) => {
-          if (e.target === document.getElementById('confirmModal')) { 
+          if (e.target === document.getElementById('confirmModal')) {
             closeModal();
             resolve(false);
           }
@@ -999,9 +977,7 @@
 
     // Cerrar modales
     window.closeModal = function() {
-      document.querySelectorAll('.modal').forEach(modal => {
-        modal.classList.remove('active');
-      });
+      document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
     };
   </script>
 </body>
