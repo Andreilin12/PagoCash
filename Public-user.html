@@ -208,6 +208,54 @@
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
 
+    /* Custom File Upload Button */
+    .file-upload-btn {
+      background: var(--card-bg);
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .file-upload-btn:hover {
+      transform: scale(1.15);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      background: var(--primary-color);
+      color: var(--text-color);
+    }
+
+    .file-upload-btn input[type="file"] {
+      display: none;
+    }
+
+    .file-upload-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s ease, height 0.4s ease;
+    }
+
+    .file-upload-btn:hover::after {
+      width: 100px;
+      height: 100px;
+    }
+
     /* Client Section */
     #client-section {
       display: none;
@@ -917,6 +965,12 @@
         width: 80px;
         height: 80px;
       }
+
+      .avatar-option, .file-upload-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8rem;
+      }
     }
 
     @media (max-width: 360px) {
@@ -1168,7 +1222,10 @@
       <div class="avatar-selector" id="avatarSelector"></div>
       <div class="form-group">
         <label data-lang="upload_image">Subir Imagen</label>
-        <input type="file" id="profileImageUpload" accept="image/*" class="form-control" aria-label="Subir imagen de perfil">
+        <label class="file-upload-btn">
+          <i class="fas fa-camera"></i>
+          <input type="file" id="profileImageUpload" accept="image/*" aria-label="Subir imagen de perfil">
+        </label>
       </div>
       <div class="modal-footer">
         <button class="btn btn-success" id="saveAvatarBtn" data-lang="save">Guardar</button>
@@ -1227,6 +1284,8 @@
       </div>
     </div>
   </div>
+
+
 
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
@@ -1500,6 +1559,9 @@
 
       const userDoc = querySnapshot.docs[0];
       currentUser = { id: userDoc.id, ...userDoc.data() };
+
+      // Load user settings from Firestore
+      await loadUserSettings();
 
       if (currentUser.loanIds && currentUser.loanIds.length > 0) {
         const loanId = currentUser.loanIds[0];
@@ -1837,8 +1899,8 @@
     document.querySelectorAll('.avatar-option').forEach(option => {
       option.classList.remove('selected');
     });
-    e.target.classList.add('selected');
-    currentUser.avatar = e.target.dataset.avatar;
+    e.currentTarget.classList.add('selected');
+    currentUser.avatar = e.currentTarget.dataset.avatar;
   }
 
   // Handle Image Upload
@@ -1860,13 +1922,27 @@
 
   // Save Avatar
   async function saveAvatar() {
+    if (!currentUser.avatar) {
+      showInfoModal(translate('info'), translate('Por favor, seleccione un avatar o suba una imagen'));
+      return;
+    }
+
     showLoading();
     try {
       const avatarDiv = document.getElementById('clientAvatar');
       if (currentUser.avatar.startsWith('data:image')) {
+        // For production, upload to Firebase Storage and save URL
+        /*
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+        const storage = getStorage();
+        const storageRef = ref(storage, `avatars/${currentUser.id}`);
+        const response = await fetch(currentUser.avatar);
+        const blob = await response.blob();
+        await uploadBytes(storageRef, blob);
+        const url = await getDownloadURL(storageRef);
+        currentUser.avatar = url;
+        */
         avatarDiv.innerHTML = `<img src="${currentUser.avatar}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-        // In production, upload to Firebase Storage and save URL
-        showInfoModal(translate('info'), translate('Imagen de perfil actualizada. En producción, se subiría a Firebase Storage'));
       } else {
         avatarDiv.innerHTML = currentUser.avatar;
       }
@@ -2187,7 +2263,7 @@ ${translate('Fecha')}: ${new Date().toLocaleDateString()}
   // Load User Settings
   async function loadUserSettings() {
     try {
-      if (currentUser) {
+      if (currentUser && currentUser.id) {
         const userRef = doc(db, "LoanUsers", currentUser.id);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists() && userSnap.data().settings) {
