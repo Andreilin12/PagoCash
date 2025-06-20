@@ -1303,13 +1303,13 @@
         document.getElementById('userAvatar').src = photoURL;
       } catch (error) {
         console.log("Using default avatar, no custom profile picture found");
-        document.getElementById('userAvatar').src = currentUser.photoURL || 'https://via.placeholder.com/40';
+        document.getElementById('userAvatar').src = currentUser.photoURL || 'logo.png';
       }
       
       // Set up logout button
       document.getElementById('logoutBtn').addEventListener('click', () => {
         signOut(auth).then(() => {
-          window.location.href = 'login.html';
+          window.location.href = 'index.html';
         }).catch((error) => {
           showInfoModal('Error', 'Error al cerrar sesión: ' + error.message);
         });
