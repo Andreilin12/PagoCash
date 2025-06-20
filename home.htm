@@ -764,17 +764,6 @@
                 <label for="guarantee">Garantía (Opcional)</label>
                 <textarea id="guarantee" class="form-control" rows="3"></textarea>
               </div>
-              
-              <!-- Credenciales de Acceso -->
-              <h3 style="margin-top: 2rem;">Credenciales de Acceso</h3>
-              <div class="form-group">
-                <label for="clientUsername">Nombre de Usuario</label>
-                <input type="text" id="clientUsername" class="form-control" required>
-              </div>
-              <div class="form-group">
-                <label for="clientPin">PIN (4 dígitos)</label>
-                <input type="password" id="clientPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required>
-              </div>
             </div>
           </div>
 
@@ -1025,6 +1014,12 @@
       <h1 class="section-title">Configuración del Sistema</h1>
       
       <div class="config-grid">
+        <div class="config-card" id="createUserCard">
+          <i class="fas fa-user-plus"></i>
+          <h3>Crear Usuario</h3>
+          <p>Crear credenciales para clientes</p>
+        </div>
+        
         <div class="config-card" onclick="navigateTo('user-settings.html')">
           <i class="fas fa-users-cog"></i>
           <h3>Opciones de Usuario</h3>
@@ -1153,6 +1148,36 @@
       <div class="modal-footer">
         <button onclick="closeModal()" class="btn">Aceptar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal para crear usuario -->
+  <div class="modal" id="createUserModal">
+    <div class="modal-content">
+      <h3 class="modal-title">Crear Nuevo Usuario</h3>
+      <form id="createUserForm">
+        <div class="form-group">
+          <label for="clientSelect">Seleccionar Cliente</label>
+          <select id="clientSelect" class="form-control" required>
+            <option value="">-- Seleccione un cliente --</option>
+            <!-- Se llenará dinámicamente -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="newUsername">Nombre de Usuario</label>
+          <input type="text" id="newUsername" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="newPin">PIN (4 dígitos)</label>
+          <input type="password" id="newPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-user-plus"></i> Crear Usuario
+          </button>
+          <button type="button" onclick="closeModal()" class="btn btn-danger">Cancelar</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1327,6 +1352,8 @@
       
       // Config section
       document.getElementById('lateFeeConfigForm').addEventListener('submit', saveSystemConfig);
+      document.getElementById('createUserCard').addEventListener('click', showCreateUserModal);
+      document.getElementById('createUserForm').addEventListener('submit', createUserAccount);
     }
 
     function debounce(func, wait) {
@@ -1350,9 +1377,15 @@
       try {
         showLoading();
         
-        // Get all loans
-        const loansQuery = query(collection(db, "Loans"));
-        const loansSnapshot = await getDocs(loansQuery);
+        // Get all loans for the current user
+        let q;
+        if (currentUser && currentUser.uid !== 'admin') {
+          q = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
+        } else {
+          q = query(collection(db, "Loans"));
+        }
+        
+        const loansSnapshot = await getDocs(q);
         
         let totalLoaned = 0;
         let totalPending = 0;
@@ -1469,6 +1502,8 @@
             loadUsersData();
           } else if (targetId === 'loans-list') {
             loadActiveLoans();
+          } else if (targetId === 'config') {
+            // No special action needed for config
           }
         });
       });
@@ -2008,7 +2043,14 @@
 
     async function calculateReportsData(year, month) {
       try {
-        const loansSnapshot = await getDocs(collection(db, "Loans"));
+        let q;
+        if (currentUser && currentUser.uid !== 'admin') {
+          q = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
+        } else {
+          q = collection(db, "Loans");
+        }
+        
+        const loansSnapshot = await getDocs(q);
         
         // Initialize data structures
         if (!yearlyReportData[year]) {
@@ -2501,9 +2543,7 @@
           name: document.getElementById('referenceName').value.trim(),
           phone: document.getElementById('referencePhone').value.trim(),
           relation: document.getElementById('referenceRelation').value.trim()
-        },
-        username: document.getElementById('clientUsername').value.trim(),
-        pin: document.getElementById('clientPin').value.trim()
+        }
       };
       
       const loanData = {
@@ -2560,27 +2600,14 @@
       try {
         showLoading();
         
-        // Registrar en la colección "LoanUsers"
-        const userRef = await addDoc(collection(db, "LoanUsers"), {
-          username: clientData.username,
-          pin: clientData.pin,
-          clientId: clientData.id,
-          loanIds: [] // Se actualizará después de crear el préstamo
-        });
-        
         // Registrar en la colección "Loans"
-        loanData.userId = userRef.id;
+        loanData.userId = currentUser.uid;
         const loanRef = await addDoc(collection(db, "Loans"), {
           ...loanData,
           client: clientData,
           payments: [],
           balance: loanData.totalPayment,
           remainingCapital: loanData.amount
-        });
-        
-        // Actualizar el usuario con el ID del préstamo
-        await updateDoc(userRef, {
-          loanIds: arrayUnion(loanRef.id)
         });
         
         // Mostrar mensaje de éxito
@@ -2644,13 +2671,8 @@
 
     function validateLoanData(clientData, loanData) {
       // Validar datos del cliente
-      if (!clientData.name || !clientData.id || !clientData.phone || !clientData.username || !clientData.pin) {
+      if (!clientData.name || !clientData.id || !clientData.phone) {
         showInfoModal('Error', 'Todos los campos obligatorios del cliente deben estar completos');
-        return false;
-      }
-      
-      if (clientData.pin.length !== 4 || !/^\d+$/.test(clientData.pin)) {
-        showInfoModal('Error', 'El PIN debe ser de 4 dígitos numéricos');
         return false;
       }
       
@@ -2961,6 +2983,106 @@
       }
       
       receiptContainer.style.display = 'none';
+    }
+
+    async function showCreateUserModal() {
+      try {
+        showLoading();
+        const clientSelect = document.getElementById('clientSelect');
+        clientSelect.innerHTML = '<option value="">-- Seleccione un cliente --</option>';
+        
+        // Get all loans to populate client list
+        let q;
+        if (currentUser && currentUser.uid !== 'admin') {
+          q = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
+        } else {
+          q = collection(db, "Loans");
+        }
+        
+        const loansSnapshot = await getDocs(q);
+        const clients = new Map();
+        
+        loansSnapshot.forEach(doc => {
+          const loan = doc.data();
+          if (!clients.has(loan.client.id)) {
+            clients.set(loan.client.id, loan.client.name);
+          }
+        });
+        
+        // Add clients to select
+        clients.forEach((name, id) => {
+          const option = document.createElement('option');
+          option.value = id;
+          option.textContent = `${name} (${id})`;
+          clientSelect.appendChild(option);
+        });
+        
+        // Show the modal
+        document.getElementById('createUserModal').classList.add('active');
+      } catch (error) {
+        console.error("Error loading clients for user creation: ", error);
+        showInfoModal('Error', 'Error al cargar la lista de clientes');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function createUserAccount(e) {
+      e.preventDefault();
+      
+      const clientId = document.getElementById('clientSelect').value;
+      const username = document.getElementById('newUsername').value.trim();
+      const pin = document.getElementById('newPin').value.trim();
+      
+      if (!clientId || !username || !pin) {
+        showInfoModal('Error', 'Todos los campos son obligatorios');
+        return;
+      }
+      
+      if (pin.length !== 4 || !/^\d+$/.test(pin)) {
+        showInfoModal('Error', 'El PIN debe ser de 4 dígitos numéricos');
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        // Check if username already exists
+        const usersQuery = query(collection(db, "LoanUsers"), where("username", "==", username));
+        const usersSnapshot = await getDocs(usersQuery);
+        
+        if (!usersSnapshot.empty) {
+          showInfoModal('Error', 'El nombre de usuario ya está en uso');
+          return;
+        }
+        
+        // Check if client already has an account
+        const clientQuery = query(collection(db, "LoanUsers"), where("clientId", "==", clientId));
+        const clientSnapshot = await getDocs(clientQuery);
+        
+        if (!clientSnapshot.empty) {
+          showInfoModal('Error', 'Este cliente ya tiene una cuenta de usuario');
+          return;
+        }
+        
+        // Create the user account
+        await addDoc(collection(db, "LoanUsers"), {
+          username,
+          pin,
+          clientId,
+          createdAt: Timestamp.now(),
+          createdBy: currentUser.uid
+        });
+        
+        showInfoModal('Éxito', 'Cuenta de usuario creada correctamente');
+        document.getElementById('createUserForm').reset();
+        closeModal();
+      } catch (error) {
+        console.error("Error creating user account: ", error);
+        showInfoModal('Error', 'Error al crear la cuenta de usuario');
+      } finally {
+        hideLoading();
+      }
     }
 
     async function showConfirmModal(title, message) {
