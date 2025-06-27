@@ -636,15 +636,6 @@
       border-radius: 8px;
     }
 
-    .recommendation-letter {
-      background-color: white;
-      color: black;
-      padding: 1.5rem;
-      border-radius: 8px;
-      margin-top: 1rem;
-      display: none;
-    }
-
     /* New styles for horizontal form */
     .loan-form-horizontal {
       display: grid;
@@ -684,6 +675,155 @@
       font-size: 1.1rem;
     }
 
+    /* Company info styles */
+    .company-info {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .company-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .company-details {
+      flex: 1;
+    }
+
+    .company-name {
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .company-rnc {
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .company-address {
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+    /* Ticket styles */
+    .ticket {
+      width: 80mm;
+      background-color: white;
+      color: black;
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+      display: none;
+    }
+
+    .ticket-header {
+      text-align: center;
+      margin-bottom: 10px;
+      border-bottom: 1px dashed #000;
+      padding-bottom: 10px;
+    }
+
+    .ticket-logo {
+      max-width: 60mm;
+      max-height: 30mm;
+      margin: 0 auto 5px;
+      display: block;
+    }
+
+    .ticket-title {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-bottom: 5px;
+    }
+
+    .ticket-info {
+      font-size: 0.8em;
+      margin-bottom: 5px;
+    }
+
+    .ticket-body {
+      margin-bottom: 10px;
+    }
+
+    .ticket-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+
+    .ticket-footer {
+      text-align: center;
+      border-top: 1px dashed #000;
+      padding-top: 10px;
+      font-size: 0.8em;
+    }
+
+    .signature-line {
+      border-top: 1px solid #000;
+      margin-top: 20px;
+      width: 60%;
+      display: inline-block;
+    }
+
+    /* Document upload styles */
+    .document-upload {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+    }
+
+    .document-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .document-item {
+      width: 150px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .document-thumbnail {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+    }
+
+    .document-name {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+      text-align: center;
+      word-break: break-all;
+    }
+
+    .document-remove {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -720,6 +860,15 @@
 
       .loan-summary-grid {
         grid-template-columns: 1fr 1fr;
+      }
+
+      .company-info {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .document-item {
+        width: 120px;
       }
     }
 
@@ -836,6 +985,17 @@
                 <label for="clientNationality">Nacionalidad</label>
                 <input type="text" id="clientNationality" class="form-control" required>
               </div>
+              
+              <!-- Nuevos campos para información laboral -->
+              <div class="form-group">
+                <label for="clientCompany">Empresa donde labora</label>
+                <input type="text" id="clientCompany" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="companyStartDate">Fecha de ingreso a la empresa</label>
+                <input type="date" id="companyStartDate" class="form-control">
+                <small id="companyTime" style="color: var(--text-light);"></small>
+              </div>
             </div>
             
             <div>
@@ -851,6 +1011,16 @@
               <div class="form-group">
                 <label for="referenceRelation">Parentesco/Relación</label>
                 <input type="text" id="referenceRelation" class="form-control" required>
+              </div>
+              
+              <!-- Sección de documentos -->
+              <div class="document-upload">
+                <h3>Documentos Adjuntos</h3>
+                <div class="form-group">
+                  <label for="documentUpload">Subir Documentos (PDF, Imágenes)</label>
+                  <input type="file" id="documentUpload" class="form-control" multiple accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+                <div class="document-preview" id="documentPreview"></div>
               </div>
             </div>
 
@@ -885,6 +1055,13 @@
               <div class="form-group">
                 <label for="loanDate">Fecha de Inicio</label>
                 <input type="date" id="loanDate" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="loanType">Tipo de Préstamo</label>
+                <select id="loanType" class="form-control" required>
+                  <option value="normal">Normal (con intereses)</option>
+                  <option value="fixed">Plazo Fijo (sin intereses)</option>
+                </select>
               </div>
               <div class="form-group">
                 <label for="guarantee">Garantía (Opcional)</label>
@@ -1003,6 +1180,9 @@
         <button id="shareReceiptBtn" class="btn btn-info" style="display: none; margin-top: 1rem;">
           <i class="fab fa-whatsapp"></i> Compartir en WhatsApp
         </button>
+        <button id="generateTicketBtn" class="btn btn-info" style="display: none; margin-top: 1rem;">
+          <i class="fas fa-ticket-alt"></i> Generar Ticket (80mm)
+        </button>
       </div>
       
       <div id="clientLoanDetails" style="margin-top: 2rem; display: none;">
@@ -1017,7 +1197,15 @@
       </div>
       
       <div id="receiptContainer" class="receipt" style="display: none;">
-        <h3>Recibo de Pago</h3>
+        <div class="company-info">
+          <img id="receiptCompanyLogo" src="logo.png" alt="Company Logo" class="company-logo">
+          <div class="company-details">
+            <div id="receiptCompanyName" class="company-name">Nombre de la Empresa</div>
+            <div id="receiptCompanyRnc" class="company-rnc">RNC: 000-00000-0</div>
+            <div id="receiptCompanyAddress" class="company-address">Dirección de la empresa</div>
+          </div>
+        </div>
+        <h3 style="text-align: center;">Recibo de Pago</h3>
         <p><strong>Cliente:</strong> <span id="receiptClientName"></span></p>
         <p><strong>Cédula:</strong> <span id="receiptClientId"></span></p>
         <p><strong>Préstamo ID:</strong> <span id="receiptLoanId"></span></p>
@@ -1026,6 +1214,63 @@
         <p><strong>Tipo:</strong> <span id="receiptType"></span></p>
         <p><strong>Mora:</strong> $<span id="receiptLateFee"></span></p>
         <p><strong>Registrado por:</strong> <span id="receiptRecordedBy"></span></p>
+        <div style="margin-top: 20px; text-align: center;">
+          <div class="signature-line"></div>
+          <p>Firma del Cliente</p>
+        </div>
+      </div>
+      
+      <div id="ticketContainer" class="ticket" style="display: none;">
+        <div class="ticket-header">
+          <img id="ticketCompanyLogo" src="logo.png" alt="Company Logo" class="ticket-logo">
+          <div id="ticketCompanyName" class="ticket-title">Nombre de la Empresa</div>
+          <div id="ticketCompanyRnc" class="ticket-info">RNC: 000-00000-0</div>
+          <div id="ticketCompanyAddress" class="ticket-info">Dirección de la empresa</div>
+          <div class="ticket-info">Teléfono: 000-000-0000</div>
+        </div>
+        <div class="ticket-body">
+          <div class="ticket-row">
+            <span>Recibo de Pago</span>
+          </div>
+          <div class="ticket-row">
+            <span>Fecha:</span>
+            <span id="ticketDate"></span>
+          </div>
+          <div class="ticket-row">
+            <span>Cliente:</span>
+            <span id="ticketClientName"></span>
+          </div>
+          <div class="ticket-row">
+            <span>Cédula:</span>
+            <span id="ticketClientId"></span>
+          </div>
+          <div class="ticket-row">
+            <span>Préstamo ID:</span>
+            <span id="ticketLoanId"></span>
+          </div>
+          <div class="ticket-row">
+            <span>Monto:</span>
+            <span id="ticketAmount"></span>
+          </div>
+          <div class="ticket-row">
+            <span>Tipo:</span>
+            <span id="ticketType"></span>
+          </div>
+          <div class="ticket-row">
+            <span>Mora:</span>
+            <span id="ticketLateFee"></span>
+          </div>
+          <div class="ticket-row">
+            <span>Registrado por:</span>
+            <span id="ticketRecordedBy"></span>
+          </div>
+        </div>
+        <div class="ticket-footer">
+          <p>¡Gracias por su pago!</p>
+          <p>---------------------</p>
+          <p>Firma del Cliente:</p>
+          <div class="signature-line"></div>
+        </div>
       </div>
     </section>
 
@@ -1056,7 +1301,9 @@
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody id="usersTableBody"></tbody>
+          <tbody id="usersTableBody">
+            <!-- Se llenará dinámicamente -->
+          </tbody>
         </table>
       </div>
       
@@ -1069,6 +1316,15 @@
     <!-- Config Section -->
     <section id="config" class="card" style="display: none;">
       <h1 class="section-title">Configuración del Sistema</h1>
+      
+      <div class="company-info">
+        <img id="configCompanyLogo" src="logo.png" alt="Company Logo" class="company-logo">
+        <div class="company-details">
+          <div id="configCompanyName" class="company-name">Nombre de la Empresa</div>
+          <div id="configCompanyRnc" class="company-rnc">RNC: 000-00000-0</div>
+          <div id="configCompanyAddress" class="company-address">Dirección de la empresa</div>
+        </div>
+      </div>
       
       <div class="config-grid">
         <div class="config-card" id="createUserCard">
@@ -1231,35 +1487,6 @@
     </div>
   </div>
 
-  <!-- Modal para carta de recomendación -->
-  <div class="modal" id="recommendationModal">
-    <div class="modal-content">
-      <h3 class="modal-title">Carta de Recomendación</h3>
-      <div id="recommendationLetter" class="recommendation-letter">
-        <h3 style="text-align: center;">CARTA DE RECOMENDACIÓN</h3>
-        <p style="text-align: right;">Fecha: <span id="letterDate"></span></p>
-        <p>A quien corresponda:</p>
-        <p>Por medio de la presente, certificamos que el/la Sr./Sra. <span id="letterClientName"></span>, 
-        portador(a) de la cédula de identidad No. <span id="letterClientId"></span>, ha cumplido 
-        satisfactoriamente con todos los pagos correspondientes al préstamo otorgado por esta institución.</p>
-        <p>Durante el tiempo que mantuvo su préstamo con nosotros, demostró ser un(a) cliente responsable 
-        y cumplido(a) con sus obligaciones financieras.</p>
-        <p>Por lo tanto, recomendamos al/la Sr./Sra. <span id="letterClientName2"></span> para futuros 
-        préstamos con nuestra institución y consideramos que es un(a) cliente confiable.</p>
-        <p>Atentamente,</p>
-        <p>PlusMoney Retom</p>
-        <p style="margin-top: 2rem;">_________________________</p>
-        <p>Firma del Administrador</p>
-      </div>
-      <div class="modal-footer">
-        <button id="printRecommendationBtn" class="btn btn-info">
-          <i class="fas fa-print"></i> Imprimir
-        </button>
-        <button onclick="closeModal()" class="btn">Cerrar</button>
-      </div>
-    </div>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
     import { 
@@ -1280,7 +1507,7 @@
       endAt
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+    import { getStorage, ref, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
@@ -1309,6 +1536,13 @@
     let monthlyReportData = {};
     let yearlyReportData = {};
     let selectedClientForDetails = null;
+    let companyData = {
+      nombreEmpresa: "Retom Digital Company",
+      rnc: "000-00000-0",
+      direccion: "Dirección de la empresa",
+      fotoURL: "logo.png"
+    };
+    let uploadedDocuments = [];
 
     // Helper function to format numbers
     function formatNumber(number) {
@@ -1340,6 +1574,27 @@
       });
     }
 
+    // Calculate time in company
+    function calculateCompanyTime(startDate) {
+      if (!startDate) return "";
+      
+      const today = new Date();
+      const start = new Date(startDate);
+      const diffTime = Math.abs(today - start);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      const years = Math.floor(diffDays / 365);
+      const months = Math.floor((diffDays % 365) / 30);
+      const days = Math.floor((diffDays % 365) % 30);
+      
+      let result = "";
+      if (years > 0) result += `${years} año${years > 1 ? 's' : ''} `;
+      if (months > 0) result += `${months} mes${months > 1 ? 'es' : ''} `;
+      if (days > 0 || result === "") result += `${days} día${days > 1 ? 's' : ''}`;
+      
+      return result.trim();
+    }
+
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
       // Set up authentication state observer
@@ -1348,6 +1603,7 @@
           currentUser = user;
           updateUserProfileDisplay();
           loadSystemConfig();
+          loadCompanyData();
           initializeAppData();
         } else {
           // Redirect to login if not authenticated
@@ -1366,7 +1622,126 @@
       
       // Show dashboard by default
       document.getElementById('dashboard').style.display = 'block';
+      
+      // Setup document upload
+      setupDocumentUpload();
+      
+      // Setup company time calculation
+      document.getElementById('companyStartDate').addEventListener('change', function() {
+        const timeSpan = calculateCompanyTime(this.value);
+        document.getElementById('companyTime').textContent = timeSpan ? `Tiempo en la empresa: ${timeSpan}` : "";
+      });
     });
+
+    function setupDocumentUpload() {
+      const documentUpload = document.getElementById('documentUpload');
+      const documentPreview = document.getElementById('documentPreview');
+      
+      documentUpload.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        documentPreview.innerHTML = '';
+        uploadedDocuments = [];
+        
+        files.forEach(file => {
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+            const documentItem = document.createElement('div');
+            documentItem.className = 'document-item';
+            
+            let thumbnailSrc = '';
+            if (file.type.startsWith('image/')) {
+              thumbnailSrc = e.target.result;
+            } else if (file.type === 'application/pdf') {
+              thumbnailSrc = 'https://cdn-icons-png.flaticon.com/512/337/337946.png'; // PDF icon
+            } else {
+              thumbnailSrc = 'https://cdn-icons-png.flaticon.com/512/136/136521.png'; // Generic document icon
+            }
+            
+            documentItem.innerHTML = `
+              <img src="${thumbnailSrc}" alt="${file.name}" class="document-thumbnail">
+              <div class="document-name">${file.name}</div>
+              <button class="document-remove" data-file-name="${file.name}">
+                <i class="fas fa-times"></i>
+              </button>
+            `;
+            
+            documentPreview.appendChild(documentItem);
+            
+            // Add remove button event
+            documentItem.querySelector('.document-remove').addEventListener('click', function() {
+              documentItem.remove();
+              uploadedDocuments = uploadedDocuments.filter(doc => doc.file.name !== file.name);
+            });
+          };
+          
+          reader.readAsDataURL(file);
+          uploadedDocuments.push({ file, url: null });
+        });
+      });
+    }
+
+    async function uploadDocuments(clientId) {
+      if (uploadedDocuments.length === 0) return [];
+      
+      const uploadedUrls = [];
+      
+      for (const doc of uploadedDocuments) {
+        try {
+          const storageRef = ref(storage, `client_documents/${clientId}/${Date.now()}_${doc.file.name}`);
+          const snapshot = await uploadBytes(storageRef, doc.file);
+          const url = await getDownloadURL(snapshot.ref);
+          uploadedUrls.push({
+            name: doc.file.name,
+            type: doc.file.type,
+            url: url,
+            uploadedAt: Timestamp.now()
+          });
+        } catch (error) {
+          console.error("Error uploading document:", error);
+          showInfoModal('Error', `Error al subir el documento ${doc.file.name}`);
+        }
+      }
+      
+      return uploadedUrls;
+    }
+
+    async function loadCompanyData() {
+      try {
+        const companyRef = doc(db, "DatosDeEmpresa", "companyData");
+        const companySnap = await getDoc(companyRef);
+        
+        if (companySnap.exists()) {
+          companyData = companySnap.data();
+          updateCompanyInfoDisplay();
+        } else {
+          // Set default company data if not exists
+          await setDoc(companyRef, companyData);
+        }
+      } catch (error) {
+        console.error("Error loading company data: ", error);
+      }
+    }
+
+    function updateCompanyInfoDisplay() {
+      // Update receipt company info
+      document.getElementById('receiptCompanyName').textContent = companyData.nombreEmpresa;
+      document.getElementById('receiptCompanyRnc').textContent = `RNC: ${companyData.rnc}`;
+      document.getElementById('receiptCompanyAddress').textContent = companyData.direccion;
+      document.getElementById('receiptCompanyLogo').src = companyData.fotoURL || 'logo.png';
+      
+      // Update ticket company info
+      document.getElementById('ticketCompanyName').textContent = companyData.nombreEmpresa;
+      document.getElementById('ticketCompanyRnc').textContent = `RNC: ${companyData.rnc}`;
+      document.getElementById('ticketCompanyAddress').textContent = companyData.direccion;
+      document.getElementById('ticketCompanyLogo').src = companyData.fotoURL || 'logo.png';
+      
+      // Update config company info
+      document.getElementById('configCompanyName').textContent = companyData.nombreEmpresa;
+      document.getElementById('configCompanyRnc').textContent = `RNC: ${companyData.rnc}`;
+      document.getElementById('configCompanyAddress').textContent = companyData.direccion;
+      document.getElementById('configCompanyLogo').src = companyData.fotoURL || 'logo.png';
+    }
 
     async function updateUserProfileDisplay() {
       if (!currentUser) return;
@@ -1407,12 +1782,14 @@
       document.getElementById('lateFeeDays').addEventListener('input', calculateLateFee);
       document.getElementById('generateReceiptBtn').addEventListener('click', generateReceipt);
       document.getElementById('shareReceiptBtn').addEventListener('click', shareReceipt);
+      document.getElementById('generateTicketBtn').addEventListener('click', generateTicket);
       
       // New loan section
       document.getElementById('loanAmount').addEventListener('input', calculateLoan);
       document.getElementById('interestRate').addEventListener('input', calculateLoan);
       document.getElementById('loanTerm').addEventListener('input', calculateLoan);
       document.getElementById('loanDate').addEventListener('change', calculateLoan);
+      document.getElementById('loanType').addEventListener('change', updateLoanType);
       document.querySelectorAll('input[name="paymentFrequency"]').forEach(radio => {
         radio.addEventListener('change', calculateLoan);
       });
@@ -1425,9 +1802,21 @@
       
       // Users section
       document.getElementById('searchUser').addEventListener('input', debounce(searchUser, 300));
+    }
+
+    function updateLoanType() {
+      const loanType = document.getElementById('loanType').value;
+      const interestRateField = document.getElementById('interestRate');
       
-      // Recommendation letter
-      document.getElementById('printRecommendationBtn').addEventListener('click', printRecommendationLetter);
+      if (loanType === 'fixed') {
+        interestRateField.value = '0';
+        interestRateField.readOnly = true;
+      } else {
+        interestRateField.value = systemConfig.interestRate || 5;
+        interestRateField.readOnly = false;
+      }
+      
+      calculateLoan();
     }
 
     function debounce(func, wait) {
@@ -1786,7 +2175,7 @@
         let q;
         
         if (currentUser && currentUser.uid !== 'admin') {
-          // For regular users, only show their own data
+          // For regular users, only show their own loans
           q = query(
             collection(db, "Loans"), 
             where("userId", "==", currentUser.uid)
@@ -1815,8 +2204,7 @@
               overdueCount: 0,
               isOverdue: false,
               isExpired: false,
-              totalLateFees: 0,
-              totalOverdueAmount: 0
+              totalLateFees: 0
             });
           }
 
@@ -1837,8 +2225,6 @@
           if (overduePayments.length > 0) {
             client.overdueCount++;
             client.isOverdue = true;
-            const overdueAmount = overduePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-            client.totalOverdueAmount += overdueAmount;
           }
           
           if (loan.status === 'expired') {
@@ -1963,6 +2349,14 @@
             <span>Dirección:</span>
             <span>${clientData.address}</span>
           </div>
+          <div class="client-detail">
+            <span>Empresa donde labora:</span>
+            <span>${clientData.company || 'No especificado'}</span>
+          </div>
+          <div class="client-detail">
+            <span>Tiempo en la empresa:</span>
+            <span>${clientData.companyTime || 'No especificado'}</span>
+          </div>
         `;
         accordionContent.appendChild(clientInfo);
         
@@ -1989,9 +2383,6 @@
               }
             });
           }
-          
-          // Calculate total overdue amount
-          const overdueAmount = overduePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
           
           const loanItem = document.createElement('div');
           loanItem.className = 'loan-item';
@@ -2030,12 +2421,8 @@
                 <span>${overduePayments.length}</span>
               </div>
               <div>
-                <span>Monto atrasado:</span>
-                <span>$${formatNumber(overdueAmount)}</span>
-              </div>
-              <div>
-                <span>Mora acumulada:</span>
-                <span>$${formatNumber(loanLateFees)}</span>
+                <span>Tipo de pago:</span>
+                <span>${loan.frequency === 'biweekly' ? 'Quincenal' : 'Mensual'} ${loan.loanType === 'fixed' ? 'Fijo' : 'Variable'}</span>
               </div>
             </div>
           `;
@@ -2071,15 +2458,6 @@
               reengageLoan(loan.id, additionalAmount);
             });
             
-            // Add recommendation letter button
-            const letterBtn = document.createElement('button');
-            letterBtn.className = 'btn btn-info';
-            letterBtn.innerHTML = '<i class="fas fa-file-alt"></i> Carta de Recomendación';
-            letterBtn.addEventListener('click', () => {
-              showRecommendationLetter(loan);
-            });
-            
-            loanItem.appendChild(letterBtn);
             loanItem.appendChild(reengagementForm);
           }
           
@@ -2117,6 +2495,7 @@
             <span>$${formatNumber(payment.amount)}</span>
             <span>${getPaymentTypeText(payment.type)}</span>
             ${isLate ? `<span>(Mora: $${formatNumber(payment.lateFee)})</span>` : ''}
+            <span>${loan.frequency === 'biweekly' ? 'Quincenal' : 'Mensual'}</span>
           `;
           container.appendChild(paymentItem);
         });
@@ -2158,21 +2537,21 @@
         // Create a new loan with the additional amount
         const newLoanData = {
           ...loan,
-          amount: loan.amount + additionalAmount,
-          balance: loan.amount + additionalAmount + (loan.totalInterest || 0),
-          remainingCapital: loan.amount + additionalAmount,
+          amount: additionalAmount, // Solo el monto adicional como nuevo préstamo
+          balance: additionalAmount,
+          remainingCapital: additionalAmount,
           status: 'active',
           startDate: new Date().toISOString().split('T')[0],
           payments: [],
           paymentSchedule: generatePaymentSchedule({
-            amount: loan.amount + additionalAmount,
+            amount: additionalAmount,
             interestRate: loan.interestRate,
             term: loan.term,
             frequency: loan.frequency,
             startDate: new Date().toISOString().split('T')[0]
           }),
-          totalInterest: (loan.amount + additionalAmount) * (loan.interestRate / 100) * loan.term,
-          totalPayment: loan.amount + additionalAmount + ((loan.amount + additionalAmount) * (loan.interestRate / 100) * loan.term),
+          totalInterest: additionalAmount * (loan.interestRate / 100) * loan.term,
+          totalPayment: additionalAmount + (additionalAmount * (loan.interestRate / 100) * loan.term),
           createdAt: Timestamp.now(),
           createdBy: currentUser.uid
         };
@@ -2194,33 +2573,6 @@
       } finally {
         hideLoading();
       }
-    }
-
-    function showRecommendationLetter(loan) {
-      if (loan.status !== 'completed') {
-        showInfoModal('Error', 'Solo se puede generar carta de recomendación para préstamos completados.');
-        return;
-      }
-      
-      const today = new Date();
-      document.getElementById('letterDate').textContent = formatDate(today);
-      document.getElementById('letterClientName').textContent = loan.client.name;
-      document.getElementById('letterClientName2').textContent = loan.client.name;
-      document.getElementById('letterClientId').textContent = loan.client.id;
-      
-      document.getElementById('recommendationModal').classList.add('active');
-    }
-
-    function printRecommendationLetter() {
-      const printContents = document.getElementById('recommendationLetter').innerHTML;
-      const originalContents = document.body.innerHTML;
-      
-      document.body.innerHTML = printContents;
-      window.print();
-      document.body.innerHTML = originalContents;
-      
-      // Restore the modal
-      document.getElementById('recommendationModal').classList.add('active');
     }
 
     async function searchUser() {
@@ -2268,8 +2620,7 @@
                 overdueCount: 0,
                 isOverdue: false,
                 isExpired: false,
-                totalLateFees: 0,
-                totalOverdueAmount: 0
+                totalLateFees: 0
               });
             }
             
@@ -2291,8 +2642,6 @@
             if (overduePayments.length > 0) {
               client.overdueCount++;
               client.isOverdue = true;
-              const overdueAmount = overduePayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-              client.totalOverdueAmount += overdueAmount;
             }
             
             if (loan.status === 'expired') {
@@ -2422,6 +2771,7 @@
         updatePaymentForm();
         document.getElementById('generateReceiptBtn').style.display = lastPaymentData ? 'block' : 'none';
         document.getElementById('shareReceiptBtn').style.display = lastPaymentData ? 'block' : 'none';
+        document.getElementById('generateTicketBtn').style.display = lastPaymentData ? 'block' : 'none';
       } catch (error) {
         console.error("Error searching client: ", error);
         // Don't show error message to avoid confusion when searching
@@ -2494,6 +2844,10 @@
         <div class="loan-detail">
           <span>Quincenas restantes:</span>
           <span>${remainingQuincenas}</span>
+        </div>
+        <div class="loan-detail">
+          <span>Tipo de pago:</span>
+          <span>${loan.frequency === 'biweekly' ? 'Quincenal' : 'Mensual'} ${loan.loanType === 'fixed' ? 'Fijo' : 'Variable'}</span>
         </div>
       `;
       
@@ -2600,6 +2954,7 @@
             <span>${formatDateTime(paymentDateTime)}</span>
             <span>$${formatNumber(payment.amount)}</span>
             <span>${getPaymentTypeText(payment.type)}</span>
+            <span>${loan.frequency === 'biweekly' ? 'Quincenal' : 'Mensual'}</span>
             ${isLate ? `<span>(Mora: $${formatNumber(payment.lateFee)})</span>` : ''}
           `;
           container.appendChild(paymentItem);
@@ -2671,10 +3026,13 @@
       const term = parseInt(document.getElementById('loanTerm').value) || 1;
       const startDate = new Date(document.getElementById('loanDate').value);
       const frequency = document.querySelector('input[name="paymentFrequency"]:checked').value;
+      const loanType = document.getElementById('loanType').value;
       
       // Calcular interés total y monto total a pagar
-      const monthlyRate = rate / 100;
-      const totalInterest = amount * monthlyRate * term;
+      let totalInterest = 0;
+      if (loanType === 'normal') {
+        totalInterest = amount * (rate / 100) * term;
+      }
       const totalPayment = amount + totalInterest;
       
       // Calcular pago por período
@@ -2712,6 +3070,8 @@
         address: document.getElementById('clientAddress').value.trim(),
         phone: document.getElementById('clientPhone').value.trim(),
         nationality: document.getElementById('clientNationality').value.trim(),
+        company: document.getElementById('clientCompany').value.trim(),
+        companyTime: calculateCompanyTime(document.getElementById('companyStartDate').value),
         reference: {
           name: document.getElementById('referenceName').value.trim(),
           phone: document.getElementById('referencePhone').value.trim(),
@@ -2725,6 +3085,7 @@
         term: parseInt(document.getElementById('loanTerm').value),
         frequency: document.querySelector('input[name="paymentFrequency"]:checked').value,
         startDate: document.getElementById('loanDate').value,
+        loanType: document.getElementById('loanType').value,
         guarantee: document.getElementById('guarantee').value.trim(),
         status: 'active',
         createdBy: currentUser.uid,
@@ -2750,10 +3111,20 @@
         return;
       }
       
+      // Subir documentos adjuntos
+      showLoading();
+      const documents = await uploadDocuments(clientData.id);
+      
       // Calcular fechas de pago
       const paymentSchedule = generatePaymentSchedule(loanData);
       loanData.paymentSchedule = paymentSchedule;
-      loanData.totalInterest = loanData.amount * (loanData.interestRate / 100) * loanData.term;
+      
+      if (loanData.loanType === 'normal') {
+        loanData.totalInterest = loanData.amount * (loanData.interestRate / 100) * loanData.term;
+      } else {
+        loanData.totalInterest = 0;
+      }
+      
       loanData.totalPayment = loanData.amount + loanData.totalInterest;
       loanData.balance = loanData.totalPayment;
       loanData.remainingCapital = loanData.amount;
@@ -2767,14 +3138,15 @@
       
       // Validar datos
       if (!validateLoanData(clientData, loanData)) {
+        hideLoading();
         return;
       }
       
       try {
-        showLoading();
-        
         // Registrar en la colección "Loans"
         loanData.userId = currentUser.uid;
+        loanData.documents = documents;
+        
         const loanRef = await addDoc(collection(db, "Loans"), {
           ...loanData,
           client: clientData,
@@ -2788,6 +3160,8 @@
         
         // Limpiar formulario
         document.getElementById('loanForm').reset();
+        document.getElementById('documentPreview').innerHTML = '';
+        uploadedDocuments = [];
         
         // Recalcular
         calculateLoan();
@@ -2849,8 +3223,13 @@
       }
       
       // Validar datos del préstamo
-      if (loanData.amount <= 0 || loanData.interestRate <= 0 || loanData.term <= 0) {
+      if (loanData.amount <= 0 || loanData.term <= 0) {
         showInfoModal('Error', 'Los valores del préstamo deben ser mayores a cero');
+        return false;
+      }
+      
+      if (loanData.loanType === 'normal' && loanData.interestRate <= 0) {
+        showInfoModal('Error', 'La tasa de interés debe ser mayor a cero para préstamos normales');
         return false;
       }
       
@@ -3060,6 +3439,7 @@
         
         document.getElementById('generateReceiptBtn').style.display = 'block';
         document.getElementById('shareReceiptBtn').style.display = 'block';
+        document.getElementById('generateTicketBtn').style.display = 'block';
         
         const updatedLoanSnap = await getDoc(loanRef);
         selectedLoanForPayment = { id: loanRef.id, ...updatedLoanSnap.data() };
@@ -3108,6 +3488,44 @@
       }
       
       receiptContainer.style.display = 'none';
+    }
+
+    async function generateTicket() {
+      if (!lastPaymentData) {
+        showInfoModal('Error', 'No hay datos de pago para generar un ticket.');
+        return;
+      }
+      
+      const ticketContainer = document.getElementById('ticketContainer');
+      document.getElementById('ticketClientName').textContent = lastPaymentData.clientName;
+      document.getElementById('ticketClientId').textContent = lastPaymentData.clientId;
+      document.getElementById('ticketLoanId').textContent = lastPaymentData.loanId;
+      document.getElementById('ticketDate').textContent = formatDateTime(lastPaymentData.date.toDate());
+      document.getElementById('ticketAmount').textContent = `$${formatNumber(lastPaymentData.amount)}`;
+      document.getElementById('ticketType').textContent = getPaymentTypeText(lastPaymentData.type);
+      document.getElementById('ticketLateFee').textContent = `$${formatNumber(lastPaymentData.lateFee || 0)}`;
+      document.getElementById('ticketRecordedBy').textContent = lastPaymentData.recordedBy;
+      
+      ticketContainer.style.display = 'block';
+      
+      try {
+        const canvas = await html2canvas(ticketContainer, { 
+          backgroundColor: '#ffffff',
+          width: 300, // 80mm in pixels (assuming 96dpi)
+          height: ticketContainer.scrollHeight,
+          scale: 1
+        });
+        
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/jpeg');
+        link.download = `ticket_pago_${lastPaymentData.loanId}_${lastPaymentData.date.toDate().toISOString().slice(0, 19).replace(/:/g, '-')}.jpg`;
+        link.click();
+      } catch (error) {
+        console.error("Error generando ticket: ", error);
+        showInfoModal('Error', 'Error al generar el ticket. Por favor, intenta de nuevo.');
+      }
+      
+      ticketContainer.style.display = 'none';
     }
 
     async function shareReceipt() {
@@ -3299,3 +3717,4 @@
     };
   </script>
 </body>
+</html>
