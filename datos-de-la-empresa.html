@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración de Empresa</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 2rem;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    /* Image selector styles */
+    .image-selector-container {
+      margin-top: 1rem;
+    }
+
+    .image-selector-title {
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .image-selector-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .image-selector-option {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--background-color);
+    }
+
+    .image-selector-option.selected {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 10px rgba(26, 188, 156, 0.5);
+      background-color: rgba(26, 188, 156, 0.1);
+    }
+
+    .image-selector-option i {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+    }
+
+    .image-selector-option span {
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    .image-selector-option img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Upload icon button styles */
+    .upload-icon-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100px;
+      height: 100px;
+      background-color: var(--background-color);
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
+    }
+
+    .upload-icon-btn:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(26, 188, 156, 0.1);
+    }
+
+    .upload-icon-btn i {
+      font-size: 2rem;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-icon-btn span {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    /* Hidden file input */
+    .hidden-file-input {
+      display: none;
+    }
+
+    /* Image preview */
+    .image-preview-container {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .image-preview {
+      max-width: 200px;
+      max-height: 150px;
+      border-radius: 8px;
+      border: 2px solid var(--border-color);
+      display: none;
+    }
+
+    /* Default logo styles */
+    .default-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      background-color: var(--background-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      margin-bottom: 1rem;
+    }
+
+    .default-logo i {
+      font-size: 3rem;
+      color: var(--primary-color);
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--secondary-color);
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      margin-bottom: 1.5rem;
+      color: var(--primary-color);
+      text-align: center;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .image-selector-option {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .upload-icon-btn {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="fas fa-building"></i> Configuración de Empresa</h1>
+    
+    <form id="companyConfigForm">
+      <!-- Logo de la empresa -->
+      <div class="form-group">
+        <label>Logo de la Empresa (PNG)</label>
+        <div class="default-logo" id="defaultLogo">
+          <i class="fas fa-building"></i>
+        </div>
+        <div class="upload-icon-btn" id="companyLogoUploadBtn">
+          <i class="fas fa-image"></i>
+          <span>Seleccionar Imagen</span>
+        </div>
+        <input type="file" id="companyLogoUpload" class="hidden-file-input" accept="image/png">
+        
+        <div class="image-preview-container">
+          <img id="companyLogoPreview" src="" alt="Logo de la empresa" class="image-preview">
+        </div>
+      </div>
+      
+      <!-- Nombre de la empresa -->
+      <div class="form-group">
+        <label for="companyName">Nombre de la Empresa</label>
+        <input type="text" id="companyName" class="form-control" required>
+      </div>
+      
+      <!-- RNC -->
+      <div class="form-group">
+        <label for="companyRNC">RNC</label>
+        <input type="text" id="companyRNC" class="form-control" required>
+      </div>
+      
+      <!-- Teléfono -->
+      <div class="form-group">
+        <label for="companyPhone">Teléfono</label>
+        <input type="tel" id="companyPhone" class="form-control" required>
+      </div>
+      
+      <!-- Dirección -->
+      <div class="form-group">
+        <label for="companyAddress">Dirección</label>
+        <input type="text" id="companyAddress" class="form-control" required>
+      </div>
+      
+      <button type="submit" class="btn btn-success btn-block">
+        <i class="fas fa-save"></i> Guardar Configuración
+      </button>
+    </form>
+  </div>
+
+  <!-- Modal para confirmación -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="confirmModalTitle"></h3>
+      <p id="confirmModalMessage"></p>
+      <div class="modal-footer">
+        <button id="confirmModalButton" class="btn btn-success">Confirmar</button>
+        <button onclick="closeModal()" class="btn btn-danger">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para información -->
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="infoModalTitle"></h3>
+      <p id="infoModalMessage"></p>
+      <div class="modal-footer">
+        <button onclick="closeModal()" class="btn">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-storage-compat.js"></script>
+
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const storage = firebase.storage();
+
+    // Variables globales
+    let currentUser = null;
+    let companyLogoFile = null;
+    let hasExistingData = false;
+
+    // Inicializar la aplicación cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+      // Configurar observador de autenticación
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          currentUser = user;
+          setupEventListeners();
+          loadCompanyData();
+        } else {
+          // Redirigir a login si no está autenticado
+          window.location.href = 'index.html';
+        }
+      });
+    });
+
+    // Configurar event listeners
+    function setupEventListeners() {
+      // Botón de subir logo
+      document.getElementById('companyLogoUploadBtn').addEventListener('click', () => {
+        document.getElementById('companyLogoUpload').click();
+      });
+      
+      // Cambio de imagen seleccionada
+      document.getElementById('companyLogoUpload').addEventListener('change', handleLogoUpload);
+      
+      // Envío del formulario
+      document.getElementById('companyConfigForm').addEventListener('submit', saveCompanyConfig);
+    }
+
+    // Manejar la subida del logo
+    function handleLogoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      // Verificar que sea una imagen PNG
+      if (file.type !== 'image/png') {
+        showInfoModal('Error', 'Por favor, selecciona una imagen en formato PNG.');
+        e.target.value = ''; // Limpiar el input
+        return;
+      }
+      
+      companyLogoFile = file;
+      
+      // Mostrar vista previa y ocultar el logo por defecto
+      const preview = document.getElementById('companyLogoPreview');
+      const defaultLogo = document.getElementById('defaultLogo');
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        defaultLogo.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Cargar datos de la empresa
+    async function loadCompanyData() {
+      try {
+        showLoading();
+        
+        if (!currentUser) return;
+        
+        const companyRef = db.collection("informacionCompany").doc(currentUser.uid);
+        const companySnap = await companyRef.get();
+        
+        if (companySnap.exists()) {
+          hasExistingData = true;
+          const companyData = companySnap.data();
+          
+          // Llenar formulario con datos existentes
+          document.getElementById('companyName').value = companyData.nombreEmpresa || '';
+          document.getElementById('companyRNC').value = companyData.rnc || '';
+          document.getElementById('companyPhone').value = companyData.telefono || '';
+          document.getElementById('companyAddress').value = companyData.direccion || '';
+          
+          // Mostrar logo si existe
+          if (companyData.fotoURL) {
+            const preview = document.getElementById('companyLogoPreview');
+            const defaultLogo = document.getElementById('defaultLogo');
+            
+            preview.src = companyData.fotoURL;
+            preview.style.display = 'block';
+            defaultLogo.style.display = 'none';
+          }
+        } else {
+          hasExistingData = false;
+          // No mostrar mensaje si no hay datos existentes
+        }
+      } catch (error) {
+        console.error("Error al cargar datos de la empresa:", error);
+        // No mostrar mensaje de error para no confundir al usuario
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Guardar configuración de la empresa
+    async function saveCompanyConfig(e) {
+      e.preventDefault();
+      
+      try {
+        showLoading();
+        
+        // Obtener valores del formulario
+        const companyName = document.getElementById('companyName').value.trim();
+        const companyRNC = document.getElementById('companyRNC').value.trim();
+        const companyPhone = document.getElementById('companyPhone').value.trim();
+        const companyAddress = document.getElementById('companyAddress').value.trim();
+        
+        // Validar campos obligatorios
+        if (!companyName || !companyRNC || !companyPhone || !companyAddress) {
+          showInfoModal('Error', 'Todos los campos son obligatorios.');
+          return;
+        }
+        
+        let logoUrl = '';
+        const preview = document.getElementById('companyLogoPreview');
+        const defaultLogo = document.getElementById('defaultLogo');
+        
+        // Subir nuevo logo si se seleccionó uno
+        if (companyLogoFile) {
+          const storageRef = storage.ref(`company_logos/${currentUser.uid}`);
+          const snapshot = await storageRef.put(companyLogoFile);
+          logoUrl = await snapshot.ref.getDownloadURL();
+        } 
+        // Si no se subió un nuevo logo pero hay uno existente, mantenerlo
+        else if (preview.style.display === 'block' && preview.src) {
+          logoUrl = preview.src;
+        }
+        
+        // Crear objeto con los datos de la empresa
+        const companyData = {
+          nombreEmpresa: companyName,
+          rnc: companyRNC,
+          telefono: companyPhone,
+          direccion: companyAddress,
+          userId: currentUser.uid,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // Solo agregar fotoURL si existe
+        if (logoUrl) {
+          companyData.fotoURL = logoUrl;
+        }
+        
+        // Guardar en Firestore
+        await db.collection("informacionCompany").doc(currentUser.uid).set(companyData);
+        
+        showInfoModal('Éxito', 'Datos de la empresa guardados correctamente.');
+        hasExistingData = true;
+      } catch (error) {
+        console.error("Error al guardar datos de la empresa:", error);
+        showInfoModal('Error', 'Ocurrió un error al guardar los datos: ' + error.message);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar modal de confirmación
+    async function showConfirmModal(title, message) {
+      return new Promise((resolve) => {
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalMessage').textContent = message;
+        document.getElementById('confirmModal').classList.add('active');
+        
+        const confirmButton = document.getElementById('confirmModalButton');
+        const handler = () => {
+          confirmButton.removeEventListener('click', handler);
+          closeModal();
+          resolve(true);
+        };
+        
+        confirmButton.addEventListener('click', handler);
+        
+        document.getElementById('confirmModal').addEventListener('click', (e) => {
+          if (e.target === document.getElementById('confirmModal')) {
+            closeModal();
+            resolve(false);
+          }
+        }, { once: true }); 
+      });
+    }
+
+    // Mostrar modal de información
+    function showInfoModal(title, message) {
+      document.getElementById('infoModalTitle').textContent = title;
+      document.getElementById('infoModalMessage').textContent = message;
+      document.getElementById('infoModal').classList.add('active');
+    }
+
+    // Mostrar loading overlay
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    // Ocultar loading overlay
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    // Cerrar modales
+    window.closeModal = function() {
+      document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+    };
+  </script>
+</body>
+</html>
