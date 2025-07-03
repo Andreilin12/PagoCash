@@ -1430,7 +1430,7 @@
         </div>
         
         <div class="config-card">
-          <a href="user-settings.html" style="text-decoration: none; color: inherit;">
+          <a href="adm-user.html" style="text-decoration: none; color: inherit;">
             <i class="fas fa-users-cog"></i>
             <h3>Opciones de Usuario</h3>
             <p>Configuración de usuarios y permisos</p>
@@ -1454,7 +1454,7 @@
         </div>
         
         <div class="config-card">
-          <a href="company-settings.html" style="text-decoration: none; color: inherit;">
+          <a href="datos-de-la-empresa.html" style="text-decoration: none; color: inherit;">
             <i class="fas fa-building"></i>
             <h3>Datos de Empresa</h3>
             <p>Configurar información de la empresa</p>
@@ -1636,10 +1636,10 @@
     let lastPaymentData = null;
     let currentUser = null;
     let systemConfig = {
-      lateFeeAmount: 100, // Monto fijo de mora en DOP
-      interestRate: 5, // Tasa de interés predeterminada
-      gracePeriod: 5, // Días de gracia
-      autoExtend: true // Extensión automática de plazo
+      lateFeeAmount: 100,
+      interestRate: 5,
+      gracePeriod: 5,
+      autoExtend: true
     };
     let monthlyReportData = {};
     let yearlyReportData = {};
@@ -1652,7 +1652,6 @@
       fotoURL: "logo.png"
     };
 
-    // Helper function to format numbers
     function formatNumber(number) {
       return number.toLocaleString('en-US', { 
         minimumFractionDigits: 2, 
@@ -1660,7 +1659,6 @@
       });
     }
 
-    // Helper function to format date
     function formatDate(date) {
       return date.toLocaleDateString('es-ES', {
         year: 'numeric',
@@ -1669,7 +1667,6 @@
       });
     }
 
-    // Helper function to format date and time
     function formatDateTime(date) {
       return date.toLocaleString('es-ES', {
         year: 'numeric',
@@ -1682,7 +1679,6 @@
       });
     }
 
-    // Calculate time in company
     function calculateCompanyTime(startDate) {
       if (!startDate) return "";
       
@@ -1703,9 +1699,7 @@
       return result.trim();
     }
 
-    // Initialize
     document.addEventListener('DOMContentLoaded', () => {
-      // Set up authentication state observer
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user;
@@ -1714,54 +1708,39 @@
           loadCompanyData();
           initializeAppData();
         } else {
-          // Redirect to login if not authenticated
           window.location.href = 'index.html';
         }
       });
 
-      // Set up event listeners
       setupEventListeners();
       
-      // Set default date to current date
       document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
       
-      // Initialize dashboard
       initializeDashboardChart();
       
-      // Show dashboard by default
       document.getElementById('dashboard').style.display = 'block';
       
-      // Setup document upload
-      setupDocumentUpload();
-      
-      // Setup company time calculation
       document.getElementById('companyStartDate').addEventListener('change', function() {
         const timeSpan = calculateCompanyTime(this.value);
         document.getElementById('companyTime').textContent = timeSpan ? `Tiempo en la empresa: ${timeSpan}` : "";
       });
 
-      // Setup image selector for loan type
       setupImageSelector();
-
-      // Setup company config modal
       setupCompanyConfigModal();
     });
 
     function setupCompanyConfigModal() {
-      // Event listener for company config card
       document.getElementById('companyConfigCard').addEventListener('click', () => {
         document.getElementById('companyConfigModal').classList.add('active');
         loadCompanyDataToForm();
       });
 
-      // Handle logo upload
       document.getElementById('companyLogoUploadBtn').addEventListener('click', () => {
         document.getElementById('companyLogoUpload').click();
       });
 
       document.getElementById('companyLogoUpload').addEventListener('change', handleCompanyLogoUpload);
 
-      // Handle form submission
       document.getElementById('companyConfigForm').addEventListener('submit', saveCompanyConfig);
     }
 
@@ -1798,10 +1777,9 @@
       const file = e.target.files[0];
       if (!file) return;
       
-      // Verificar que sea una imagen PNG
       if (!file.type.match('image.*')) {
         showInfoModal('Error', 'Por favor, selecciona una imagen válida (PNG, JPG, JPEG)');
-        e.target.value = ''; // Limpiar el input
+        e.target.value = '';
         return;
       }
       
@@ -1820,13 +1798,11 @@
       try {
         showLoading();
         
-        // Obtener valores del formulario
         const companyName = document.getElementById('companyName').value.trim();
         const companyRNC = document.getElementById('companyRNC').value.trim();
         const companyPhone = document.getElementById('companyPhone').value.trim();
         const companyAddress = document.getElementById('companyAddress').value.trim();
         
-        // Validar campos obligatorios
         if (!companyName || !companyRNC || !companyPhone || !companyAddress) {
           showInfoModal('Error', 'Todos los campos son obligatorios');
           return;
@@ -1836,18 +1812,15 @@
         const fileInput = document.getElementById('companyLogoUpload');
         const previewImg = document.getElementById('companyLogoPreviewImg');
         
-        // Subir nuevo logo si se seleccionó uno
         if (fileInput.files && fileInput.files[0]) {
           const storageRef = ref(storage, `company_logos/${currentUser.uid}`);
           const snapshot = await uploadBytes(storageRef, fileInput.files[0]);
           logoUrl = await getDownloadURL(snapshot.ref);
         } 
-        // Si no se subió un nuevo logo pero hay uno existente, mantenerlo
         else if (previewImg.style.display === 'block' && previewImg.src) {
           logoUrl = previewImg.src;
         }
         
-        // Crear objeto con los datos de la empresa
         const companyData = {
           nombreEmpresa: companyName,
           rnc: companyRNC,
@@ -1857,20 +1830,14 @@
           updatedAt: Timestamp.now()
         };
         
-        // Solo agregar fotoURL si existe
         if (logoUrl) {
           companyData.fotoURL = logoUrl;
         }
         
-        // Guardar en Firestore
         await setDoc(doc(db, "informacionCompany", currentUser.uid), companyData);
         
         showInfoModal('Éxito', 'Datos de la empresa guardados correctamente');
-        
-        // Actualizar los datos en la interfaz
         updateCompanyInfoDisplay();
-        
-        // Cerrar el modal
         closeModal();
       } catch (error) {
         console.error("Error al guardar datos de la empresa:", error);
@@ -1888,11 +1855,9 @@
         if (companySnap.exists()) {
           companyData = companySnap.data();
         } else {
-          // Set default company data if not exists
           await setDoc(companyRef, companyData);
         }
         
-        // Update company info display in all sections
         updateCompanyInfoDisplay();
       } catch (error) {
         console.error("Error loading company data: ", error);
@@ -1901,7 +1866,6 @@
     }
 
     function updateCompanyInfoDisplay() {
-      // Update receipt company info
       const receiptContainer = document.getElementById('receiptContainer');
       if (receiptContainer) {
         receiptContainer.innerHTML = `
@@ -1926,7 +1890,6 @@
         `;
       }
 
-      // Update ticket company info
       const ticketContainer = document.getElementById('ticketContainer');
       if (ticketContainer) {
         ticketContainer.innerHTML = `
@@ -1986,66 +1949,11 @@
       const options = document.querySelectorAll('.image-selector-option');
       options.forEach(option => {
         option.addEventListener('click', function() {
-          // Remove selected class from all options
           options.forEach(opt => opt.classList.remove('selected'));
-          
-          // Add selected class to clicked option
           this.classList.add('selected');
-          
-          // Update loan type select
           const value = this.getAttribute('data-value');
           document.getElementById('loanType').value = value;
-          
-          // Update loan calculation
           calculateLoan();
-        });
-      });
-    }
-
-    function setupDocumentUpload() {
-      const documentUpload = document.getElementById('documentUpload');
-      const documentPreview = document.getElementById('documentPreview');
-      
-      documentUpload.addEventListener('change', function(e) {
-        const files = Array.from(e.target.files);
-        documentPreview.innerHTML = '';
-        uploadedDocuments = [];
-        
-        files.forEach(file => {
-          const reader = new FileReader();
-          
-          reader.onload = function(e) {
-            const documentItem = document.createElement('div');
-            documentItem.className = 'document-item';
-            
-            let thumbnailSrc = '';
-            if (file.type.startsWith('image/')) {
-              thumbnailSrc = e.target.result;
-            } else if (file.type === 'application/pdf') {
-              thumbnailSrc = 'https://cdn-icons-png.flaticon.com/512/337/337946.png'; // PDF icon
-            } else {
-              thumbnailSrc = 'https://cdn-icons-png.flaticon.com/512/136/136521.png'; // Generic document icon
-            }
-            
-            documentItem.innerHTML = `
-              <img src="${thumbnailSrc}" alt="${file.name}" class="document-thumbnail">
-              <div class="document-name">${file.name}</div>
-              <button class="document-remove" data-file-name="${file.name}">
-                <i class="fas fa-times"></i>
-              </button>
-            `;
-            
-            documentPreview.appendChild(documentItem);
-            
-            // Add remove button event
-            documentItem.querySelector('.document-remove').addEventListener('click', function() {
-              documentItem.remove();
-              uploadedDocuments = uploadedDocuments.filter(doc => doc.file.name !== file.name);
-            });
-          };
-          
-          reader.readAsDataURL(file);
-          uploadedDocuments.push({ file, url: null });
         });
       });
     }
@@ -2053,12 +1961,10 @@
     async function updateUserProfileDisplay() {
       if (!currentUser) return;
       
-      // Update sidebar profile
       document.getElementById('userName').textContent = currentUser.displayName || 'Usuario';
       document.getElementById('userRole').textContent = currentUser.email ? 'Administrador' : 'Usuario';
       
       try {
-        // Get user profile picture from Firebase Storage
         const storageRef = ref(storage, `profile_pictures/${currentUser.uid}`);
         const photoURL = await getDownloadURL(storageRef);
         document.getElementById('userAvatar').src = photoURL;
@@ -2067,7 +1973,6 @@
         document.getElementById('userAvatar').src = currentUser.photoURL || 'logo.png';
       }
       
-      // Set up logout button
       document.getElementById('logoutBtn').addEventListener('click', () => {
         signOut(auth).then(() => {
           window.location.href = 'index.html';
@@ -2078,10 +1983,8 @@
     }
 
     function setupEventListeners() {
-      // Navigation
       setupNavigation();
       
-      // Payment section
       document.getElementById('searchClientPayment').addEventListener('input', debounce(searchClientForPayment, 300));
       document.getElementById('paymentForm').addEventListener('submit', registerPayment);
       document.getElementById('paymentType').addEventListener('change', updatePaymentForm);
@@ -2091,7 +1994,6 @@
       document.getElementById('shareReceiptBtn').addEventListener('click', shareReceipt);
       document.getElementById('generateTicketBtn').addEventListener('click', generateTicket);
       
-      // New loan section
       document.getElementById('loanAmount').addEventListener('input', calculateLoan);
       document.getElementById('interestRate').addEventListener('input', calculateLoan);
       document.getElementById('loanTerm').addEventListener('input', calculateLoan);
@@ -2102,12 +2004,10 @@
       });
       document.getElementById('loanForm').addEventListener('submit', registerLoan);
       
-      // Config section
       document.getElementById('lateFeeConfigForm').addEventListener('submit', saveSystemConfig);
       document.getElementById('createUserCard').addEventListener('click', showCreateUserModal);
       document.getElementById('createUserForm').addEventListener('submit', createUserAccount);
       
-      // Users section
       document.getElementById('searchUser').addEventListener('input', debounce(searchUser, 300));
     }
 
@@ -2123,7 +2023,6 @@
         interestRateField.readOnly = false;
       }
       
-      // Update image selector
       const options = document.querySelectorAll('.image-selector-option');
       options.forEach(option => {
         option.classList.remove('selected');
@@ -2154,7 +2053,6 @@
       try {
         showLoading();
         
-        // Get all loans for the current user
         let q;
         if (currentUser && currentUser.uid !== 'admin') {
           q = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
@@ -2179,7 +2077,6 @@
           totalInterest += loan.totalInterest || 0;
           totalClients.add(loan.client.id);
           
-          // Check for overdue status and calculate losses
           const today = new Date();
           const overduePayments = loan.paymentSchedule?.filter(p => 
             p.status === 'pending' && new Date(p.dueDate) < today
@@ -2191,7 +2088,6 @@
             totalOverdueLoss += overdueAmount;
           }
           
-          // Calculate late fees
           if (loan.payments) {
             loan.payments.forEach(payment => {
               if (payment.lateFee && payment.lateFee > 0) {
@@ -2201,13 +2097,11 @@
           }
         });
         
-        // Update dashboard stats
         document.getElementById('totalLoaned').textContent = `$${formatNumber(totalLoaned)}`;
         document.getElementById('totalPending').textContent = `$${formatNumber(totalPending)}`;
         document.getElementById('totalInterest').textContent = `$${formatNumber(totalInterest)}`;
         document.getElementById('totalClients').textContent = totalClients.size;
         
-        // Update dashboard chart
         const chart = Chart.getChart('dashboardChart');
         if (chart) {
           chart.data.datasets[0].data = [
@@ -2238,10 +2132,8 @@
           document.getElementById('lateFeeGracePeriod').value = systemConfig.gracePeriod || 5;
           document.getElementById('autoExtendLoan').value = systemConfig.autoExtend ? 'yes' : 'no';
           
-          // Set default interest rate in new loan form
           document.getElementById('interestRate').value = systemConfig.interestRate || 5;
         } else {
-          // Set default config if not exists
           await setDoc(configRef, systemConfig);
         }
       } catch (error) {
@@ -2289,25 +2181,20 @@
           document.getElementById(targetId).style.display = 'block';
           link.classList.add('active');
           
-          // Add active class to corresponding mobile nav link
           document.querySelectorAll(`.mobile-nav .nav-link[href="#${targetId}"]`).forEach(mobileLink => {
             mobileLink.classList.add('active');
           });
           
-          // Add active class to corresponding sidebar link
           document.querySelectorAll(`.sidebar .nav-link[href="#${targetId}"]`).forEach(sidebarLink => {
             sidebarLink.classList.add('active');
           });
           
-          // Load data if needed
           if (targetId === 'dashboard') {
             loadDashboardData();
           } else if (targetId === 'users') {
             loadUsersData();
           } else if (targetId === 'loans-list') {
             loadActiveLoans();
-          } else if (targetId === 'config') {
-            // No special action needed for config
           }
         });
       });
@@ -2323,14 +2210,12 @@
         let q;
         
         if (currentUser && currentUser.uid !== 'admin') {
-          // For regular users, only show their own loans
           q = query(
             collection(db, "Loans"), 
             where("userId", "==", currentUser.uid),
             where("status", "in", ["active", "overdue", "completed"])
           );
         } else {
-          // For admin, show all active loans
           q = query(
             collection(db, "Loans"), 
             where("status", "in", ["active", "overdue", "completed"])
@@ -2372,7 +2257,6 @@
           loansTableBody.appendChild(row);
         });
         
-        // Attach event listeners to pay buttons
         document.querySelectorAll('.pay-loan-btn').forEach(button => {
           button.addEventListener('click', () => {
             const loanId = button.getAttribute('data-loan-id');
@@ -2401,7 +2285,6 @@
 
         selectedLoanForPayment = { id: loanId, ...loanSnap.data() };
 
-        // Switch to payment section
         const sections = document.querySelectorAll('.main-container section');
         const navLinks = document.querySelectorAll('.nav-link');
         sections.forEach(section => section.style.display = 'none');
@@ -2409,7 +2292,6 @@
         document.getElementById('payment').style.display = 'block';
         document.querySelectorAll('.nav-link[href="#payment"]').forEach(link => link.classList.add('active'));
 
-        // Pre-fill payment form
         document.getElementById('searchClientPayment').value = clientName;
         document.getElementById('paymentLoanId').value = loanId;
         await searchClientForPayment();
@@ -2491,13 +2373,11 @@
         let q;
         
         if (currentUser && currentUser.uid !== 'admin') {
-          // For regular users, only show their own loans
           q = query(
             collection(db, "Loans"), 
             where("userId", "==", currentUser.uid)
           );
         } else {
-          // For admin, show all loans
           q = collection(db, "Loans");
         }
         
@@ -2530,7 +2410,6 @@
           client.totalWithInterest += loan.amount + (loan.totalInterest || 0);
           client.totalPending += loan.balance || 0;
           
-          // Marcar como completado si el saldo es 0
           if (loan.balance <= 0) {
             loan.status = 'completed';
             client.completedLoans++;
@@ -2552,7 +2431,6 @@
             client.isExpired = true;
           }
           
-          // Calculate late fees
           if (loan.payments) {
             loan.payments.forEach(payment => {
               if (payment.lateFee && payment.lateFee > 0) {
@@ -2588,7 +2466,6 @@
           tableBody.appendChild(row);
         }
         
-        // Attach event listeners to view buttons
         document.querySelectorAll('.view-client-btn').forEach(button => {
           button.addEventListener('click', () => {
             const clientId = button.getAttribute('data-client-id');
@@ -2607,7 +2484,6 @@
       try {
         showLoading();
         
-        // Get all loans for this client
         let q;
         if (currentUser && currentUser.uid !== 'admin') {
           q = query(
@@ -2644,12 +2520,10 @@
           loans: loans
         };
         
-        // Show the accordion
         document.getElementById('userDetailsAccordion').style.display = 'block';
         const accordionContent = document.getElementById('userAccordionContent');
         accordionContent.innerHTML = '';
         
-        // Add client info
         const clientInfo = document.createElement('div');
         clientInfo.className = 'client-info';
         clientInfo.innerHTML = `
@@ -2681,7 +2555,6 @@
         `;
         accordionContent.appendChild(clientInfo);
         
-        // Add loans accordion
         const loansAccordion = document.createElement('div');
         loansAccordion.className = 'user-loans-list';
         loansAccordion.innerHTML = '<h4>Préstamos del Cliente</h4>';
@@ -2695,12 +2568,10 @@
           const paymentsMade = loan.payments?.length || 0;
           const totalPayments = loan.paymentSchedule?.length || 0;
           
-          // Marcar como completado si el saldo es 0
           if (loan.balance <= 0) {
             loan.status = 'completed';
           }
           
-          // Calculate late fees for this loan
           let loanLateFees = 0;
           if (loan.payments) {
             loan.payments.forEach(payment => {
@@ -2755,7 +2626,6 @@
             </div>
           `;
           
-          // Add payment history button
           const historyBtn = document.createElement('button');
           historyBtn.className = 'btn btn-info';
           historyBtn.innerHTML = '<i class="fas fa-history"></i> Ver Historial';
@@ -2763,7 +2633,6 @@
             showLoanPaymentHistory(loan);
           });
           
-          // Add reengagement form if loan is completed
           if (loan.status === 'completed') {
             const reengagementForm = document.createElement('div');
             reengagementForm.className = 'reengagement-form';
@@ -2794,8 +2663,6 @@
         });
         
         accordionContent.appendChild(loansAccordion);
-        
-        // Scroll to the accordion
         document.getElementById('userDetailsAccordion').scrollIntoView({ behavior: 'smooth' });
       } catch (error) {
         console.error("Error showing client details: ", error);
@@ -2831,7 +2698,6 @@
         container.innerHTML += '<p>No hay pagos registrados para este préstamo.</p>';
       }
       
-      // Show in a modal
       document.getElementById('infoModalTitle').textContent = `Historial de Pagos - ${loan.client.name}`;
       document.getElementById('infoModalMessage').innerHTML = '';
       document.getElementById('infoModalMessage').appendChild(container);
@@ -2862,10 +2728,9 @@
           return;
         }
         
-        // Create a new loan with the additional amount
         const newLoanData = {
           ...loan,
-          amount: additionalAmount, // Solo el monto adicional como nuevo préstamo
+          amount: additionalAmount,
           balance: additionalAmount,
           remainingCapital: additionalAmount,
           status: 'active',
@@ -2884,14 +2749,12 @@
           createdBy: currentUser.uid
         };
         
-        // Remove id from the data to avoid overwriting
         delete newLoanData.id;
         
         await addDoc(collection(db, "Loans"), newLoanData);
         
         showInfoModal('Éxito', 'Préstamo renegociado correctamente.');
         
-        // Reload data
         loadUsersData();
         loadDashboardData();
         loadActiveLoans();
@@ -2907,7 +2770,6 @@
       const searchTerm = document.getElementById('searchUser').value.trim().toLowerCase();
       
       if (!searchTerm) {
-        // Show all users if search is empty
         loadUsersData();
         return;
       }
@@ -2917,13 +2779,11 @@
         let q;
         
         if (currentUser && currentUser.uid !== 'admin') {
-          // For regular users, only search their own loans
           q = query(
             collection(db, "Loans"), 
             where("userId", "==", currentUser.uid)
           );
         } else {
-          // For admin, search all loans
           q = collection(db, "Loans");
         }
         
@@ -2958,7 +2818,6 @@
             client.totalWithInterest += loan.amount + (loan.totalInterest || 0);
             client.totalPending += loan.balance || 0;
             
-            // Marcar como completado si el saldo es 0
             if (loan.balance <= 0) {
               loan.status = 'completed';
               client.completedLoans++;
@@ -2980,7 +2839,6 @@
               client.isExpired = true;
             }
             
-            // Calculate late fees
             if (loan.payments) {
               loan.payments.forEach(payment => {
                 if (payment.lateFee && payment.lateFee > 0) {
@@ -3017,7 +2875,6 @@
           tableBody.appendChild(row);
         }
         
-        // Attach event listeners to view buttons
         document.querySelectorAll('.view-client-btn').forEach(button => {
           button.addEventListener('click', () => {
             const clientId = button.getAttribute('data-client-id');
@@ -3025,7 +2882,6 @@
           });
         });
         
-        // Hide details if showing
         document.getElementById('userDetailsAccordion').style.display = 'none';
       } catch (error) {
         console.error("Error searching users: ", error);
@@ -3051,14 +2907,12 @@
         let q;
         
         if (currentUser && currentUser.uid !== 'admin') {
-          // For regular users, only search their own loans
           q = query(
             collection(db, "Loans"), 
             where("userId", "==", currentUser.uid),
             where("status", "in", ["active", "overdue", "completed"])
           );
         } else {
-          // For admin, search all active loans
           q = query(
             collection(db, "Loans"), 
             where("status", "in", ["active", "overdue", "completed"])
@@ -3086,7 +2940,6 @@
           return;
         }
         
-        // Select the first matching loan
         selectedLoanForPayment = matchingLoans[0];
         document.getElementById('paymentFormContainer').style.display = 'block';
         document.getElementById('paymentLoanId').value = selectedLoanForPayment.id;
@@ -3106,7 +2959,6 @@
         document.getElementById('generateTicketBtn').style.display = lastPaymentData ? 'block' : 'none';
       } catch (error) {
         console.error("Error searching client: ", error);
-        // Don't show error message to avoid confusion when searching
       } finally {
         hideLoading();
       }
@@ -3118,11 +2970,9 @@
       const paymentsMade = loan.payments?.length || 0;
       const totalPayments = loan.paymentSchedule?.length || 0;
       
-      // Cálculo de amortización lineal y tasa de interés ajustada según la nueva lógica
       const remainingQuincenas = totalPayments - paymentsMade;
       const capitalToPay = remainingQuincenas > 0 ? loan.remainingCapital / remainingQuincenas : 0;
       
-      // Ajuste de la tasa de interés según la especificación
       const tasaQuincenal = loan.interestRate / (loan.frequency === 'biweekly' ? 1 : 2);
       const interestToPay = loan.remainingCapital * (tasaQuincenal / 100);
       
@@ -3214,7 +3064,6 @@
         statusClass = 'status-overdue';
         statusMessage = 'Atrasado';
         
-        // Calculate overdue days and payments
         const overduePayments = loan.paymentSchedule.filter(p => 
           p.status === 'pending' && new Date(p.dueDate) < today
         );
@@ -3222,7 +3071,6 @@
         const firstOverdueDate = new Date(overduePayments[0].dueDate);
         const daysOverdue = Math.floor((today - firstOverdueDate) / (1000 * 60 * 60 * 24));
         
-        // Calculate late fee based on system configuration (fixed amount per overdue payment)
         const lateFee = overduePayments.length * systemConfig.lateFeeAmount;
         
         statusHTML = `
@@ -3234,7 +3082,6 @@
         `;
       }
       
-      // Check if loan is completed (balance = 0)
       if (loan.balance <= 0) {
         loan.status = 'completed';
         statusClass = 'status-good';
@@ -3245,7 +3092,6 @@
           <p><i class="fas fa-handshake"></i> Puede calificar para un nuevo préstamo</p>
         `;
       }
-      // Check if loan is expired (passed final due date without being completed)
       else {
         const finalPayment = loan.paymentSchedule?.[loan.paymentSchedule.length - 1];
         if (finalPayment && new Date(finalPayment.dueDate) < today && loan.status !== 'completed') {
@@ -3256,9 +3102,8 @@
             <p><i class="fas fa-ban"></i> No califica para nuevos préstamos</p>
           `;
           
-          // Auto-extend loan if configured
           if (systemConfig.autoExtend) {
-            const newTerm = Math.ceil(loan.term / 2); // Half of original term
+            const newTerm = Math.ceil(loan.term / 2);
             statusHTML += `<p><i class="fas fa-calendar-plus"></i> Plazo extendido por ${newTerm} meses</p>`;
           }
         }
@@ -3358,7 +3203,6 @@
         p.status === 'pending' && new Date(p.dueDate) < new Date()
       ) || [];
       
-      // Calculate late fee as fixed amount per overdue payment
       const lateFee = overduePayments.length * systemConfig.lateFeeAmount;
       
       document.getElementById('lateFeeAmount').value = formatNumber(lateFee);
@@ -3372,30 +3216,25 @@
       const frequency = document.querySelector('input[name="paymentFrequency"]:checked').value;
       const loanType = document.getElementById('loanType').value;
       
-      // Calcular interés total y monto total a pagar
       let totalInterest = 0;
       if (loanType === 'normal') {
         totalInterest = amount * (rate / 100) * term;
       }
       const totalPayment = amount + totalInterest;
       
-      // Calcular pago por período
       let periods = term;
       if (frequency === 'biweekly') {
         periods = term * 2;
       }
       const periodPayment = totalPayment / periods;
       
-      // Calcular fecha de finalización
       const endDate = new Date(startDate);
       if (frequency === 'monthly') {
         endDate.setMonth(endDate.getMonth() + term);
       } else {
-        // Biweekly - 15 days per period
         endDate.setDate(endDate.getDate() + (term * 15 * 2));
       }
       
-      // Actualizar resumen con formato de moneda
       document.getElementById('summaryAmount').textContent = `DOP${formatNumber(amount)}`;
       document.getElementById('summaryRate').textContent = `${rate}%`;
       document.getElementById('summaryTotalInterest').textContent = `DOP${formatNumber(totalInterest)}`;
@@ -3407,7 +3246,6 @@
     async function registerLoan(e) {
       e.preventDefault();
       
-      // Obtener datos del formulario
       const clientData = {
         name: document.getElementById('clientName').value.trim(),
         id: document.getElementById('clientId').value.trim(),
@@ -3436,7 +3274,6 @@
         createdAt: Timestamp.now()
       };
       
-      // Validar que el cliente no tenga préstamos activos
       try {
         const clientLoansQuery = query(
           collection(db, "Loans"),
@@ -3455,11 +3292,8 @@
         return;
       }
       
-      // Subir documentos adjuntos
       showLoading();
-      const documents = await uploadDocuments(clientData.id);
       
-      // Calcular fechas de pago
       const paymentSchedule = generatePaymentSchedule(loanData);
       loanData.paymentSchedule = paymentSchedule;
       
@@ -3473,23 +3307,19 @@
       loanData.balance = loanData.totalPayment;
       loanData.remainingCapital = loanData.amount;
       
-      // Calcular pago por período
       if (loanData.frequency === 'monthly') {
         loanData.periodPayment = loanData.totalPayment / loanData.term;
       } else {
         loanData.periodPayment = loanData.totalPayment / (loanData.term * 2);
       }
       
-      // Validar datos
       if (!validateLoanData(clientData, loanData)) {
         hideLoading();
         return;
       }
       
       try {
-        // Registrar en la colección "Loans"
         loanData.userId = currentUser.uid;
-        loanData.documents = documents;
         
         const loanRef = await addDoc(collection(db, "Loans"), {
           ...loanData,
@@ -3499,18 +3329,11 @@
           remainingCapital: loanData.amount
         });
         
-        // Mostrar mensaje de éxito
         showInfoModal('Éxito', 'Préstamo registrado correctamente');
         
-        // Limpiar formulario
         document.getElementById('loanForm').reset();
-        document.getElementById('documentPreview').innerHTML = '';
-        uploadedDocuments = [];
-        
-        // Recalcular
         calculateLoan();
         
-        // Recargar datos
         loadDashboardData();
         loadActiveLoans();
         loadUsersData();
@@ -3529,7 +3352,6 @@
       let paymentNumber = 1;
       
       if (loanData.frequency === 'monthly') {
-        // Pagos mensuales
         for (let i = 0; i < loanData.term; i++) {
           paymentDate = new Date(startDate);
           paymentDate.setMonth(startDate.getMonth() + i + 1);
@@ -3542,7 +3364,6 @@
           });
         }
       } else {
-        // Pagos quincenales (cada 15 días)
         for (let i = 0; i < loanData.term * 2; i++) {
           paymentDate = new Date(startDate);
           paymentDate.setDate(startDate.getDate() + (i + 1) * 15);
@@ -3560,13 +3381,11 @@
     }
 
     function validateLoanData(clientData, loanData) {
-      // Validar datos del cliente
       if (!clientData.name || !clientData.id || !clientData.phone) {
         showInfoModal('Error', 'Todos los campos obligatorios del cliente deben estar completos');
         return false;
       }
       
-      // Validar datos del préstamo
       if (loanData.amount <= 0 || loanData.term <= 0) {
         showInfoModal('Error', 'Los valores del préstamo deben ser mayores a cero');
         return false;
@@ -3616,10 +3435,8 @@
       const totalPayments = selectedLoanForPayment.paymentSchedule?.length || 0;
       const remainingQuincenas = totalPayments - paymentsMade;
       
-      // Cálculo según la nueva lógica de amortización lineal y tasa de interés ajustada
       const capitalToPay = remainingQuincenas > 0 ? selectedLoanForPayment.remainingCapital / remainingQuincenas : 0;
       
-      // Ajuste de la tasa de interés según la especificación
       const tasaQuincenal = selectedLoanForPayment.interestRate / (selectedLoanForPayment.frequency === 'biweekly' ? 1 : 2);
       const interestToPay = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
       
@@ -3686,7 +3503,6 @@
         let totalLateFees = (selectedLoanForPayment.payments || []).reduce((sum, p) => sum + (p.lateFee || 0), 0) + lateFee;
         
         if (paymentType === 'full') {
-          // Cálculo de intereses pendientes según la nueva lógica
           const interestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
           interestPayment = Math.min(paymentAmount, interestDue);
           capitalPayment = paymentAmount - interestPayment;
@@ -3696,7 +3512,6 @@
         } else if (paymentType === 'capital') {
           capitalPayment = paymentAmount;
         } else if (paymentType === 'custom') {
-          // For custom payments, we apply to capital first, then interest
           const interestDue = selectedLoanForPayment.remainingCapital * (tasaQuincenal / 100);
           capitalPayment = Math.min(paymentAmount, selectedLoanForPayment.remainingCapital);
           interestPayment = Math.min(paymentAmount - capitalPayment, interestDue);
@@ -3730,27 +3545,23 @@
           }
         }
         
-        // Check if loan is completed (balance = 0)
         let newStatus = selectedLoanForPayment.status;
         
         if (newRemainingCapital <= 0 && !hasInterestDue && totalLateFees <= 0) {
           newStatus = 'completed';
           
-          // Mark all payments as paid
           updatedPaymentSchedule = updatedPaymentSchedule.map(payment => ({
             ...payment,
             status: 'paid'
           }));
         } 
-        // Check if loan is expired (passed final due date without being completed)
         else {
           const finalPayment = updatedPaymentSchedule[updatedPaymentSchedule.length - 1];
           if (finalPayment && new Date(finalPayment.dueDate) < today && newStatus !== 'completed') {
             newStatus = 'expired';
             
-            // Auto-extend loan if configured
             if (systemConfig.autoExtend) {
-              const newTerm = Math.ceil(selectedLoanForPayment.term / 2); // Half of original term
+              const newTerm = Math.ceil(selectedLoanForPayment.term / 2);
               const newPayments = generatePaymentSchedule({
                 ...selectedLoanForPayment,
                 term: newTerm,
@@ -3865,7 +3676,7 @@
       try {
         const canvas = await html2canvas(ticketContainer, { 
           backgroundColor: '#ffffff',
-          width: 300, // 80mm in pixels (assuming 96dpi)
+          width: 300,
           height: ticketContainer.scrollHeight,
           scale: 1
         });
@@ -3934,7 +3745,6 @@
         const clientSelect = document.getElementById('clientSelect');
         clientSelect.innerHTML = '<option value="">-- Seleccione un cliente --</option>';
         
-        // Get all loans to populate client list
         let q;
         if (currentUser && currentUser.uid !== 'admin') {
           q = query(
@@ -3955,7 +3765,6 @@
           }
         });
         
-        // Add clients to select
         clients.forEach((name, id) => {
           const option = document.createElement('option');
           option.value = id;
@@ -3963,7 +3772,6 @@
           clientSelect.appendChild(option);
         });
         
-        // Show the modal
         document.getElementById('createUserModal').classList.add('active');
       } catch (error) {
         console.error("Error loading clients for user creation: ", error);
@@ -3993,7 +3801,6 @@
       try {
         showLoading();
         
-        // Check if username already exists
         const usersQuery = query(collection(db, "LoanUsers"), where("username", "==", username));
         const usersSnapshot = await getDocs(usersQuery);
         
@@ -4002,7 +3809,6 @@
           return;
         }
         
-        // Check if client already has an account
         const clientQuery = query(collection(db, "LoanUsers"), where("clientId", "==", clientId));
         const clientSnapshot = await getDocs(clientQuery);
         
@@ -4011,7 +3817,6 @@
           return;
         }
         
-        // Create the user account
         await addDoc(collection(db, "LoanUsers"), {
           username,
           pin,
@@ -4073,4 +3878,3 @@
       document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
     };
   </script>
-  
