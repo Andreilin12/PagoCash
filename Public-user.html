@@ -21,15 +21,15 @@
             --card-bg: #34495e;
             --danger-color: #e74c3c;
             --warning-color: #f39c12;
-            --success-color: #2ecc71;
-            --info-color: #3498db;
+            --success-color: #15b086;
+            --info-color: #15a086;
             
             /* Variables para el menú de onda */
             --bar-bg-color: #2a2a3f;
             --bar-border-radius: 30px;
             --dark-bg-color: #21212c;
             --icon-inactive-color: #9e9e9e;
-            --icon-active-color: #ffffff;
+            --icon-active-color: #15a086;
             --shadow-light: 0 5px 20px rgba(0, 0, 0, 0.15);
             --shadow-active: 0 5px 15px rgba(0, 0, 0, 0.3);
             --nav-height: 70px;
@@ -1113,7 +1113,7 @@
                 <div class="spinner-icon"></div>
             </div>
             <img src="logo.png" alt="Sistema de Préstamos Logo" class="login-logo">
-            <h1 class="login-title">Bienvenido</h1>
+            <h1 class="login-title">PlusMoney Retom</h1>
             <form id="loginForm">
                 <div class="form-group">
                     <label for="loginUsername">Nombre de Usuario</label>
@@ -1291,7 +1291,7 @@
                         </select>
                     </div>
                     <div class="settings-option">
-                        <label data-lang="notifications">Notificaciones</label>
+                      <!--  <label data-lang="notifications">Notificaciones</label>
                         <div class="settings-toggle">
                             <input type="checkbox" id="emailNotifications">
                             <label for="emailNotifications" data-lang="email_notifications">Notificaciones por Email</label>
@@ -1299,7 +1299,7 @@
                         <div class="settings-toggle">
                             <input type="checkbox" id="smsNotifications">
                             <label for="smsNotifications" data-lang="sms_notifications">Notificaciones por SMS</label>
-                        </div>
+                        </div>-->
                     </div>
                     <div class="settings-option">
                         <label data-lang="font_size">Tamaño de Fuente</label>
@@ -2005,10 +2005,10 @@
                     <span class="loan-detail-label">Total a pagar (próxima quincena):</span>
                     <span class="loan-detail-value">${currencySymbol}${formatCurrency(totalToPay)}</span>
                 </div>
-                <div class="loan-detail-item">
+               <!-- <div class="loan-detail-item">
                     <span class="loan-detail-label">Monto pendiente:</span>
                     <span class="loan-detail-value">${currencySymbol}${formatCurrency(montoPendiente)}</span>
-                </div>
+                </div>-->
                 <div class="loan-detail-item">
                     <span class="loan-detail-label">Capital pendiente:</span>
                     <span class="loan-detail-value">${currencySymbol}${formatCurrency(currentLoan.remainingCapital)}</span>
