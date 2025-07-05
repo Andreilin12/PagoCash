@@ -332,24 +332,6 @@
             opacity: 0.8;
         }
 
-        .company-info-header {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .company-info-header img {
-            margin-bottom: 0.5rem;
-            max-height: 35px;
-            max-width: 120px;
-        }
-
-        .company-info-header span {
-            font-size: 0.8rem;
-            text-align: right;
-            color: var(--text-light);
-        }
-
         .main-container-client {
             padding: 1.5rem;
         }
@@ -430,6 +412,9 @@
             display: flex;
             gap: 0.75rem;
             margin-bottom: 1.5rem;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .search-bar input {
@@ -440,6 +425,7 @@
             background-color: var(--background-color);
             color: var(--text-color);
             font-size: 0.95rem;
+            max-width: calc(100% - 130px);
         }
 
         .search-bar select {
@@ -656,7 +642,7 @@
             transform: translateX(-50%);
             width: 95%;
             max-width: 500px;
-            height: calc(var(--wave-top-offset) + var(--wave-size));
+            height: var(--nav-height);
             z-index: 1000;
             display: flex;
             justify-content: center;
@@ -675,41 +661,6 @@
             position: relative;
             z-index: 1;
             padding-bottom: 5px;
-        }
-
-        .wave-wrapper {
-            position: absolute;
-            top: calc(var(--nav-height) - (var(--wave-top-offset) + var(--wave-size)));
-            left: 0;
-            width: var(--wave-size);
-            height: var(--wave-size);
-            transition: transform var(--transition-speed) ease-in-out;
-            z-index: 2;
-            pointer-events: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .wave-indicator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--dark-bg-color);
-            border-radius: 50%;
-            box-shadow: var(--shadow-active);
-            z-index: 1;
-        }
-
-        .wave-wrapper .wave-icon {
-            font-size: var(--active-icon-size);
-            color: var(--icon-active-color);
-            position: relative;
-            z-index: 2;
-            opacity: 0;
-            transition: opacity var(--transition-speed) ease;
         }
 
         .nav-item {
@@ -744,9 +695,13 @@
             overflow: hidden;
         }
 
+        .nav-item.active {
+            color: var(--icon-active-color);
+        }
+
         .nav-item.active i {
-            opacity: 0;
-            pointer-events: none;
+            transform: translateY(-10px);
+            font-size: var(--active-icon-size);
         }
 
         .nav-item.active span {
@@ -982,6 +937,16 @@
             .client-name {
                 font-size: 1rem;
             }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-bar input,
+            .search-bar select {
+                max-width: 100%;
+                width: 100%;
+            }
         }
 
         /* Tema claro */
@@ -1007,6 +972,92 @@
 
         .font-large {
             font-size: 18px;
+        }
+
+        /* Menu superior */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .micro-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 250px;
+            height: 100%;
+            background-color: var(--secondary-color);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s ease;
+            z-index: 1001;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .micro-menu.active {
+            right: 0;
+        }
+
+        .micro-menu-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .micro-menu-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 0.5rem;
+        }
+
+        .micro-menu-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .micro-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .micro-menu-item:hover {
+            color: var(--primary-color);
+        }
+
+        .micro-menu-item i {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
         }
     </style>
 </head>
@@ -1055,10 +1106,9 @@
                     <span class="client-id" id="clientId">ID: 000-0000000-0</span>
                 </div>
             </div>
-            <div class="company-info-header">
-                <img id="companyLogoHeader" src="" alt="Logo Empresa" style="display: none; max-height: 35px;">
-                <span id="companyNameHeader"></span>
-            </div>
+            <button class="menu-btn" id="menuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
 
         <div class="main-container-client">
@@ -1238,11 +1288,6 @@
         <!-- Menú de navegación inferior con efecto de onda -->
         <div class="bottom-nav-container">
             <nav class="bottom-nav">
-                <div class="wave-wrapper" id="waveWrapper">
-                    <div class="wave-indicator"></div>
-                    <i class="wave-icon" id="waveActiveIcon"></i>
-                </div>
-
                 <a href="#" class="nav-item" data-section="summary" data-icon-class="fas fa-home">
                     <i class="fas fa-home"></i>
                     <span data-lang="home">Inicio</span>
@@ -1264,6 +1309,43 @@
                     <span data-lang="settings">Ajustes</span>
                 </a>
             </nav>
+        </div>
+
+        <!-- Micro menú superior -->
+        <div class="overlay" id="overlay"></div>
+        <div class="micro-menu" id="microMenu">
+            <div class="micro-menu-header">
+                <img src="logo.png" alt="PlusMoney Retom" class="micro-menu-logo">
+                <div class="micro-menu-title">PlusMoney Retom</div>
+            </div>
+            <a href="info-prestamo.html" class="micro-menu-item">
+                <i class="fas fa-info-circle"></i>
+                <span>Información de Préstamos</span>
+            </a>
+            <a href="pagar.html" class="micro-menu-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Realizar Pagos</span>
+            </a>
+            <a href="#" class="micro-menu-item">
+                <i class="fas fa-history"></i>
+                <span>Mi Historial Financiero</span>
+            </a>
+            <a href="#" class="micro-menu-item">
+                <i class="fas fa-question-circle"></i>
+                <span>Ayuda</span>
+            </a>
+            <a href="#" class="micro-menu-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>Política de Privacidad</span>
+            </a>
+            <a href="#" class="micro-menu-item">
+                <i class="fas fa-lock"></i>
+                <span>Política de Seguridad</span>
+            </a>
+            <a href="#" class="micro-menu-item">
+                <i class="fas fa-info-circle"></i>
+                <span>Acerca de</span>
+            </a>
         </div>
     </section>
 
@@ -1389,7 +1471,8 @@
             rnc: "123-456789-1",
             phone: "809-555-5555",
             address: "Calle Principal #123, Santo Domingo",
-            fotoURL: "logo.png"
+            fotoURL: "logo.png",
+            showToClients: false
         };
         let userSettings = {
             theme: 'dark',
@@ -1615,54 +1698,29 @@
             
             // Configurar el menú de navegación con efecto de onda
             const navItems = document.querySelectorAll('.nav-item');
-            const waveWrapper = document.getElementById('waveWrapper');
-            const waveActiveIcon = document.getElementById('waveActiveIcon');
             const bottomNav = document.querySelector('.bottom-nav');
-
-            const moveWave = (itemToActivate) => {
-                const currentActiveItem = document.querySelector('.nav-item.active');
-                if (currentActiveItem) {
-                    currentActiveItem.classList.remove('active');
-                }
-
-                itemToActivate.classList.add('active');
-
-                waveActiveIcon.style.opacity = '0';
-                setTimeout(() => {
-                    waveActiveIcon.className = 'wave-icon ' + itemToActivate.dataset.iconClass;
-                    waveActiveIcon.style.opacity = '1';
-                }, parseFloat(getComputedStyle(waveActiveIcon).transitionDuration) * 1000 / 2);
-
-                const itemRect = itemToActivate.getBoundingClientRect();
-                const navRect = bottomNav.getBoundingClientRect();
-
-                const itemCenterX = itemRect.left + (itemRect.width / 2);
-                const relativeX = itemCenterX - navRect.left;
-
-                const wrapperTranslateX = relativeX - (waveWrapper.offsetWidth / 2);
-                waveWrapper.style.transform = `translateX(${wrapperTranslateX}px)`;
-            };
 
             navItems.forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
-                    moveWave(this);
+                    const currentActiveItem = document.querySelector('.nav-item.active');
+                    if (currentActiveItem) {
+                        currentActiveItem.classList.remove('active');
+                    }
+
+                    this.classList.add('active');
                     navigateToSection(this.dataset.section);
                 });
             });
 
             // Activar el primer ítem del menú
             if (navItems.length > 0) {
-                setTimeout(() => moveWave(navItems[0]), 50);
+                setTimeout(() => navItems[0].classList.add('active'), 50);
             }
 
-            // Redimensionamiento de la ventana
-            window.addEventListener('resize', () => {
-                const activeItem = document.querySelector('.nav-item.active');
-                if (activeItem) {
-                    moveWave(activeItem);
-                }
-            });
+            // Menu superior
+            document.getElementById('menuBtn').addEventListener('click', toggleMicroMenu);
+            document.getElementById('overlay').addEventListener('click', toggleMicroMenu);
 
             // Resto de event listeners
             document.getElementById('detailsBtn').addEventListener('click', showLoanDetails);
@@ -1686,6 +1744,12 @@
             document.getElementById('rememberSession').addEventListener('change', updateRememberSession);
             document.getElementById('rememberSessionSettings').addEventListener('change', updateRememberSession);
             document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+        }
+
+        // Toggle micro menu
+        function toggleMicroMenu() {
+            document.getElementById('microMenu').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
         }
 
         // Manejar login
@@ -1782,7 +1846,7 @@
                 const querySnapshot = await getDocs(companyQuery);
                 
                 if (!querySnapshot.empty) {
-                    // Tomar el primer documento de la colección (asumimos que solo hay uno)
+                    // Tomar la primera empresa encontrada (puedes ajustar esto según tu lógica)
                     const companyData = querySnapshot.docs[0].data();
                     
                     // Actualizar companyInfo con los datos recuperados
@@ -1791,17 +1855,9 @@
                         rnc: companyData.rnc || "123-456789-1",
                         phone: companyData.telefono || "809-555-5555",
                         address: companyData.direccion || "Calle Principal #123, Santo Domingo",
-                        fotoURL: companyData.fotoURL || "logo.png"
+                        fotoURL: companyData.fotoURL || "logo.png",
+                        showToClients: companyData.showToClients || false
                     };
-                    
-                    // Mostrar logo y nombre en el header
-                    if (companyInfo.fotoURL) {
-                        document.getElementById('companyLogoHeader').src = companyInfo.fotoURL;
-                        document.getElementById('companyLogoHeader').style.display = 'block';
-                    }
-                    if (companyInfo.nombreEmpresa) {
-                        document.getElementById('companyNameHeader').textContent = companyInfo.nombreEmpresa;
-                    }
                 }
             } catch (error) {
                 console.error("Error al cargar información de la empresa:", error);
@@ -2295,12 +2351,14 @@
                     const content = `
                         <div class="receipt-preview" id="receiptPreview_${receiptId}">
                             <div style="text-align: center; margin-bottom: 15px;">
-                                ${receipt.companyInfo.fotoURL ? 
+                                ${receipt.companyInfo.showToClients && receipt.companyInfo.fotoURL ? 
                                     `<img src="${receipt.companyInfo.fotoURL}" alt="Logo" style="max-width: 120px; max-height: 60px;">` : 
                                     `<i class="fas fa-building" style="font-size: 3rem; color: #15a086;"></i>`}
-                                <h3>${receipt.companyInfo.nombreEmpresa || 'Empresa de Préstamos'}</h3>
-                                <p>RNC: ${receipt.companyInfo.rnc || '123-456789-1'}</p>
-                                <p>${receipt.companyInfo.phone || '809-555-5555'} - ${receipt.companyInfo.address || 'Calle Principal #123, Santo Domingo'}</p>
+                                <h3>${receipt.companyInfo.showToClients ? (receipt.companyInfo.nombreEmpresa || 'Empresa de Préstamos') : 'Empresa de Préstamos'}</h3>
+                                ${receipt.companyInfo.showToClients ? `
+                                    <p>RNC: ${receipt.companyInfo.rnc || '123-456789-1'}</p>
+                                    <p>${receipt.companyInfo.phone || '809-555-5555'} - ${receipt.companyInfo.address || 'Calle Principal #123, Santo Domingo'}</p>
+                                ` : ''}
                             </div>
                             <hr>
                             <h3 style="text-align: center;">RECIBO DE PAGO</h3>
@@ -2540,6 +2598,8 @@
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.classList.remove('active');
             });
+            document.getElementById('microMenu').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
         };
 
         // Mostrar carga
@@ -2565,6 +2625,8 @@
             localStorage.removeItem('rememberedUser');
             applyTheme();
             updateLanguage();
+            // Recargar la página para limpiar completamente el estado
+            window.location.reload();
         }
 
         // Función de traducción
