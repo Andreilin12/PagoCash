@@ -838,6 +838,31 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         }
 
+        /* Estilos para la vista previa de imagen */
+        .image-preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 0.5rem;
+            border: 2px solid var(--primary-color);
+        }
+
+        .image-name {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-align: center;
+            word-break: break-all;
+        }
+
         /* Estilos responsivos */
         @media (min-width: 768px) {
             .profile-info {
@@ -1371,6 +1396,10 @@
                     <i class="fas fa-camera"></i>
                     <input type="file" id="profileImageUpload" accept="image/*" aria-label="Subir imagen de perfil">
                 </label>
+                <div class="image-preview-container" id="imagePreviewContainer">
+                    <img id="imagePreview" class="image-preview" src="" alt="Vista previa de la imagen">
+                    <span id="imageName" class="image-name"></span>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" id="saveAvatarBtn" data-lang="save">Guardar</button>
@@ -1920,6 +1949,10 @@
             const nextPaymentAmount = nextPayment ? nextPayment.amount : 0;
             const lateFee = nextPayment && nextPayment.lateFee ? nextPayment.lateFee : 0;
             const totalToPay = nextPaymentAmount + lateFee;
+            
+            // Calcular el monto con interés (10% del saldo pendiente)
+            const interestAmount = currentLoan.balance * 0.10;
+            const totalWithInterest = currentLoan.balance + interestAmount;
 
             const content = `
                 <div class="loan-summary-item">
@@ -1933,6 +1966,18 @@
                 <div class="loan-summary-item">
                     <span class="loan-detail-label" data-lang="frequency">${translate('frequency')}:</span>
                     <span data-lang="${currentLoan.frequency === 'biweekly' ? 'biweekly' : 'monthly'}">${translate(currentLoan.frequency === 'biweekly' ? 'biweekly' : 'monthly')}</span>
+                </div>
+                <div class="loan-summary-item">
+                    <span class="loan-detail-label" data-lang="loan_balance">${translate('loan_balance')}:</span>
+                    <span>${currencySymbol}${formatCurrency(currentLoan.balance)}</span>
+                </div>
+                <div class="loan-summary-item">
+                    <span class="loan-detail-label">Interés (10%):</span>
+                    <span>${currencySymbol}${formatCurrency(interestAmount)}</span>
+                </div>
+                <div class="loan-summary-item">
+                    <span class="loan-detail-label">Total a pagar (próxima quincena):</span>
+                    <span>${currencySymbol}${formatCurrency(totalWithInterest)}</span>
                 </div>
                 <div class="loan-summary-item">
                     <span class="loan-detail-label" data-lang="next_payment">${translate('next_payment')}:</span>
@@ -2190,6 +2235,7 @@
             });
 
             document.getElementById('profileImageUpload').value = '';
+            document.getElementById('imagePreviewContainer').style.display = 'none';
             document.getElementById('avatarModal').classList.add('active');
             updateLanguage();
         }
@@ -2201,6 +2247,7 @@
             });
             e.currentTarget.classList.add('selected');
             currentUser.avatar = e.currentTarget.dataset.avatar;
+            document.getElementById('imagePreviewContainer').style.display = 'none';
         }
 
         // Manejar carga de imagen
@@ -2213,6 +2260,15 @@
                     document.querySelectorAll('.avatar-option').forEach(option => {
                         option.classList.remove('selected');
                     });
+                    
+                    // Mostrar vista previa de la imagen
+                    const previewContainer = document.getElementById('imagePreviewContainer');
+                    const preview = document.getElementById('imagePreview');
+                    const nameDisplay = document.getElementById('imageName');
+                    
+                    preview.src = event.target.result;
+                    nameDisplay.textContent = file.name;
+                    previewContainer.style.display = 'flex';
                 };
                 reader.readAsDataURL(file);
             } else {
