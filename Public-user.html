@@ -1084,6 +1084,25 @@
         .overlay.active {
             display: block;
         }
+
+        /* Estilos específicos para los detalles del préstamo */
+        .loan-detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .loan-detail-label {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .loan-detail-value {
+            text-align: right;
+            color: var(--text-light);
+        }
     </style>
 </head>
 <body>
@@ -1378,7 +1397,9 @@
     <div class="modal" id="detailsModal">
         <div class="modal-content">
             <h3 class="modal-title"><i class="fas fa-info-circle"></i> <span data-lang="loan_details">Detalles del Préstamo</span></h3>
-            <div id="loanDetailsContent"></div>
+            <div id="loanDetailsContent">
+                <!-- Aquí se inyectará el contenido dinámico -->
+            </div>
             <div class="modal-footer">
                 <button class="btn btn-info" onclick="closeModal()" data-lang="close">Cerrar</button>
             </div>
@@ -1945,65 +1966,64 @@
             const totalPayments = currentLoan.paymentSchedule.length;
             const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
             
-            // Calcular el monto total a pagar en la próxima quincena (incluyendo mora si aplica)
-            const nextPaymentAmount = nextPayment ? nextPayment.amount : 0;
-            const lateFee = nextPayment && nextPayment.lateFee ? nextPayment.lateFee : 0;
-            const totalToPay = nextPaymentAmount + lateFee;
+            // Calcular los valores según la lógica que proporcionaste
+            const remainingQuincenas = totalPayments - paymentsMade;
+            const capitalToPay = remainingQuincenas > 0 ? currentLoan.remainingCapital / remainingQuincenas : 0;
+            const tasaQuincenal = currentLoan.interestRate / (currentLoan.frequency === 'biweekly' ? 1 : 2);
+            const interestToPay = currentLoan.remainingCapital * (tasaQuincenal / 100);
+            const totalToPay = capitalToPay + interestToPay;
             
-            // Calcular el monto con interés (10% del saldo pendiente)
-            const interestAmount = currentLoan.balance * 0.10;
-            const totalWithInterest = currentLoan.balance + interestAmount;
+            // Calcular el monto pendiente (capital + intereses futuros)
+            const montoPendiente = currentLoan.remainingCapital + (interestToPay * remainingQuincenas);
 
             const content = `
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label" data-lang="original_amount">${translate('original_amount')}:</span>
-                    <span>${currencySymbol}${formatCurrency(currentLoan.amount)}</span>
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Monto original:</span>
+                    <span class="loan-detail-value">${currencySymbol}${formatCurrency(currentLoan.amount)}</span>
                 </div>
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label" data-lang="interest_rate">${translate('interest_rate')}:</span>
-                    <span>${currentLoan.interestRate}%</span>
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Tasa de interés:</span>
+                    <span class="loan-detail-value">${currentLoan.interestRate}% quincenal (${currentLoan.interestRate}%)</span>
                 </div>
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label" data-lang="frequency">${translate('frequency')}:</span>
-                    <span data-lang="${currentLoan.frequency === 'biweekly' ? 'biweekly' : 'monthly'}">${translate(currentLoan.frequency === 'biweekly' ? 'biweekly' : 'monthly')}</span>
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Frecuencia de pago:</span>
+                    <span class="loan-detail-value">Quincenal</span>
                 </div>
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label" data-lang="loan_balance">${translate('loan_balance')}:</span>
-                    <span>${currencySymbol}${formatCurrency(currentLoan.balance)}</span>
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Próximo pago:</span>
+                    <span class="loan-detail-value">${nextPayment ? new Date(nextPayment.dueDate).toLocaleDateString() : 'N/A'}</span>
                 </div>
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label">Interés (10%):</span>
-                    <span>${currencySymbol}${formatCurrency(interestAmount)}</span>
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Capital a pagar (próxima quincena):</span>
+                    <span class="loan-detail-value">${currencySymbol}${formatCurrency(capitalToPay)}</span>
                 </div>
-                <div class="loan-summary-item">
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Interés a pagar (próxima quincena):</span>
+                    <span class="loan-detail-value">${currencySymbol}${formatCurrency(interestToPay)}</span>
+                </div>
+                <div class="loan-detail-item">
                     <span class="loan-detail-label">Total a pagar (próxima quincena):</span>
-                    <span>${currencySymbol}${formatCurrency(totalWithInterest)}</span>
+                    <span class="loan-detail-value">${currencySymbol}${formatCurrency(totalToPay)}</span>
                 </div>
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label" data-lang="next_payment">${translate('next_payment')}:</span>
-                    <span>${nextPayment ? new Date(nextPayment.dueDate).toLocaleDateString() : 'N/A'}</span>
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Monto pendiente:</span>
+                    <span class="loan-detail-value">${currencySymbol}${formatCurrency(montoPendiente)}</span>
                 </div>
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label" data-lang="next_payment_amount">${translate('next_payment_amount')}:</span>
-                    <span>${nextPayment ? `${currencySymbol}${formatCurrency(nextPaymentAmount)}` : 'N/A'}</span>
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Capital pendiente:</span>
+                    <span class="loan-detail-value">${currencySymbol}${formatCurrency(currentLoan.remainingCapital)}</span>
                 </div>
-                ${nextPayment && lateFee > 0 ? `
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label">Monto de mora:</span>
-                    <span>${currencySymbol}${formatCurrency(lateFee)}</span>
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Pagos realizados:</span>
+                    <span class="loan-detail-value">${paymentsMade} de ${totalPayments}</span>
                 </div>
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label" data-lang="total_to_pay">${translate('total_to_pay')}:</span>
-                    <span>${currencySymbol}${formatCurrency(totalToPay)}</span>
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Quincenas restantes:</span>
+                    <span class="loan-detail-value">${remainingQuincenas}</span>
                 </div>
-                ` : ''}
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label" data-lang="payments_made">${translate('payments_made')}:</span>
-                    <span>${paymentsMade}</span>
-                </div>
-                <div class="loan-summary-item">
-                    <span class="loan-detail-label" data-lang="payments_pending">${translate('payments_pending')}:</span>
-                    <span>${totalPayments - paymentsMade}</span>
+                <div class="loan-detail-item">
+                    <span class="loan-detail-label">Tipo de pago:</span>
+                    <span class="loan-detail-value">Variable (Capital + Interés)</span>
                 </div>
             `;
             document.getElementById('loanDetailsContent').innerHTML = content;
