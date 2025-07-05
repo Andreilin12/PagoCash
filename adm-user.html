@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* Estilos anteriores se mantienen igual */
     :root {
       --primary-color: #1abc9c;
       --primary-dark: #16a085;
@@ -40,6 +39,120 @@
     .main-container {
       padding: 2rem;
       width: 100%;
+    }
+
+    .company-info-card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .company-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      background-color: var(--background-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .company-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .company-logo i {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+    }
+
+    .company-details {
+      flex: 1;
+    }
+
+    .company-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .company-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .company-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-light);
+    }
+
+    .company-meta-item i {
+      color: var(--primary-color);
+    }
+
+    .toggle-display {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: var(--success-color);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(26px);
     }
 
     .section-title {
@@ -292,10 +405,62 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    @media (max-width: 768px) {
+      .company-info-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+      }
+      
+      .toggle-display {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .company-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
   </style>
 </head>
 <body>
   <main class="main-container">
+    <!-- Company Info Section -->
+    <section id="companyInfo" class="company-info-card" style="display: none;">
+      <div class="company-logo" id="companyLogo">
+        <i class="fas fa-building"></i>
+      </div>
+      
+      <div class="company-details">
+        <h2 class="company-name" id="companyName">Nombre de la Empresa</h2>
+        <div class="company-meta">
+          <div class="company-meta-item">
+            <i class="fas fa-id-card"></i>
+            <span id="companyRNC">RNC: 000-000000-0</span>
+          </div>
+          <div class="company-meta-item">
+            <i class="fas fa-phone"></i>
+            <span id="companyPhone">Teléfono: 000-000-0000</span>
+          </div>
+          <div class="company-meta-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span id="companyAddress">Dirección: Calle #, Ciudad</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="toggle-display">
+        <span>Mostrar a clientes:</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleDisplayToClients">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </section>
+
     <!-- Users Section -->
     <section id="users" class="card">
       <h1 class="section-title">Administración de Usuarios</h1>
@@ -370,15 +535,19 @@
     </div>
   </div>
 
-  <!-- Modal para editar PIN -->
-  <div class="modal" id="editPinModal">
+  <!-- Modal para editar usuario -->
+  <div class="modal" id="editUserModal">
     <div class="modal-content">
-      <h3 class="modal-title">Editar PIN</h3>
-      <form id="editPinForm">
+      <h3 class="modal-title">Editar Usuario</h3>
+      <form id="editUserForm">
         <input type="hidden" id="editUserId">
         <div class="form-group">
-          <label for="newPin">Nuevo PIN (4 dígitos)</label>
-          <input type="password" id="newPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required>
+          <label for="editUsername">Nombre de Usuario</label>
+          <input type="text" id="editUsername" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="editPin">Nuevo PIN (4 dígitos)</label>
+          <input type="password" id="editPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required>
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-success">
@@ -436,6 +605,7 @@
     let activeUsersData = [];
     let blockedUsersData = [];
     let currentTab = 'active-users';
+    let companyData = null;
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
@@ -443,6 +613,7 @@
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user;
+          loadCompanyData();
           loadUsersData();
         } else {
           // Redirect to login if not authenticated
@@ -459,13 +630,90 @@
       document.getElementById('searchUsers').addEventListener('input', debounce(searchUsers, 300));
       document.getElementById('refreshUsers').addEventListener('click', loadUsersData);
       
-      // Edit PIN form
-      document.getElementById('editPinForm').addEventListener('submit', savePinChanges);
+      // Edit user form
+      document.getElementById('editUserForm').addEventListener('submit', saveUserChanges);
       
       // Tab switching
       document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => switchTab(tab.getAttribute('data-tab')));
       });
+      
+      // Toggle display to clients
+      document.getElementById('toggleDisplayToClients').addEventListener('change', toggleDisplayToClients);
+    }
+
+    async function loadCompanyData() {
+      try {
+        showLoading();
+        
+        if (!currentUser) return;
+        
+        const companyRef = doc(db, "informacionCompany", currentUser.uid);
+        const companySnap = await getDoc(companyRef);
+        
+        if (companySnap.exists()) {
+          companyData = companySnap.data();
+          displayCompanyInfo(companyData);
+        } else {
+          document.getElementById('companyInfo').style.display = 'none';
+        }
+      } catch (error) {
+        console.error("Error loading company data: ", error);
+        document.getElementById('companyInfo').style.display = 'none';
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function displayCompanyInfo(data) {
+      const companyInfoSection = document.getElementById('companyInfo');
+      companyInfoSection.style.display = 'flex';
+      
+      // Set company name
+      document.getElementById('companyName').textContent = data.nombreEmpresa || 'Nombre de la Empresa';
+      
+      // Set RNC
+      document.getElementById('companyRNC').textContent = `RNC: ${data.rnc || 'N/A'}`;
+      
+      // Set phone
+      document.getElementById('companyPhone').textContent = `Teléfono: ${data.telefono || 'N/A'}`;
+      
+      // Set address
+      document.getElementById('companyAddress').textContent = `Dirección: ${data.direccion || 'N/A'}`;
+      
+      // Set logo
+      const companyLogo = document.getElementById('companyLogo');
+      if (data.fotoURL) {
+        companyLogo.innerHTML = `<img src="${data.fotoURL}" alt="Logo de la empresa">`;
+      } else {
+        companyLogo.innerHTML = '<i class="fas fa-building"></i>';
+      }
+      
+      // Set toggle switch state
+      document.getElementById('toggleDisplayToClients').checked = data.showToClients || false;
+    }
+
+    async function toggleDisplayToClients(e) {
+      try {
+        showLoading();
+        
+        const showToClients = e.target.checked;
+        const companyRef = doc(db, "informacionCompany", currentUser.uid);
+        
+        await updateDoc(companyRef, {
+          showToClients: showToClients,
+          updatedAt: Timestamp.now()
+        });
+        
+        showInfoModal('Éxito', `La información de la empresa ahora ${showToClients ? 'se muestra' : 'no se muestra'} a los clientes`);
+      } catch (error) {
+        console.error("Error updating company display setting: ", error);
+        showInfoModal('Error', 'Error al actualizar la configuración de visualización');
+        // Revert the toggle if there was an error
+        e.target.checked = !e.target.checked;
+      } finally {
+        hideLoading();
+      }
     }
 
     function debounce(func, wait) {
@@ -608,8 +856,8 @@
           <td class="status-active">Activo</td>
           <td>
             <div style="display: flex; gap: 0.5rem;">
-              <button class="btn btn-sm btn-info edit-pin-btn" data-user-id="${user.id}" title="Editar PIN">
-                <i class="fas fa-key"></i>
+              <button class="btn btn-sm btn-info edit-user-btn" data-user-id="${user.id}" title="Editar usuario">
+                <i class="fas fa-edit"></i>
               </button>
               <button class="btn btn-sm btn-warning block-btn" data-user-id="${user.id}" title="Bloquear usuario">
                 <i class="fas fa-lock"></i>
@@ -662,8 +910,8 @@
     }
 
     function addActiveUsersEventListeners() {
-      document.querySelectorAll('#activeUsersTableBody .edit-pin-btn').forEach(btn => {
-        btn.addEventListener('click', () => showEditPinModal(btn.getAttribute('data-user-id')));
+      document.querySelectorAll('#activeUsersTableBody .edit-user-btn').forEach(btn => {
+        btn.addEventListener('click', () => showEditUserModal(btn.getAttribute('data-user-id')));
       });
       
       document.querySelectorAll('#activeUsersTableBody .block-btn').forEach(btn => {
@@ -759,8 +1007,8 @@
           <td class="status-active">Activo</td>
           <td>
             <div style="display: flex; gap: 0.5rem;">
-              <button class="btn btn-sm btn-info edit-pin-btn" data-user-id="${user.id}" title="Editar PIN">
-                <i class="fas fa-key"></i>
+              <button class="btn btn-sm btn-info edit-user-btn" data-user-id="${user.id}" title="Editar usuario">
+                <i class="fas fa-edit"></i>
               </button>
               <button class="btn btn-sm btn-warning block-btn" data-user-id="${user.id}" title="Bloquear usuario">
                 <i class="fas fa-lock"></i>
@@ -821,22 +1069,29 @@
       });
     }
 
-    function showEditPinModal(userId) {
+    function showEditUserModal(userId) {
       const user = activeUsersData.find(u => u.id === userId);
       if (!user) return;
       
       document.getElementById('editUserId').value = userId;
-      document.getElementById('newPin').value = '';
-      document.getElementById('editPinModal').classList.add('active');
+      document.getElementById('editUsername').value = user.username;
+      document.getElementById('editPin').value = user.pin;
+      document.getElementById('editUserModal').classList.add('active');
     }
 
-    async function savePinChanges(e) {
+    async function saveUserChanges(e) {
       e.preventDefault();
       
       const userId = document.getElementById('editUserId').value;
-      const newPin = document.getElementById('newPin').value;
+      const newUsername = document.getElementById('editUsername').value.trim();
+      const newPin = document.getElementById('editPin').value;
       
-      if (!userId || !newPin || newPin.length !== 4 || !/^\d+$/.test(newPin)) {
+      if (!userId || !newUsername) {
+        showInfoModal('Error', 'El nombre de usuario es obligatorio');
+        return;
+      }
+      
+      if (!newPin || newPin.length !== 4 || !/^\d+$/.test(newPin)) {
         showInfoModal('Error', 'El PIN debe ser de 4 dígitos numéricos');
         return;
       }
@@ -846,17 +1101,18 @@
         const userRef = doc(db, "LoanUsers", userId);
         
         await updateDoc(userRef, {
+          username: newUsername,
           pin: newPin,
           updatedAt: Timestamp.now(),
           updatedBy: currentUser.uid
         });
         
-        showInfoModal('Éxito', 'PIN actualizado correctamente');
+        showInfoModal('Éxito', 'Usuario actualizado correctamente');
         closeModal();
         loadUsersData();
       } catch (error) {
-        console.error("Error updating PIN: ", error);
-        showInfoModal('Error', 'Error al actualizar el PIN');
+        console.error("Error updating user: ", error);
+        showInfoModal('Error', 'Error al actualizar el usuario');
       } finally {
         hideLoading();
       }
