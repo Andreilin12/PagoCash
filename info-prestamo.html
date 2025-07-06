@@ -316,27 +316,47 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
-      // Check for remembered session from main system
-      const rememberedUser = localStorage.getItem('rememberedUser');
+      // Load settings from localStorage (shared with main system)
       const storedSettings = localStorage.getItem('userSettings');
-      
       if (storedSettings) {
-        userSettings = JSON.parse(storedSettings);
-        applyTheme();
-        updateFontSize();
+        try {
+          userSettings = JSON.parse(storedSettings);
+          applyTheme();
+          updateFontSize();
+        } catch (e) {
+          console.error("Error loading settings:", e);
+        }
       }
 
-      // Set up authentication state observer
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          currentUser = user;
-          loadClientData();
-        } else {
-          // Redirect to login if not authenticated
-          window.location.href = 'index.html';
-        }
-      });
+      // Check for active session
+      checkCurrentSession();
     });
+
+    // Check current session from main system
+    async function checkCurrentSession() {
+      showLoading();
+      
+      try {
+        // Get current user from localStorage (set by main system)
+        const sessionData = localStorage.getItem('currentLoanUser');
+        if (!sessionData) {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        const userData = JSON.parse(sessionData);
+        currentUser = userData;
+        
+        // Load company data for this user
+        await loadCompanyData();
+      } catch (error) {
+        console.error("Session check error:", error);
+        showError("Error al verificar la sesión");
+        window.location.href = 'index.html';
+      } finally {
+        hideLoading();
+      }
+    }
 
     // Apply selected theme from main system
     function applyTheme() {
@@ -364,70 +384,53 @@
       document.body.classList.add(`font-${userSettings.fontSize}`);
     }
 
-    // Load client data and company information
-    async function loadClientData() {
+    // Load company data for the current user
+    async function loadCompanyData() {
       try {
         showLoading();
         
-        // First find the client associated with this user
-        let q = query(collection(db, "LoanUsers"), where("username", "==", currentUser.email || currentUser.uid));
-        let querySnapshot = await getDocs(q);
+        if (!currentUser || !currentUser.clientId) {
+          showError("No se encontró información del cliente");
+          return;
+        }
+
+        // Try to get company info from loan first
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("client.id", "==", currentUser.clientId),
+          where("status", "in", ["active", "overdue"])
+        );
         
-        if (querySnapshot.empty) {
-          // Fallback to old system collection
-          q = query(collection(db, "Users"), where("username", "==", currentUser.email || currentUser.uid));
-          querySnapshot = await getDocs(q);
+        const loansSnapshot = await getDocs(loansQuery);
+        
+        if (!loansSnapshot.empty) {
+          const loanDoc = loansSnapshot.docs[0];
+          currentLoan = { id: loanDoc.id, ...loanDoc.data() };
           
-          if (querySnapshot.empty) {
-            showError("No se encontró información del cliente");
+          if (currentLoan.companyInfo) {
+            displayCompanyInfo(currentLoan.companyInfo);
             return;
           }
         }
 
-        const userDoc = querySnapshot.docs[0];
-        const clientData = userDoc.data();
-        const clientId = clientData.clientId || userDoc.id;
-
-        // Now find active loans for this client
-        q = query(collection(db, "Loans"), 
-             where("client.id", "==", clientId),
-             where("status", "in", ["active", "overdue"]));
+        // Fallback to general company info
+        const companyRef = doc(db, "informacionCompany", "default");
+        const companySnap = await getDoc(companyRef);
         
-        const loansSnapshot = await getDocs(q);
-        
-        if (loansSnapshot.empty) {
-          showError("No se encontró préstamo activo asociado");
-          return;
-        }
-
-        // Take the first loan found
-        const loanDoc = loansSnapshot.docs[0];
-        currentLoan = { id: loanDoc.id, ...loanDoc.data() };
-
-        // Load company information (either from loan or company collection)
-        if (currentLoan.companyInfo) {
-          // If company info is embedded in loan
-          displayCompanyInfo(currentLoan.companyInfo);
+        if (companySnap.exists()) {
+          displayCompanyInfo(companySnap.data());
         } else {
-          // Load from separate company collection
-          const companyRef = doc(db, "informacionCompany", "default");
-          const companySnap = await getDoc(companyRef);
-          
-          if (companySnap.exists()) {
-            displayCompanyInfo(companySnap.data());
-          } else {
-            // Fallback to minimal company info
-            displayCompanyInfo({
-              nombreEmpresa: "Empresa de Préstamos",
-              rnc: "N/A",
-              direccion: "N/A",
-              telefono: "N/A"
-            });
-          }
+          displayCompanyInfo({
+            nombreEmpresa: "Empresa de Préstamos",
+            rnc: "N/A",
+            direccion: "N/A",
+            telefono: "N/A",
+            fotoURL: ""
+          });
         }
       } catch (error) {
-        console.error("Error loading data:", error);
-        showError("Error al cargar los datos");
+        console.error("Error loading company data:", error);
+        showError("Error al cargar información de la empresa");
       } finally {
         hideLoading();
       }
