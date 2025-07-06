@@ -19,6 +19,22 @@
       --warning-color: #f39c12;
       --success-color: #2ecc71;
       --info-color: #3498db;
+      --modal-bg: rgba(0, 0, 0, 0.8);
+      --modal-content-bg: #2a2a3f;
+      --modal-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      --modal-border-radius: 12px;
+      --modal-padding: 2rem;
+      --modal-title-size: 1.5rem;
+      --modal-message-size: 1rem;
+      --modal-footer-gap: 1rem;
+      --alert-success-bg: rgba(46, 204, 113, 0.2);
+      --alert-success-border: #2ecc71;
+      --alert-error-bg: rgba(231, 76, 60, 0.2);
+      --alert-error-border: #e74c3c;
+      --alert-warning-bg: rgba(243, 156, 18, 0.2);
+      --alert-warning-border: #f39c12;
+      --alert-info-bg: rgba(52, 152, 219, 0.2);
+      --alert-info-border: #3498db;
     }
 
     * {
@@ -75,6 +91,13 @@
       background-color: var(--background-color);
       color: var(--text-color);
       font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
     }
 
     .btn {
@@ -85,7 +108,7 @@
       padding: 0.75rem 1.5rem;
       cursor: pointer;
       font-size: 1rem;
-      transition: background-color 0.3s ease;
+      transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -97,6 +120,13 @@
 
     .btn:hover {
       background-color: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .btn-block {
@@ -106,6 +136,10 @@
 
     .btn-success {
       background-color: var(--success-color);
+    }
+
+    .btn-success:hover {
+      background-color: #27ae60;
     }
 
     .btn-danger {
@@ -119,6 +153,10 @@
     .btn-secondary {
       background-color: var(--secondary-color);
       border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #3a3a4f;
     }
 
     /* Image selector styles */
@@ -253,37 +291,95 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
+      background-color: var(--modal-bg);
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     .modal.active {
       display: flex;
+      opacity: 1;
     }
 
     .modal-content {
-      background-color: var(--secondary-color);
-      padding: 2rem;
-      border-radius: 12px;
+      background-color: var(--modal-content-bg);
+      padding: var(--modal-padding);
+      border-radius: var(--modal-border-radius);
       width: 90%;
       max-width: 500px;
       max-height: 90vh;
       overflow-y: auto;
+      box-shadow: var(--modal-shadow);
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal.active .modal-content {
+      transform: translateY(0);
     }
 
     .modal-title {
       margin-bottom: 1.5rem;
       color: var(--primary-color);
       text-align: center;
+      font-size: var(--modal-title-size);
+      font-weight: 600;
+    }
+
+    .modal-message {
+      margin-bottom: 1.5rem;
+      font-size: var(--modal-message-size);
+      line-height: 1.5;
+      color: var(--text-light);
     }
 
     .modal-footer {
       display: flex;
       justify-content: flex-end;
-      gap: 1rem;
+      gap: var(--modal-footer-gap);
       margin-top: 1.5rem;
+    }
+
+    /* Alert styles */
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      border-left: 4px solid transparent;
+    }
+
+    .alert i {
+      margin-right: 0.75rem;
+      font-size: 1.5rem;
+    }
+
+    .alert-success {
+      background-color: var(--alert-success-bg);
+      border-left-color: var(--alert-success-border);
+      color: #d1f5e0;
+    }
+
+    .alert-error {
+      background-color: var(--alert-error-bg);
+      border-left-color: var(--alert-error-border);
+      color: #ffd3d3;
+    }
+
+    .alert-warning {
+      background-color: var(--alert-warning-bg);
+      border-left-color: var(--alert-warning-border);
+      color: #ffe8c5;
+    }
+
+    .alert-info {
+      background-color: var(--alert-info-bg);
+      border-left-color: var(--alert-info-border);
+      color: #d1e8ff;
     }
 
     /* Loading overlay */
@@ -343,6 +439,13 @@
       padding: 1.5rem;
       margin-bottom: 1.5rem;
       position: relative;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .bank-account-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
     .remove-bank-account {
@@ -359,10 +462,12 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: all 0.3s ease;
     }
 
     .remove-bank-account:hover {
       background-color: #c0392b;
+      transform: scale(1.1);
     }
 
     .bank-logo-container {
@@ -381,6 +486,12 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      background-color: var(--background-color);
+    }
+
+    .bank-logo-preview i {
+      font-size: 1.5rem;
+      color: var(--primary-color);
     }
 
     .bank-logo-preview img {
@@ -396,10 +507,103 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.9rem;
+      transition: all 0.3s ease;
     }
 
     .bank-logo-upload-btn:hover {
       border-color: var(--primary-color);
+      background-color: rgba(26, 188, 156, 0.1);
+    }
+
+    /* Confirmation dialog styles */
+    .confirmation-dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background-color: var(--modal-content-bg);
+      padding: 2rem;
+      border-radius: var(--modal-border-radius);
+      box-shadow: var(--modal-shadow);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      max-width: 90%;
+      width: 400px;
+    }
+
+    .confirmation-dialog.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .confirmation-title {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .confirmation-message {
+      margin-bottom: 1.5rem;
+      color: var(--text-light);
+    }
+
+    .confirmation-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    /* Toast notification styles */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      z-index: 3000;
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+      max-width: 350px;
+    }
+
+    .toast.active {
+      transform: translateX(0);
+    }
+
+    .toast i {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+    }
+
+    .toast-success {
+      background-color: var(--alert-success-bg);
+      border-left: 4px solid var(--alert-success-border);
+      color: #d1f5e0;
+    }
+
+    .toast-error {
+      background-color: var(--alert-error-bg);
+      border-left: 4px solid var(--alert-error-border);
+      color: #ffd3d3;
+    }
+
+    .toast-warning {
+      background-color: var(--alert-warning-bg);
+      border-left: 4px solid var(--alert-warning-border);
+      color: #ffe8c5;
+    }
+
+    .toast-info {
+      background-color: var(--alert-info-bg);
+      border-left: 4px solid var(--alert-info-border);
+      color: #d1e8ff;
     }
 
     /* Responsive design */
@@ -420,6 +624,22 @@
 
       .bank-account-card {
         padding: 1rem;
+      }
+
+      .modal-content {
+        padding: 1.5rem;
+      }
+
+      .confirmation-dialog {
+        width: 95%;
+        padding: 1.5rem;
+      }
+
+      .toast {
+        max-width: 90%;
+        left: 5%;
+        right: 5%;
+        top: 10px;
       }
     }
   </style>
@@ -494,7 +714,7 @@
   <div class="modal" id="confirmModal">
     <div class="modal-content">
       <h3 class="modal-title" id="confirmModalTitle"></h3>
-      <p id="confirmModalMessage"></p>
+      <p class="modal-message" id="confirmModalMessage"></p>
       <div class="modal-footer">
         <button id="confirmModalButton" class="btn btn-success">Confirmar</button>
         <button onclick="closeModal()" class="btn btn-danger">Cancelar</button>
@@ -506,7 +726,7 @@
   <div class="modal" id="infoModal">
     <div class="modal-content">
       <h3 class="modal-title" id="infoModalTitle"></h3>
-      <p id="infoModalMessage"></p>
+      <p class="modal-message" id="infoModalMessage"></p>
       <div class="modal-footer">
         <button onclick="closeModal()" class="btn">Aceptar</button>
       </div>
@@ -516,6 +736,22 @@
   <!-- Loading overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="loader"></div>
+  </div>
+
+  <!-- Confirmation dialog -->
+  <div class="confirmation-dialog" id="confirmationDialog">
+    <h4 class="confirmation-title" id="confirmationTitle">Confirmación</h4>
+    <p class="confirmation-message" id="confirmationMessage"></p>
+    <div class="confirmation-buttons">
+      <button id="confirmationCancelBtn" class="btn btn-secondary">Cancelar</button>
+      <button id="confirmationConfirmBtn" class="btn btn-danger">Eliminar</button>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toastNotification">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Operación realizada con éxito</span>
   </div>
 
   <!-- Firebase SDK -->
@@ -579,6 +815,17 @@
       
       // Envío del formulario
       document.getElementById('companyConfigForm').addEventListener('submit', saveCompanyConfig);
+      
+      // Configurar botones de confirmación
+      document.getElementById('confirmationCancelBtn').addEventListener('click', () => {
+        document.getElementById('confirmationDialog').classList.remove('active');
+      });
+      
+      document.getElementById('confirmationConfirmBtn').addEventListener('click', () => {
+        const accountId = parseInt(document.getElementById('confirmationDialog').dataset.accountId);
+        removeBankAccountConfirmed(accountId);
+        document.getElementById('confirmationDialog').classList.remove('active');
+      });
     }
 
     // Manejar la subida del logo
@@ -588,7 +835,7 @@
       
       // Verificar que sea una imagen PNG
       if (file.type !== 'image/png') {
-        showInfoModal('Error', 'Por favor, selecciona una imagen en formato PNG.');
+        showToast('Error', 'Por favor, selecciona una imagen en formato PNG.', 'error');
         e.target.value = ''; // Limpiar el input
         return;
       }
@@ -620,7 +867,7 @@
       
       // Plantilla HTML para la cuenta bancaria
       bankAccountElement.innerHTML = `
-        <button type="button" class="remove-bank-account" onclick="removeBankAccount(${bankAccountId})">
+        <button type="button" class="remove-bank-account" onclick="showConfirmationDialog(${bankAccountId})">
           <i class="fas fa-times"></i>
         </button>
         
@@ -699,7 +946,7 @@
       
       // Verificar que sea una imagen
       if (!file.type.match('image.*')) {
-        showInfoModal('Error', 'Por favor, selecciona una imagen válida.');
+        showToast('Error', 'Por favor, selecciona una imagen válida.', 'error');
         e.target.value = ''; // Limpiar el input
         return;
       }
@@ -720,17 +967,26 @@
       }
     }
 
-    // Eliminar cuenta bancaria
-    window.removeBankAccount = function(bankAccountId) {
-      if (confirm('¿Estás seguro de que deseas eliminar esta cuenta bancaria?')) {
-        // Eliminar del DOM
-        const element = document.querySelector(`.bank-account-card[data-id="${bankAccountId}"]`);
-        if (element) element.remove();
-        
-        // Eliminar de la lista
-        bankAccounts = bankAccounts.filter(acc => acc.id !== bankAccountId);
-      }
+    // Mostrar diálogo de confirmación para eliminar cuenta bancaria
+    window.showConfirmationDialog = function(bankAccountId) {
+      const dialog = document.getElementById('confirmationDialog');
+      dialog.dataset.accountId = bankAccountId;
+      document.getElementById('confirmationMessage').textContent = 
+        '¿Estás seguro de que deseas eliminar esta cuenta bancaria? Esta acción no se puede deshacer.';
+      dialog.classList.add('active');
     };
+
+    // Eliminar cuenta bancaria confirmada
+    function removeBankAccountConfirmed(bankAccountId) {
+      // Eliminar del DOM
+      const element = document.querySelector(`.bank-account-card[data-id="${bankAccountId}"]`);
+      if (element) element.remove();
+      
+      // Eliminar de la lista
+      bankAccounts = bankAccounts.filter(acc => acc.id !== bankAccountId);
+      
+      showToast('Éxito', 'Cuenta bancaria eliminada correctamente.', 'success');
+    }
 
     // Cargar datos de la empresa
     async function loadCompanyData() {
@@ -774,7 +1030,7 @@
         }
       } catch (error) {
         console.error("Error al cargar datos de la empresa:", error);
-        // No mostrar mensaje de error para no confundir al usuario
+        showToast('Error', 'No se pudieron cargar los datos de la empresa.', 'error');
       } finally {
         hideLoading();
       }
@@ -795,7 +1051,7 @@
         
         // Validar campos obligatorios
         if (!companyName || !companyRNC || !companyPhone || !companyAddress) {
-          showInfoModal('Error', 'Todos los campos son obligatorios.');
+          showToast('Error', 'Todos los campos son obligatorios.', 'error');
           return;
         }
         
@@ -828,7 +1084,7 @@
           
           // Validar campos obligatorios
           if (!bankName || !accountNumber || !accountHolder) {
-            showInfoModal('Error', 'Todos los campos de las cuentas bancarias son obligatorios.');
+            showToast('Error', 'Todos los campos de las cuentas bancarias son obligatorios.', 'error');
             return;
           }
           
@@ -873,11 +1129,11 @@
         // Guardar en Firestore
         await db.collection("informacionCompany").doc(currentUser.uid).set(companyData);
         
-        showInfoModal('Éxito', 'Datos de la empresa guardados correctamente.');
+        showToast('Éxito', 'Datos de la empresa guardados correctamente.', 'success');
         hasExistingData = true;
       } catch (error) {
         console.error("Error al guardar datos de la empresa:", error);
-        showInfoModal('Error', 'Ocurrió un error al guardar los datos: ' + error.message);
+        showToast('Error', 'Ocurrió un error al guardar los datos: ' + error.message, 'error');
       } finally {
         hideLoading();
       }
@@ -913,6 +1169,32 @@
       document.getElementById('infoModalTitle').textContent = title;
       document.getElementById('infoModalMessage').textContent = message;
       document.getElementById('infoModal').classList.add('active');
+    }
+
+    // Mostrar toast notification
+    function showToast(title, message, type = 'success') {
+      const toast = document.getElementById('toastNotification');
+      const toastMessage = document.getElementById('toastMessage');
+      
+      // Configurar el toast según el tipo
+      toast.className = 'toast';
+      toast.classList.add(`toast-${type}`);
+      
+      // Configurar icono según el tipo
+      let icon = 'fa-check-circle';
+      if (type === 'error') icon = 'fa-exclamation-circle';
+      if (type === 'warning') icon = 'fa-exclamation-triangle';
+      if (type === 'info') icon = 'fa-info-circle';
+      
+      toast.innerHTML = `<i class="fas ${icon}"></i><span id="toastMessage">${message}</span>`;
+      
+      // Mostrar el toast
+      toast.classList.add('active');
+      
+      // Ocultar después de 5 segundos
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 5000);
     }
 
     // Mostrar loading overlay
