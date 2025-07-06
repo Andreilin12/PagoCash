@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Información de la Empresa</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      color: var(--primary-color);
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .company-card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: transform 0.3s ease;
+      border: 1px solid var(--border-color);
+    }
+
+    .company-card:active {
+      transform: scale(0.98);
+    }
+
+    .company-logo-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .company-logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 12px;
+      background-color: var(--background-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 3px solid var(--primary-color);
+    }
+
+    .company-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .company-logo i {
+      font-size: 3.5rem;
+      color: var(--primary-color);
+    }
+
+    .company-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-icon {
+      font-size: 1.2rem;
+      color: var(--primary-color);
+      margin-right: 1rem;
+      margin-top: 0.2rem;
+      min-width: 24px;
+    }
+
+    .info-content {
+      flex: 1;
+    }
+
+    .info-label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 1rem;
+      font-weight: 500;
+      word-break: break-word;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--primary-color);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Efectos especiales */
+    .company-card:hover {
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .info-item:hover .info-icon {
+      transform: scale(1.1);
+      transition: transform 0.2s ease;
+    }
+
+    /* Tema claro */
+    .light-theme {
+      --background-color: #f5f5f5;
+      --text-color: #333333;
+      --text-light: #666666;
+      --border-color: #dddddd;
+      --card-bg: #ffffff;
+      --secondary-color: #f0f0f0;
+    }
+
+    /* Tamaños de fuente */
+    .font-small {
+      font-size: 14px;
+    }
+
+    .font-medium {
+      font-size: 16px;
+    }
+
+    .font-large {
+      font-size: 18px;
+    }
+
+    /* Responsive para tablets */
+    @media (min-width: 600px) {
+      body {
+        padding: 30px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      
+      .company-logo {
+        width: 150px;
+        height: 150px;
+      }
+      
+      .company-name {
+        font-size: 1.8rem;
+      }
+      
+      .info-value {
+        font-size: 1.1rem;
+      }
+    }
+
+    /* Animación de carga */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .company-card {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Información de la Empresa</h1>
+    <p>Datos corporativos y de contacto</p>
+  </div>
+  
+  <div class="company-card">
+    <div class="company-logo-container">
+      <div class="company-logo" id="companyLogo">
+        <i class="fas fa-building"></i>
+      </div>
+    </div>
+    
+    <h2 class="company-name" id="companyName">Cargando...</h2>
+    
+    <div class="info-item">
+      <div class="info-icon">
+        <i class="fas fa-id-card"></i>
+      </div>
+      <div class="info-content">
+        <div class="info-label">RNC</div>
+        <div class="info-value" id="companyRNC">Cargando...</div>
+      </div>
+    </div>
+    
+    <div class="info-item">
+      <div class="info-icon">
+        <i class="fas fa-map-marker-alt"></i>
+      </div>
+      <div class="info-content">
+        <div class="info-label">Dirección</div>
+        <div class="info-value" id="companyAddress">Cargando...</div>
+      </div>
+    </div>
+    
+    <div class="info-item">
+      <div class="info-icon">
+        <i class="fas fa-phone"></i>
+      </div>
+      <div class="info-content">
+        <div class="info-label">Teléfono</div>
+        <div class="info-value" id="companyPhone">Cargando...</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection,
+      query,
+      where,
+      getDocs,
+      doc, 
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+    let companyData = null;
+    let userSettings = {
+      theme: 'dark',
+      customColor: '#15a086',
+      language: 'es',
+      fontSize: 'medium'
+    };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check for remembered session
+      const rememberedUser = localStorage.getItem('rememberedUser');
+      if (rememberedUser) {
+        try {
+          const userData = JSON.parse(rememberedUser);
+          document.getElementById('loginUsername').value = userData.username;
+          document.getElementById('loginPin').value = userData.pin;
+        } catch (error) {
+          console.error("Error al cargar sesión recordada:", error);
+          localStorage.removeItem('rememberedUser');
+        }
+      }
+
+      // Set up authentication state observer
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          loadUserSettings().then(() => {
+            loadCompanyData();
+          });
+        } else {
+          // Redirect to login if not authenticated
+          window.location.href = 'index.html';
+        }
+      });
+    });
+
+    // Load user settings from localStorage
+    async function loadUserSettings() {
+      const settings = localStorage.getItem('userSettings');
+      if (settings) {
+        userSettings = JSON.parse(settings);
+        applyTheme();
+        updateFontSize();
+      }
+    }
+
+    // Apply selected theme
+    function applyTheme() {
+      document.body.classList.remove('light-theme');
+      document.documentElement.style.setProperty('--primary-color', '#15a086');
+      document.documentElement.style.setProperty('--primary-dark', '#127c68');
+
+      if (userSettings.theme === 'light') {
+        document.body.classList.add('light-theme');
+      } else if (userSettings.theme === 'custom') {
+        document.documentElement.style.setProperty('--primary-color', userSettings.customColor);
+        document.documentElement.style.setProperty('--primary-dark', darkenColor(userSettings.customColor, 0.8));
+      }
+    }
+
+    // Darken color for theme
+    function darkenColor(hex, factor) {
+      hex = hex.replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16) * factor;
+      const g = parseInt(hex.substr(2, 2), 16) * factor;
+      const b = parseInt(hex.substr(4, 2), 16) * factor;
+      return `#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`;
+    }
+
+    // Update font size
+    function updateFontSize() {
+      document.body.classList.remove('font-small', 'font-medium', 'font-large');
+      document.body.classList.add(`font-${userSettings.fontSize}`);
+    }
+
+    async function loadCompanyData() {
+      try {
+        showLoading();
+        
+        if (!currentUser) return;
+        
+        // Primero buscamos el cliente asociado a este usuario
+        let q = query(collection(db, "LoanUsers"), where("username", "==", currentUser.email || currentUser.uid));
+        let querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          // Si no encontramos en LoanUsers, buscamos en Users (sistema anterior)
+          q = query(collection(db, "Users"), where("username", "==", currentUser.email || currentUser.uid));
+          querySnapshot = await getDocs(q);
+          
+          if (querySnapshot.empty) {
+            showError("No se encontró información del cliente");
+            return;
+          }
+        }
+
+        const userDoc = querySnapshot.docs[0];
+        const clientId = userDoc.data().clientId || userDoc.id;
+
+        // Buscar préstamos activos para este cliente
+        q = query(collection(db, "Loans"), 
+             where("client.id", "==", clientId),
+             where("status", "in", ["active", "overdue"]));
+        
+        const loansSnapshot = await getDocs(q);
+        
+        if (loansSnapshot.empty) {
+          showError("No se encontró préstamo activo asociado a este usuario");
+          return;
+        }
+
+        // Tomar el primer préstamo encontrado
+        const loanDoc = loansSnapshot.docs[0];
+        const loanData = loanDoc.data();
+
+        // Ahora cargamos la información de la empresa
+        const companyRef = doc(db, "informacionCompany", "default"); // O el ID correspondiente
+        const companySnap = await getDoc(companyRef);
+        
+        if (companySnap.exists()) {
+          companyData = companySnap.data();
+          displayCompanyInfo(companyData);
+        } else {
+          // Mostrar información básica si no hay datos específicos
+          displayCompanyInfo({
+            nombreEmpresa: loanData.companyName || "Empresa de Préstamos",
+            rnc: loanData.companyRNC || "N/A",
+            direccion: loanData.companyAddress || "N/A",
+            telefono: loanData.companyPhone || "N/A",
+            fotoURL: loanData.companyLogo || null
+          });
+        }
+      } catch (error) {
+        console.error("Error loading company data: ", error);
+        showError("Error al cargar los datos de la empresa");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function displayCompanyInfo(data) {
+      // Set company name
+      document.getElementById('companyName').textContent = data.nombreEmpresa || 'Nombre no disponible';
+      
+      // Set RNC
+      document.getElementById('companyRNC').textContent = data.rnc || 'N/A';
+      
+      // Set address
+      document.getElementById('companyAddress').textContent = data.direccion || 'N/A';
+      
+      // Set phone
+      document.getElementById('companyPhone').textContent = data.telefono || 'N/A';
+      
+      // Set logo
+      const companyLogo = document.getElementById('companyLogo');
+      if (data.fotoURL) {
+        companyLogo.innerHTML = `<img src="${data.fotoURL}" alt="Logo de la empresa">`;
+      } else {
+        companyLogo.innerHTML = '<i class="fas fa-building"></i>';
+      }
+    }
+
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    function showError(message) {
+      alert(`Error: ${message}`);
+    }
+  </script> 
+</body>
+</html>
