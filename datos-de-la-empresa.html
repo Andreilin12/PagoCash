@@ -116,6 +116,11 @@
       background-color: #c0392b;
     }
 
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      border: 1px solid var(--border-color);
+    }
+
     /* Image selector styles */
     .image-selector-container {
       margin-top: 1rem;
@@ -313,6 +318,90 @@
       100% { transform: rotate(360deg); }
     }
 
+    /* Bank accounts styles */
+    .bank-accounts-container {
+      margin-top: 2rem;
+      border-top: 2px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .bank-account-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .bank-account-title {
+      color: var(--primary-color);
+      font-size: 1.2rem;
+    }
+
+    .bank-account-card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .remove-bank-account {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .remove-bank-account:hover {
+      background-color: #c0392b;
+    }
+
+    .bank-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .bank-logo-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .bank-logo-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .bank-logo-upload-btn {
+      padding: 0.5rem 1rem;
+      background-color: var(--background-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .bank-logo-upload-btn:hover {
+      border-color: var(--primary-color);
+    }
+
     /* Responsive design */
     @media (max-width: 768px) {
       .container {
@@ -327,6 +416,10 @@
       .upload-icon-btn {
         width: 80px;
         height: 80px;
+      }
+
+      .bank-account-card {
+        padding: 1rem;
       }
     }
   </style>
@@ -375,6 +468,20 @@
       <div class="form-group">
         <label for="companyAddress">Dirección</label>
         <input type="text" id="companyAddress" class="form-control" required>
+      </div>
+      
+      <!-- Cuentas Bancarias -->
+      <div class="bank-accounts-container">
+        <div class="bank-account-header">
+          <h3 class="bank-account-title"><i class="fas fa-university"></i> Cuentas Bancarias</h3>
+          <button type="button" id="addBankAccountBtn" class="btn btn-secondary">
+            <i class="fas fa-plus"></i> Agregar Cuenta
+          </button>
+        </div>
+        
+        <div id="bankAccountsList">
+          <!-- Las cuentas bancarias se agregarán aquí dinámicamente -->
+        </div>
       </div>
       
       <button type="submit" class="btn btn-success btn-block">
@@ -439,6 +546,8 @@
     let currentUser = null;
     let companyLogoFile = null;
     let hasExistingData = false;
+    let bankAccounts = [];
+    let nextBankAccountId = 1;
 
     // Inicializar la aplicación cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', () => {
@@ -464,6 +573,9 @@
       
       // Cambio de imagen seleccionada
       document.getElementById('companyLogoUpload').addEventListener('change', handleLogoUpload);
+      
+      // Botón para agregar cuenta bancaria
+      document.getElementById('addBankAccountBtn').addEventListener('click', addBankAccount);
       
       // Envío del formulario
       document.getElementById('companyConfigForm').addEventListener('submit', saveCompanyConfig);
@@ -496,6 +608,130 @@
       reader.readAsDataURL(file);
     }
 
+    // Agregar nueva cuenta bancaria
+    function addBankAccount(bankData = null) {
+      const bankAccountId = nextBankAccountId++;
+      const bankAccountsList = document.getElementById('bankAccountsList');
+      
+      // Crear elemento de cuenta bancaria
+      const bankAccountElement = document.createElement('div');
+      bankAccountElement.className = 'bank-account-card';
+      bankAccountElement.dataset.id = bankAccountId;
+      
+      // Plantilla HTML para la cuenta bancaria
+      bankAccountElement.innerHTML = `
+        <button type="button" class="remove-bank-account" onclick="removeBankAccount(${bankAccountId})">
+          <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="form-group">
+          <label for="bankName_${bankAccountId}">Nombre del Banco</label>
+          <input type="text" id="bankName_${bankAccountId}" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Logo del Banco (Opcional)</label>
+          <div class="bank-logo-container">
+            <div class="bank-logo-preview" id="bankLogoPreview_${bankAccountId}">
+              <i class="fas fa-university"></i>
+            </div>
+            <button type="button" class="bank-logo-upload-btn" id="bankLogoUploadBtn_${bankAccountId}">
+              <i class="fas fa-image"></i> Seleccionar Logo
+            </button>
+            <input type="file" id="bankLogoUpload_${bankAccountId}" class="hidden-file-input" accept="image/*">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="accountNumber_${bankAccountId}">Número de Cuenta</label>
+          <input type="text" id="accountNumber_${bankAccountId}" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="accountType_${bankAccountId}">Tipo de Cuenta</label>
+          <select id="accountType_${bankAccountId}" class="form-control" required>
+            <option value="ahorro">Ahorro</option>
+            <option value="corriente">Corriente</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="accountHolder_${bankAccountId}">Nombre del Titular</label>
+          <input type="text" id="accountHolder_${bankAccountId}" class="form-control" required>
+        </div>
+      `;
+      
+      // Agregar al DOM
+      bankAccountsList.appendChild(bankAccountElement);
+      
+      // Configurar event listeners para esta cuenta
+      const uploadBtn = document.getElementById(`bankLogoUploadBtn_${bankAccountId}`);
+      const fileInput = document.getElementById(`bankLogoUpload_${bankAccountId}`);
+      
+      uploadBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => handleBankLogoUpload(e, bankAccountId));
+      
+      // Si hay datos existentes, llenar el formulario
+      if (bankData) {
+        document.getElementById(`bankName_${bankAccountId}`).value = bankData.bankName || '';
+        document.getElementById(`accountNumber_${bankAccountId}`).value = bankData.accountNumber || '';
+        document.getElementById(`accountType_${bankAccountId}`).value = bankData.accountType || 'ahorro';
+        document.getElementById(`accountHolder_${bankAccountId}`).value = bankData.accountHolder || '';
+        
+        if (bankData.logoURL) {
+          const preview = document.getElementById(`bankLogoPreview_${bankAccountId}`);
+          preview.innerHTML = `<img src="${bankData.logoURL}" alt="Logo del banco">`;
+        }
+      }
+      
+      // Agregar a la lista de cuentas
+      bankAccounts.push({
+        id: bankAccountId,
+        logoFile: null,
+        logoURL: bankData ? bankData.logoURL : null
+      });
+    }
+
+    // Manejar la subida del logo del banco
+    function handleBankLogoUpload(e, bankAccountId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      // Verificar que sea una imagen
+      if (!file.type.match('image.*')) {
+        showInfoModal('Error', 'Por favor, selecciona una imagen válida.');
+        e.target.value = ''; // Limpiar el input
+        return;
+      }
+      
+      // Actualizar la cuenta bancaria con el archivo
+      const bankAccount = bankAccounts.find(acc => acc.id === bankAccountId);
+      if (bankAccount) {
+        bankAccount.logoFile = file;
+        bankAccount.logoURL = null; // Resetear URL si ya existía una
+        
+        // Mostrar vista previa
+        const preview = document.getElementById(`bankLogoPreview_${bankAccountId}`);
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `<img src="${e.target.result}" alt="Logo del banco">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Eliminar cuenta bancaria
+    window.removeBankAccount = function(bankAccountId) {
+      if (confirm('¿Estás seguro de que deseas eliminar esta cuenta bancaria?')) {
+        // Eliminar del DOM
+        const element = document.querySelector(`.bank-account-card[data-id="${bankAccountId}"]`);
+        if (element) element.remove();
+        
+        // Eliminar de la lista
+        bankAccounts = bankAccounts.filter(acc => acc.id !== bankAccountId);
+      }
+    };
+
     // Cargar datos de la empresa
     async function loadCompanyData() {
       try {
@@ -524,6 +760,13 @@
             preview.src = companyData.fotoURL;
             preview.style.display = 'block';
             defaultLogo.style.display = 'none';
+          }
+          
+          // Cargar cuentas bancarias si existen
+          if (companyData.bankAccounts && companyData.bankAccounts.length > 0) {
+            companyData.bankAccounts.forEach(account => {
+              addBankAccount(account);
+            });
           }
         } else {
           hasExistingData = false;
@@ -571,6 +814,42 @@
           logoUrl = preview.src;
         }
         
+        // Procesar cuentas bancarias
+        const bankAccountsData = [];
+        
+        for (const bankAccount of bankAccounts) {
+          const accountId = bankAccount.id;
+          
+          // Obtener datos del formulario
+          const bankName = document.getElementById(`bankName_${accountId}`).value.trim();
+          const accountNumber = document.getElementById(`accountNumber_${accountId}`).value.trim();
+          const accountType = document.getElementById(`accountType_${accountId}`).value;
+          const accountHolder = document.getElementById(`accountHolder_${accountId}`).value.trim();
+          
+          // Validar campos obligatorios
+          if (!bankName || !accountNumber || !accountHolder) {
+            showInfoModal('Error', 'Todos los campos de las cuentas bancarias son obligatorios.');
+            return;
+          }
+          
+          let bankLogoUrl = bankAccount.logoURL;
+          
+          // Subir nuevo logo del banco si se seleccionó uno
+          if (bankAccount.logoFile) {
+            const storageRef = storage.ref(`bank_logos/${currentUser.uid}/${accountId}`);
+            const snapshot = await storageRef.put(bankAccount.logoFile);
+            bankLogoUrl = await snapshot.ref.getDownloadURL();
+          }
+          
+          bankAccountsData.push({
+            bankName,
+            accountNumber,
+            accountType,
+            accountHolder,
+            logoURL: bankLogoUrl
+          });
+        }
+        
         // Crear objeto con los datos de la empresa
         const companyData = {
           nombreEmpresa: companyName,
@@ -584,6 +863,11 @@
         // Solo agregar fotoURL si existe
         if (logoUrl) {
           companyData.fotoURL = logoUrl;
+        }
+        
+        // Agregar cuentas bancarias si existen
+        if (bankAccountsData.length > 0) {
+          companyData.bankAccounts = bankAccountsData;
         }
         
         // Guardar en Firestore
