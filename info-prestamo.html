@@ -169,16 +169,6 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Efectos especiales */
-    .company-card:hover {
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-    }
-
-    .info-item:hover .info-icon {
-      transform: scale(1.1);
-      transition: transform 0.2s ease;
-    }
-
     /* Tema claro */
     .light-theme {
       --background-color: #f5f5f5;
@@ -313,36 +303,34 @@
     const auth = getAuth(app);
 
     let currentUser = null;
+    let currentLoan = null;
     let companyData = null;
     let userSettings = {
       theme: 'dark',
       customColor: '#15a086',
       language: 'es',
-      fontSize: 'medium'
+      fontSize: 'medium',
+      currency: 'USD',
+      rememberSession: false
     };
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
-      // Check for remembered session
+      // Check for remembered session from main system
       const rememberedUser = localStorage.getItem('rememberedUser');
-      if (rememberedUser) {
-        try {
-          const userData = JSON.parse(rememberedUser);
-          document.getElementById('loginUsername').value = userData.username;
-          document.getElementById('loginPin').value = userData.pin;
-        } catch (error) {
-          console.error("Error al cargar sesión recordada:", error);
-          localStorage.removeItem('rememberedUser');
-        }
+      const storedSettings = localStorage.getItem('userSettings');
+      
+      if (storedSettings) {
+        userSettings = JSON.parse(storedSettings);
+        applyTheme();
+        updateFontSize();
       }
 
       // Set up authentication state observer
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user;
-          loadUserSettings().then(() => {
-            loadCompanyData();
-          });
+          loadClientData();
         } else {
           // Redirect to login if not authenticated
           window.location.href = 'index.html';
@@ -350,27 +338,14 @@
       });
     });
 
-    // Load user settings from localStorage
-    async function loadUserSettings() {
-      const settings = localStorage.getItem('userSettings');
-      if (settings) {
-        userSettings = JSON.parse(settings);
-        applyTheme();
-        updateFontSize();
-      }
-    }
-
-    // Apply selected theme
+    // Apply selected theme from main system
     function applyTheme() {
       document.body.classList.remove('light-theme');
-      document.documentElement.style.setProperty('--primary-color', '#15a086');
-      document.documentElement.style.setProperty('--primary-dark', '#127c68');
+      document.documentElement.style.setProperty('--primary-color', userSettings.theme === 'custom' ? userSettings.customColor : '#15a086');
+      document.documentElement.style.setProperty('--primary-dark', userSettings.theme === 'custom' ? darkenColor(userSettings.customColor, 0.8) : '#127c68');
 
       if (userSettings.theme === 'light') {
         document.body.classList.add('light-theme');
-      } else if (userSettings.theme === 'custom') {
-        document.documentElement.style.setProperty('--primary-color', userSettings.customColor);
-        document.documentElement.style.setProperty('--primary-dark', darkenColor(userSettings.customColor, 0.8));
       }
     }
 
@@ -383,24 +358,23 @@
       return `#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`;
     }
 
-    // Update font size
+    // Update font size from main system settings
     function updateFontSize() {
       document.body.classList.remove('font-small', 'font-medium', 'font-large');
       document.body.classList.add(`font-${userSettings.fontSize}`);
     }
 
-    async function loadCompanyData() {
+    // Load client data and company information
+    async function loadClientData() {
       try {
         showLoading();
         
-        if (!currentUser) return;
-        
-        // Primero buscamos el cliente asociado a este usuario
+        // First find the client associated with this user
         let q = query(collection(db, "LoanUsers"), where("username", "==", currentUser.email || currentUser.uid));
         let querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
-          // Si no encontramos en LoanUsers, buscamos en Users (sistema anterior)
+          // Fallback to old system collection
           q = query(collection(db, "Users"), where("username", "==", currentUser.email || currentUser.uid));
           querySnapshot = await getDocs(q);
           
@@ -411,9 +385,10 @@
         }
 
         const userDoc = querySnapshot.docs[0];
-        const clientId = userDoc.data().clientId || userDoc.id;
+        const clientData = userDoc.data();
+        const clientId = clientData.clientId || userDoc.id;
 
-        // Buscar préstamos activos para este cliente
+        // Now find active loans for this client
         q = query(collection(db, "Loans"), 
              where("client.id", "==", clientId),
              where("status", "in", ["active", "overdue"]));
@@ -421,34 +396,38 @@
         const loansSnapshot = await getDocs(q);
         
         if (loansSnapshot.empty) {
-          showError("No se encontró préstamo activo asociado a este usuario");
+          showError("No se encontró préstamo activo asociado");
           return;
         }
 
-        // Tomar el primer préstamo encontrado
+        // Take the first loan found
         const loanDoc = loansSnapshot.docs[0];
-        const loanData = loanDoc.data();
+        currentLoan = { id: loanDoc.id, ...loanDoc.data() };
 
-        // Ahora cargamos la información de la empresa
-        const companyRef = doc(db, "informacionCompany", "default"); // O el ID correspondiente
-        const companySnap = await getDoc(companyRef);
-        
-        if (companySnap.exists()) {
-          companyData = companySnap.data();
-          displayCompanyInfo(companyData);
+        // Load company information (either from loan or company collection)
+        if (currentLoan.companyInfo) {
+          // If company info is embedded in loan
+          displayCompanyInfo(currentLoan.companyInfo);
         } else {
-          // Mostrar información básica si no hay datos específicos
-          displayCompanyInfo({
-            nombreEmpresa: loanData.companyName || "Empresa de Préstamos",
-            rnc: loanData.companyRNC || "N/A",
-            direccion: loanData.companyAddress || "N/A",
-            telefono: loanData.companyPhone || "N/A",
-            fotoURL: loanData.companyLogo || null
-          });
+          // Load from separate company collection
+          const companyRef = doc(db, "informacionCompany", "default");
+          const companySnap = await getDoc(companyRef);
+          
+          if (companySnap.exists()) {
+            displayCompanyInfo(companySnap.data());
+          } else {
+            // Fallback to minimal company info
+            displayCompanyInfo({
+              nombreEmpresa: "Empresa de Préstamos",
+              rnc: "N/A",
+              direccion: "N/A",
+              telefono: "N/A"
+            });
+          }
         }
       } catch (error) {
-        console.error("Error loading company data: ", error);
-        showError("Error al cargar los datos de la empresa");
+        console.error("Error loading data:", error);
+        showError("Error al cargar los datos");
       } finally {
         hideLoading();
       }
@@ -456,7 +435,7 @@
 
     function displayCompanyInfo(data) {
       // Set company name
-      document.getElementById('companyName').textContent = data.nombreEmpresa || 'Nombre no disponible';
+      document.getElementById('companyName').textContent = data.nombreEmpresa || 'Empresa de Préstamos';
       
       // Set RNC
       document.getElementById('companyRNC').textContent = data.rnc || 'N/A';
@@ -487,6 +466,6 @@
     function showError(message) {
       alert(`Error: ${message}`);
     }
-  </script> 
+  </script>
 </body>
 </html>
