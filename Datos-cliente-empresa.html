@@ -159,6 +159,14 @@
       background-color: #3a3a4f;
     }
 
+    .btn-warning {
+      background-color: var(--warning-color);
+    }
+
+    .btn-warning:hover {
+      background-color: #e67e22;
+    }
+
     /* Image preview styles */
     .image-preview-container {
       margin-top: 1rem;
@@ -378,6 +386,58 @@
       color: #d1e8ff;
     }
 
+    .buttons-container {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    /* Modal de confirmación */
+    .custom-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--modal-bg);
+      z-index: 4000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .custom-modal.active {
+      display: flex;
+    }
+
+    .custom-modal-content {
+      background-color: var(--modal-content-bg);
+      border-radius: var(--modal-border-radius);
+      padding: var(--modal-padding);
+      width: 90%;
+      max-width: 500px;
+      box-shadow: var(--modal-shadow);
+      text-align: center;
+    }
+
+    .custom-modal-title {
+      font-size: var(--modal-title-size);
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .custom-modal-message {
+      font-size: var(--modal-message-size);
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .custom-modal-footer {
+      display: flex;
+      justify-content: center;
+      gap: var(--modal-footer-gap);
+    }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -387,6 +447,14 @@
     @media (max-width: 768px) {
       .container {
         padding: 1rem;
+      }
+      
+      .buttons-container {
+        flex-direction: column;
+      }
+      
+      .custom-modal-footer {
+        flex-direction: column;
       }
     }
   </style>
@@ -451,9 +519,14 @@
         </div>
       </div>
       
-      <button type="button" id="associateBtn" class="btn btn-success btn-block">
-        <i class="fas fa-link"></i> Asociar Configuración al Cliente Seleccionado
-      </button>
+      <div class="buttons-container">
+        <button type="button" id="associateBtn" class="btn btn-success btn-block">
+          <i class="fas fa-link"></i> Asociar al Cliente Seleccionado
+        </button>
+        <button type="button" id="associateAllBtn" class="btn btn-warning btn-block">
+          <i class="fas fa-users"></i> Asociar a Todos los Clientes
+        </button>
+      </div>
     </form>
   </div>
 
@@ -466,6 +539,22 @@
   <div class="toast" id="toastNotification">
     <i class="fas fa-check-circle"></i>
     <span id="toastMessage">Operación realizada con éxito</span>
+  </div>
+
+  <!-- Modal de confirmación -->
+  <div class="custom-modal" id="confirmationModal">
+    <div class="custom-modal-content">
+      <h3 class="custom-modal-title"><i class="fas fa-exclamation-circle"></i> Confirmación</h3>
+      <p class="custom-modal-message" id="confirmationMessage">¿Estás seguro de realizar esta acción?</p>
+      <div class="custom-modal-footer">
+        <button id="confirmYes" class="btn btn-success">
+          <i class="fas fa-check"></i> Sí
+        </button>
+        <button id="confirmNo" class="btn btn-danger">
+          <i class="fas fa-times"></i> No
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Firebase SDK -->
@@ -504,6 +593,7 @@
     let companyData = null;
     let clientsList = [];
     let selectedClient = null;
+    let confirmCallback = null;
 
     // Inicializar la aplicación cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', () => {
@@ -534,8 +624,41 @@
       // Buscador de clientes
       document.getElementById('searchClient').addEventListener('input', searchClients);
       
-      // Botón para asociar configuración
+      // Botón para asociar configuración al cliente seleccionado
       document.getElementById('associateBtn').addEventListener('click', associateCompanyToClient);
+      
+      // Botón para asociar configuración a todos los clientes
+      document.getElementById('associateAllBtn').addEventListener('click', () => {
+        showConfirmation(
+          'Confirmar Asociación Masiva',
+          `¿Estás seguro de asociar la configuración a TODOS los clientes (${clientsList.length} clientes)?`,
+          associateCompanyToAllClients
+        );
+      });
+      
+      // Event listeners para el modal de confirmación
+      document.getElementById('confirmYes').addEventListener('click', () => {
+        if (confirmCallback) {
+          confirmCallback();
+        }
+        hideConfirmation();
+      });
+      
+      document.getElementById('confirmNo').addEventListener('click', hideConfirmation);
+    }
+
+    // Mostrar modal de confirmación
+    function showConfirmation(title, message, callback) {
+      document.getElementById('confirmationMessage').textContent = message;
+      document.querySelector('.custom-modal-title').innerHTML = `<i class="fas fa-exclamation-circle"></i> ${title}`;
+      confirmCallback = callback;
+      document.getElementById('confirmationModal').classList.add('active');
+    }
+
+    // Ocultar modal de confirmación
+    function hideConfirmation() {
+      document.getElementById('confirmationModal').classList.remove('active');
+      confirmCallback = null;
     }
 
     // Cargar datos de la empresa
@@ -815,6 +938,60 @@
       } catch (error) {
         console.error("Error asociando empresa al cliente:", error);
         showToast('Error', 'Ocurrió un error al asociar la configuración: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Asociar configuración de empresa a TODOS los clientes
+    async function associateCompanyToAllClients() {
+      if (!companyData) {
+        console.log('No hay datos de empresa');
+        showToast('Error', 'No hay datos de empresa para asociar.', 'error');
+        return;
+      }
+      
+      if (!clientsList || clientsList.length === 0) {
+        console.log('No hay clientes para asociar');
+        showToast('Error', 'No hay clientes disponibles para asociar.', 'error');
+        return;
+      }
+      
+      try {
+        showLoading();
+        console.log('Asociando configuración a TODOS los clientes');
+        
+        // Contador para llevar registro de las asociaciones exitosas
+        let successCount = 0;
+        let errorCount = 0;
+        
+        // Procesar cada cliente
+        for (const client of clientsList) {
+          try {
+            const loanRef = db.collection("Loans").doc(client.loanId);
+            await loanRef.update({
+              companyInfo: {
+                nombreEmpresa: companyData.nombreEmpresa || '',
+                rnc: companyData.rnc || '',
+                telefono: companyData.telefono || '',
+                direccion: companyData.direccion || '',
+                fotoURL: companyData.fotoURL || '',
+                bankAccounts: companyData.bankAccounts || []
+              },
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            successCount++;
+          } catch (error) {
+            console.error(`Error asociando empresa al cliente ${client.id}:`, error);
+            errorCount++;
+          }
+        }
+        
+        console.log('Proceso de asociación masiva completado');
+        showToast('Éxito', `Configuración asociada a ${successCount} clientes. ${errorCount > 0 ? `(Errores: ${errorCount})` : ''}`, 'success');
+      } catch (error) {
+        console.error("Error en asociación masiva:", error);
+        showToast('Error', 'Ocurrió un error al asociar la configuración a todos los clientes: ' + error.message, 'error');
       } finally {
         hideLoading();
       }
