@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlusMoney - Reportes de Préstamos</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <title>PlusMoney - Reportes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --primary-color: #1abc9c;
@@ -15,22 +14,66 @@
       --secondary-color: #2a2a3f;
       --background-color: #2c3e50;
       --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
       --card-bg: #34495e;
-      --danger-color: #e74c3c;
-      --success-color: #2ecc71;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Roboto', sans-serif;
     }
 
     body {
+      font-family: 'Roboto', sans-serif;
       background-color: var(--background-color);
       color: var(--text-color);
-      padding: 20px;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    /* Main Content */
+    .main-container {
+      padding: 2rem;
+      width: 100%;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .print-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .print-btn:hover {
+      background-color: var(--primary-dark);
+      transform: scale(1.1);
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .container {
@@ -38,211 +81,316 @@
       margin: 0 auto;
     }
 
-    h1 {
-      color: var(--primary-color);
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
     .filters {
       display: flex;
-      justify-content: center;
       gap: 15px;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
     }
 
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .form-group {
+      margin-bottom: 15px;
     }
 
-    label {
-      font-weight: 500;
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text-light);
     }
 
-    select, button {
-      padding: 8px 15px;
-      border-radius: 5px;
-      border: 1px solid var(--primary-color);
-      background-color: var(--secondary-color);
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
       color: var(--text-color);
-      cursor: pointer;
+      font-size: 1rem;
     }
 
-    button {
+    .btn {
       background-color: var(--primary-color);
+      color: var(--text-color);
       border: none;
-      transition: background-color 0.3s;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    button:hover {
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
       background-color: var(--primary-dark);
     }
 
-    .stats-container {
+    .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
     }
 
     .stat-card {
       background-color: var(--card-bg);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      border-radius: 8px;
       text-align: center;
     }
 
     .stat-card h3 {
       color: var(--primary-color);
-      margin-bottom: 10px;
-      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
     }
 
     .stat-card p {
-      font-size: 1.8rem;
+      font-size: 1.2rem;
       font-weight: 700;
     }
 
-    .charts-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-top: 30px;
-    }
-
-    .chart-card {
+    .chart-container {
+      max-width: 100%;
+      margin: 1rem 0;
       background-color: var(--card-bg);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      border-radius: 12px;
     }
 
-    .chart-card h2 {
+    .chart-title {
       color: var(--primary-color);
       margin-bottom: 15px;
       text-align: center;
+      font-size: 1rem;
     }
 
-    .chart-container {
-      width: 100%;
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-wrapper {
+      background-color: var(--card-bg);
+      padding: 1rem;
+      border-radius: 12px;
       height: 300px;
     }
 
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+      max-height: 250px;
+    }
+
     .loading {
-      display: none;
       text-align: center;
       margin: 20px 0;
       color: var(--primary-color);
     }
 
+    .no-data {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-light);
+    }
+
+    /* Estilos para impresión */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #reports, #reports * {
+        visibility: visible;
+      }
+      #reports {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background-color: white;
+        color: black;
+        padding: 20px;
+      }
+      .filters, .btn, .print-btn {
+        display: none !important;
+      }
+      .card {
+        box-shadow: none;
+        background-color: white;
+        color: black;
+      }
+      .stat-card {
+        background-color: #f5f5f5;
+        color: black;
+      }
+      .stat-card h3 {
+        color: #1abc9c;
+      }
+      .chart-wrapper {
+        background-color: #f5f5f5;
+        page-break-inside: avoid;
+      }
+      .section-title {
+        color: #1abc9c;
+        border-bottom-color: #ddd;
+      }
+      .charts-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+    }
+
+    /* Responsive Design */
     @media (max-width: 768px) {
-      .charts-container {
-        grid-template-columns: 1fr;
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
       }
       
       .filters {
         flex-direction: column;
-        align-items: center;
+      }
+      
+      .chart-wrapper {
+        min-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .main-container {
+        padding: 1rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Reportes de Préstamos</h1>
-    
-    <div class="filters">
-      <div class="filter-group">
-        <label for="year">Año:</label>
-        <select id="year">
-          <!-- Se llenará dinámicamente -->
-        </select>
-      </div>
+  <main class="main-container">
+    <!-- Reports Section -->
+    <section id="reports" class="card">
+      <h1 class="section-title">
+        <span><i class="fas fa-chart-pie"></i> Reportes Mensuales</span>
+        <button class="print-btn" id="printReport" title="Imprimir Reporte">
+          <i class="fas fa-print"></i>
+        </button>
+      </h1>
       
-      <div class="filter-group">
-        <label for="month">Mes:</label>
-        <select id="month">
-          <!-- Se llenará dinámicamente -->
-        </select>
-      </div>
-      
-      <button id="generateReport">Generar Reporte</button>
-    </div>
-    
-    <div id="loading" class="loading">
-      <p>Cargando datos...</p>
-    </div>
-    
-    <div class="stats-container">
-      <div class="stat-card">
-        <h3>Total de Préstamos</h3>
-        <p id="totalLoans">0</p>
-      </div>
-      
-      <div class="stat-card">
-        <h3>Total de Capital</h3>
-        <p id="totalCapital">$0.00</p>
-      </div>
-      
-      <div class="stat-card">
-        <h3>Total de Moras</h3>
-        <p id="totalLateFees">$0.00</p>
-      </div>
-      
-      <div class="stat-card">
-        <h3>Total de Intereses</h3>
-        <p id="totalInterest">$0.00</p>
-      </div>
-      
-      <div class="stat-card">
-        <h3>Capital Pagado</h3>
-        <p id="paidCapital">$0.00</p>
-      </div>
-      
-      <div class="stat-card">
-        <h3>Intereses Pagados</h3>
-        <p id="paidInterest">$0.00</p>
-      </div>
-      
-      <div class="stat-card">
-        <h3>Total Pagado</h3>
-        <p id="totalPaid">$0.00</p>
-      </div>
-      
-      <div class="stat-card">
-        <h3>Clientes Activos</h3>
-        <p id="activeClients">0</p>
-      </div>
-      
-      <div class="stat-card">
-        <h3>Préstamos Activos</h3>
-        <p id="activeLoans">0</p>
-      </div>
-    </div>
-    
-    <div class="charts-container">
-      <div class="chart-card">
-        <h2>Distribución de Pagos</h2>
-        <div class="chart-container">
-          <canvas id="pieChart"></canvas>
+      <div class="filters">
+        <div class="form-group">
+          <label for="reportMonth">Mes</label>
+          <select id="reportMonth" class="form-control">
+            <!-- Se llenará dinámicamente -->
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="reportYear">Año</label>
+          <select id="reportYear" class="form-control">
+            <!-- Se llenará dinámicamente -->
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button id="generateReport" class="btn"><i class="fas fa-sync-alt"></i> Generar Reporte</button>
         </div>
       </div>
       
-      <div class="chart-card">
-        <h2>Desempeño de Préstamos</h2>
-        <div class="chart-container">
-          <canvas id="barChart"></canvas>
+      <div id="loading" class="loading" style="display: none;">
+        <i class="fas fa-spinner fa-spin"></i> Cargando datos...
+      </div>
+      
+      <div id="noData" class="no-data" style="display: none;">
+        <i class="fas fa-info-circle"></i> No hay datos para el período seleccionado
+      </div>
+      
+      <div id="reportContent">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Total de Préstamos</h3>
+            <p id="totalLoans">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Total de Capital</h3>
+            <p id="totalCapital">$0.00</p>
+          </div>
+          <div class="stat-card">
+            <h3>Total de Moras</h3>
+            <p id="totalLateFees">$0.00</p>
+          </div>
+          <div class="stat-card">
+            <h3>Total de Intereses</h3>
+            <p id="totalInterest">$0.00</p>
+          </div>
+          <div class="stat-card">
+            <h3>Capital Pagado</h3>
+            <p id="totalPaidCapital">$0.00</p>
+          </div>
+          <div class="stat-card">
+            <h3>Intereses Pagados</h3>
+            <p id="totalPaidInterest">$0.00</p>
+          </div>
+          <div class="stat-card">
+            <h3>Total Pagado</h3>
+            <p id="totalPaid">$0.00</p>
+          </div>
+          <div class="stat-card">
+            <h3>Pérdidas por Atrasos</h3>
+            <p id="totalLosses">$0.00</p>
+          </div>
+          <div class="stat-card">
+            <h3>Clientes</h3>
+            <p id="totalClients">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Préstamos Activos</h3>
+            <p id="activeLoans">0</p>
+          </div>
+        </div>
+        
+        <div class="charts-row">
+          <div class="chart-wrapper">
+            <h3 class="chart-title">Distribución de Pagos</h3>
+            <canvas id="pieChart"></canvas>
+          </div>
+          
+          <div class="chart-wrapper">
+            <h3 class="chart-title">Resumen Financiero</h3>
+            <canvas id="barChart"></canvas>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+  </main>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
   </div>
 
-  <script>
-    // Configuración de Firebase (usa tu configuración)
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      query, 
+      where, 
+      getDocs,
+      Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
       authDomain: "inventario-35d6b.firebaseapp.com",
@@ -253,268 +401,276 @@
       appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
     };
 
-    // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
 
-    // Variables globales
     let currentUser = null;
     let pieChart = null;
     let barChart = null;
 
-    document.addEventListener('DOMContentLoaded', function() {
-      // Verificar autenticación
-      auth.onAuthStateChanged(user => {
-        if (user) {
-          currentUser = user;
-          initApp();
-        } else {
-          window.location.href = 'index.html';
-        }
-      });
-    });
-
-    function initApp() {
-      // Inicializar selectores de año y mes
-      initDateSelectors();
-      
-      // Cargar reporte del mes actual por defecto
-      loadCurrentMonthReport();
-      
-      // Configurar evento para el botón de generar reporte
-      document.getElementById('generateReport').addEventListener('click', generateReport);
+    // Formatear número con separadores de miles y decimales
+    function formatNumber(number) {
+      return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(number);
     }
 
-    function initDateSelectors() {
-      const yearSelect = document.getElementById('year');
-      const monthSelect = document.getElementById('month');
-      
-      // Años (últimos 5 años y el actual)
-      const currentYear = new Date().getFullYear();
-      for (let i = currentYear; i >= currentYear - 5; i--) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = i;
-        if (i === currentYear) option.selected = true;
-        yearSelect.appendChild(option);
-      }
-      
-      // Meses
+    // Obtener nombre del mes
+    function getMonthName(monthIndex) {
       const months = [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
       ];
-      
-      months.forEach((month, index) => {
-        const option = document.createElement('option');
-        option.value = index + 1;
-        option.textContent = month;
-        if (index === new Date().getMonth()) option.selected = true;
-        monthSelect.appendChild(option);
-      });
+      return months[monthIndex];
     }
 
-    function loadCurrentMonthReport() {
+    // Llenar selectores de mes y año
+    function populateDateSelectors() {
+      const monthSelect = document.getElementById('reportMonth');
+      const yearSelect = document.getElementById('reportYear');
+      
       const currentDate = new Date();
-      const currentMonth = currentDate.getMonth() + 1;
+      const currentMonth = currentDate.getMonth();
       const currentYear = currentDate.getFullYear();
       
-      // Cargar reporte para el mes actual
-      loadReportData(currentMonth, currentYear);
-    }
-
-    function generateReport() {
-      const selectedMonth = parseInt(document.getElementById('month').value);
-      const selectedYear = parseInt(document.getElementById('year').value);
+      // Llenar meses
+      for (let i = 0; i < 12; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = getMonthName(i);
+        option.selected = i === currentMonth;
+        monthSelect.appendChild(option);
+      }
       
-      // Cargar reporte para el mes y año seleccionados
-      loadReportData(selectedMonth, selectedYear);
+      // Llenar años (últimos 5 años y próximos 2)
+      for (let year = currentYear - 5; year <= currentYear + 2; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        option.selected = year === currentYear;
+        yearSelect.appendChild(option);
+      }
     }
 
-    async function loadReportData(month, year) {
-      showLoading(true);
+    // Calcular intereses acumulados por atrasos
+    function calculateInterestLoss(loan, today) {
+      let totalLoss = 0;
+      
+      if (!loan.paymentSchedule) return 0;
+      
+      // Calcular tasa de interés quincenal
+      const tasaQuincenal = loan.interestRate / (loan.frequency === 'biweekly' ? 1 : 2);
+      
+      // Encontrar pagos atrasados
+      const overduePayments = loan.paymentSchedule.filter(p => {
+        if (p.status === 'pending') {
+          const dueDate = new Date(p.dueDate);
+          return dueDate < today;
+        }
+        return false;
+      });
+      
+      // Calcular pérdida por cada pago atrasado
+      overduePayments.forEach(payment => {
+        const dueDate = new Date(payment.dueDate);
+        const daysLate = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+        
+        // Interés diario basado en la tasa quincenal
+        const dailyInterestRate = tasaQuincenal / (15 * 100);
+        const capitalPending = loan.remainingCapital || loan.amount;
+        
+        // Pérdida = capital pendiente * tasa diaria * días de atraso
+        totalLoss += capitalPending * dailyInterestRate * daysLate;
+      });
+      
+      return totalLoss;
+    }
+
+    // Obtener datos del reporte
+    async function getReportData(month, year) {
+      if (!currentUser) return null;
       
       try {
-        // Obtener todos los préstamos del usuario actual
-        let loansQuery = db.collection("Loans").where("userId", "==", currentUser.uid);
-        const loansSnapshot = await loansQuery.get();
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('noData').style.display = 'none';
+        document.getElementById('reportContent').style.display = 'none';
         
-        if (loansSnapshot.empty) {
-          updateStatsWithZero();
-          showLoading(false);
-          return;
+        // Crear rango de fechas para el mes seleccionado
+        const startDate = new Date(year, month, 1);
+        const endDate = new Date(year, month + 1, 0, 23, 59, 59);
+        const today = new Date();
+        
+        // Convertir a Timestamp de Firebase
+        const startTimestamp = Timestamp.fromDate(startDate);
+        const endTimestamp = Timestamp.fromDate(endDate);
+        
+        // Consultar préstamos del usuario actual
+        let q;
+        if (currentUser.uid === 'admin') {
+          q = query(collection(db, "Loans"));
+        } else {
+          q = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
         }
         
-        // Filtrar préstamos por mes y año
-        const startDate = new Date(year, month - 1, 1);
-        const endDate = new Date(year, month, 0, 23, 59, 59);
+        const loansSnapshot = await getDocs(q);
         
-        const reportData = {
+        let reportData = {
           totalLoans: 0,
           totalCapital: 0,
           totalLateFees: 0,
           totalInterest: 0,
-          paidCapital: 0,
-          paidInterest: 0,
+          totalPaidCapital: 0,
+          totalPaidInterest: 0,
           totalPaid: 0,
-          activeClients: new Set(),
+          totalLosses: 0,
+          totalClients: new Set(),
           activeLoans: 0,
-          pieChartData: {
-            labels: ['Capital Pagado', 'Interés Pagado', 'Mora Cobrada', 'Pendiente'],
-            data: [0, 0, 0, 0],
-            colors: ['#1abc9c', '#3498db', '#e74c3c', '#f39c12']
-          },
-          barChartData: {
-            labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-            capitalData: [0, 0, 0, 0],
-            interestData: [0, 0, 0, 0],
-            lateFeeData: [0, 0, 0, 0]
-          }
+          loans: []
         };
         
         // Procesar cada préstamo
-        loansSnapshot.forEach(doc => {
+        for (const doc of loansSnapshot.docs) {
           const loan = doc.data();
-          const loanDate = loan.createdAt ? loan.createdAt.toDate() : new Date();
+          const loanDate = loan.createdAt.toDate();
           
-          // Verificar si el préstamo fue creado en el mes seleccionado
+          // Verificar si el préstamo está dentro del rango de fechas
           if (loanDate >= startDate && loanDate <= endDate) {
             reportData.totalLoans++;
             reportData.totalCapital += loan.amount || 0;
-            reportData.totalInterest += loan.totalInterest || 0;
+            reportData.totalClients.add(loan.client.id);
             
-            // Contar clientes únicos
-            if (loan.client && loan.client.id) {
-              reportData.activeClients.add(loan.client.id);
+            // Sumar todos los intereses (no solo los del período)
+            if (loan.loanType === 'normal') {
+              reportData.totalInterest += loan.totalInterest || 0;
             }
             
-            // Verificar préstamos activos
+            // Verificar si el préstamo está activo
             if (loan.status === 'active' || loan.status === 'overdue') {
               reportData.activeLoans++;
             }
-          }
-          
-          // Procesar pagos del préstamo (si están en el mes seleccionado)
-          if (loan.payments) {
-            loan.payments.forEach(payment => {
-              const paymentDate = payment.date ? payment.date.toDate() : new Date();
-              
-              if (paymentDate >= startDate && paymentDate <= endDate) {
-                // Calcular capital e interés pagado
-                if (payment.type === 'full' || payment.type === 'capital' || payment.type === 'custom') {
-                  const capitalPaid = payment.amount - (payment.lateFee || 0);
-                  reportData.paidCapital += capitalPaid;
-                  reportData.totalPaid += capitalPaid;
-                }
-                
-                if (payment.type === 'full' || payment.type === 'interest' || payment.type === 'custom') {
-                  const interestPaid = payment.amount - (payment.lateFee || 0);
-                  reportData.paidInterest += interestPaid;
-                  reportData.totalPaid += interestPaid;
-                }
-                
-                // Sumar moras
-                if (payment.lateFee) {
-                  reportData.totalLateFees += payment.lateFee;
-                  reportData.totalPaid += payment.lateFee;
-                }
-                
-                // Actualizar gráfico de barras por semana
-                const weekOfMonth = Math.floor((paymentDate.getDate() - 1) / 7);
-                if (weekOfMonth >= 0 && weekOfMonth < 4) {
-                  if (payment.type === 'full' || payment.type === 'capital' || payment.type === 'custom') {
-                    reportData.barChartData.capitalData[weekOfMonth] += payment.amount - (payment.lateFee || 0);
+            
+            // Calcular pérdidas por atrasos
+            reportData.totalLosses += calculateInterestLoss(loan, today);
+            
+            // Procesar pagos del préstamo
+            if (loan.payments) {
+              for (const payment of loan.payments) {
+                const paymentDate = payment.date.toDate();
+                if (paymentDate >= startDate && paymentDate <= endDate) {
+                  reportData.totalPaid += payment.amount || 0;
+                  
+                  // Calcular capital e intereses pagados (de cualquier tipo de pago)
+                  if (payment.type === 'full') {
+                    // Para pagos completos, estimar la parte de intereses
+                    const tasaQuincenal = loan.interestRate / (loan.frequency === 'biweekly' ? 1 : 2);
+                    const interestPayment = (loan.remainingCapital || loan.amount) * (tasaQuincenal / 100);
+                    
+                    reportData.totalPaidInterest += Math.min(payment.amount, interestPayment);
+                    reportData.totalPaidCapital += payment.amount - Math.min(payment.amount, interestPayment);
+                  } else if (payment.type === 'interest') {
+                    reportData.totalPaidInterest += payment.amount || 0;
+                  } else if (payment.type === 'capital') {
+                    reportData.totalPaidCapital += payment.amount || 0;
+                  } else if (payment.type === 'custom') {
+                    // Para pagos personalizados, estimar la parte de intereses
+                    const tasaQuincenal = loan.interestRate / (loan.frequency === 'biweekly' ? 1 : 2);
+                    const interestPayment = (loan.remainingCapital || loan.amount) * (tasaQuincenal / 100);
+                    const interestPart = Math.min(payment.amount, interestPayment);
+                    
+                    reportData.totalPaidInterest += interestPart;
+                    reportData.totalPaidCapital += payment.amount - interestPart;
                   }
-                  if (payment.type === 'full' || payment.type === 'interest' || payment.type === 'custom') {
-                    reportData.barChartData.interestData[weekOfMonth] += payment.amount - (payment.lateFee || 0);
-                  }
-                  if (payment.lateFee) {
-                    reportData.barChartData.lateFeeData[weekOfMonth] += payment.lateFee;
+                  
+                  // Sumar moras
+                  if (payment.lateFee && payment.lateFee > 0) {
+                    reportData.totalLateFees += payment.lateFee;
                   }
                 }
               }
-            });
+            }
+            
+            // Agregar préstamo a la lista para análisis adicional
+            reportData.loans.push(loan);
           }
-        });
+        }
         
-        // Calcular pendientes para el gráfico circular
-        reportData.pieChartData.data[0] = reportData.paidCapital;
-        reportData.pieChartData.data[1] = reportData.paidInterest;
-        reportData.pieChartData.data[2] = reportData.totalLateFees;
-        reportData.pieChartData.data[3] = reportData.totalCapital - reportData.paidCapital;
+        // Convertir Set a número
+        reportData.totalClients = reportData.totalClients.size;
         
-        // Actualizar número de clientes activos
-        reportData.activeClients = reportData.activeClients.size;
+        // Si no hay datos, mostrar mensaje
+        if (reportData.totalLoans === 0 && reportData.totalPaid === 0) {
+          document.getElementById('noData').style.display = 'block';
+          return null;
+        }
         
-        // Actualizar la interfaz con los datos
-        updateStats(reportData);
-        updateCharts(reportData);
+        document.getElementById('reportContent').style.display = 'block';
+        return reportData;
         
       } catch (error) {
-        console.error("Error al cargar reporte:", error);
-        alert("Error al cargar los datos del reporte");
+        console.error("Error obteniendo datos del reporte:", error);
+        document.getElementById('noData').style.display = 'block';
+        return null;
       } finally {
-        showLoading(false);
+        document.getElementById('loading').style.display = 'none';
       }
     }
 
-    function updateStatsWithZero() {
-      const zeroData = {
-        totalLoans: 0,
-        totalCapital: 0,
-        totalLateFees: 0,
-        totalInterest: 0,
-        paidCapital: 0,
-        paidInterest: 0,
-        totalPaid: 0,
-        activeClients: 0,
-        activeLoans: 0
-      };
-      updateStats(zeroData);
+    // Actualizar la UI con los datos del reporte
+    function updateUI(reportData) {
+      if (!reportData) return;
       
-      // Actualizar gráficos con datos cero
-      updateCharts({
-        pieChartData: {
-          labels: ['Capital Pagado', 'Interés Pagado', 'Mora Cobrada', 'Pendiente'],
-          data: [0, 0, 0, 0],
-          colors: ['#1abc9c', '#3498db', '#e74c3c', '#f39c12']
-        },
-        barChartData: {
-          labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-          capitalData: [0, 0, 0, 0],
-          interestData: [0, 0, 0, 0],
-          lateFeeData: [0, 0, 0, 0]
-        }
-      });
+      // Actualizar estadísticas
+      document.getElementById('totalLoans').textContent = reportData.totalLoans;
+      document.getElementById('totalCapital').textContent = `$${formatNumber(reportData.totalCapital)}`;
+      document.getElementById('totalLateFees').textContent = `$${formatNumber(reportData.totalLateFees)}`;
+      document.getElementById('totalInterest').textContent = `$${formatNumber(reportData.totalInterest)}`;
+      document.getElementById('totalPaidCapital').textContent = `$${formatNumber(reportData.totalPaidCapital)}`;
+      document.getElementById('totalPaidInterest').textContent = `$${formatNumber(reportData.totalPaidInterest)}`;
+      document.getElementById('totalPaid').textContent = `$${formatNumber(reportData.totalPaid)}`;
+      document.getElementById('totalLosses').textContent = `$${formatNumber(reportData.totalLosses)}`;
+      document.getElementById('totalClients').textContent = reportData.totalClients;
+      document.getElementById('activeLoans').textContent = reportData.activeLoans;
+      
+      // Actualizar gráficos
+      updatePieChart(reportData);
+      updateBarChart(reportData);
     }
 
-    function updateStats(data) {
-      document.getElementById('totalLoans').textContent = data.totalLoans;
-      document.getElementById('totalCapital').textContent = `$${formatCurrency(data.totalCapital)}`;
-      document.getElementById('totalLateFees').textContent = `$${formatCurrency(data.totalLateFees)}`;
-      document.getElementById('totalInterest').textContent = `$${formatCurrency(data.totalInterest)}`;
-      document.getElementById('paidCapital').textContent = `$${formatCurrency(data.paidCapital)}`;
-      document.getElementById('paidInterest').textContent = `$${formatCurrency(data.paidInterest)}`;
-      document.getElementById('totalPaid').textContent = `$${formatCurrency(data.totalPaid)}`;
-      document.getElementById('activeClients').textContent = data.activeClients;
-      document.getElementById('activeLoans').textContent = data.activeLoans;
-    }
-
-    function updateCharts(data) {
-      // Destruir gráficos existentes si hay alguno
-      if (pieChart) pieChart.destroy();
-      if (barChart) barChart.destroy();
+    // Actualizar gráfico de pastel
+    function updatePieChart(reportData) {
+      const ctx = document.getElementById('pieChart').getContext('2d');
       
-      // Gráfico de pastel (distribución de pagos)
-      const pieCtx = document.getElementById('pieChart').getContext('2d');
-      pieChart = new Chart(pieCtx, {
+      // Destruir gráfico anterior si existe
+      if (pieChart) {
+        pieChart.destroy();
+      }
+      
+      pieChart = new Chart(ctx, {
         type: 'pie',
         data: {
-          labels: data.pieChartData.labels,
+          labels: ['Capital Pagado', 'Intereses Pagados', 'Mora', 'Pérdidas'],
           datasets: [{
-            data: data.pieChartData.data,
-            backgroundColor: data.pieChartData.colors,
+            data: [
+              reportData.totalPaidCapital,
+              reportData.totalPaidInterest,
+              reportData.totalLateFees,
+              reportData.totalLosses
+            ],
+            backgroundColor: [
+              'rgba(26, 188, 156, 0.6)',
+              'rgba(52, 152, 219, 0.6)',
+              'rgba(231, 76, 60, 0.6)',
+              'rgba(243, 156, 18, 0.6)'
+            ],
+            borderColor: [
+              'rgba(26, 188, 156, 1)',
+              'rgba(52, 152, 219, 1)',
+              'rgba(231, 76, 60, 1)',
+              'rgba(243, 156, 18, 1)'
+            ],
             borderWidth: 1
           }]
         },
@@ -525,7 +681,10 @@
             legend: {
               position: 'right',
               labels: {
-                color: '#ffffff'
+                color: 'white',
+                font: {
+                  size: 12
+                }
               }
             },
             tooltip: {
@@ -535,43 +694,53 @@
                   const value = context.raw || 0;
                   const total = context.dataset.data.reduce((a, b) => a + b, 0);
                   const percentage = Math.round((value / total) * 100);
-                  return `${label}: $${formatCurrency(value)} (${percentage}%)`;
+                  return `${label}: $${formatNumber(value)} (${percentage}%)`;
                 }
               }
             }
           }
         }
       });
+    }
+
+    // Actualizar gráfico de barras
+    function updateBarChart(reportData) {
+      const ctx = document.getElementById('barChart').getContext('2d');
       
-      // Gráfico de barras (desempeño de préstamos)
-      const barCtx = document.getElementById('barChart').getContext('2d');
-      barChart = new Chart(barCtx, {
+      // Destruir gráfico anterior si existe
+      if (barChart) {
+        barChart.destroy();
+      }
+      
+      barChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: data.barChartData.labels,
-          datasets: [
-            {
-              label: 'Capital',
-              data: data.barChartData.capitalData,
-              backgroundColor: 'rgba(26, 188, 156, 0.7)',
-              borderColor: 'rgba(26, 188, 156, 1)',
-              borderWidth: 1
-            },
-            {
-              label: 'Interés',
-              data: data.barChartData.interestData,
-              backgroundColor: 'rgba(52, 152, 219, 0.7)',
-              borderColor: 'rgba(52, 152, 219, 1)',
-              borderWidth: 1
-            },
-            {
-              label: 'Mora',
-              data: data.barChartData.lateFeeData,
-              backgroundColor: 'rgba(231, 76, 60, 0.7)',
-              borderColor: 'rgba(231, 76, 60, 1)',
-              borderWidth: 1
-            }
-          ]
+          labels: ['Capital', 'Intereses', 'Mora', 'Pérdidas', 'Total'],
+          datasets: [{
+            label: 'Resumen Financiero ($)',
+            data: [
+              reportData.totalCapital,
+              reportData.totalInterest,
+              reportData.totalLateFees,
+              reportData.totalLosses,
+              reportData.totalCapital + reportData.totalInterest + reportData.totalLateFees + reportData.totalLosses
+            ],
+            backgroundColor: [
+              'rgba(26, 188, 156, 0.6)',
+              'rgba(52, 152, 219, 0.6)',
+              'rgba(231, 76, 60, 0.6)',
+              'rgba(243, 156, 18, 0.6)',
+              'rgba(155, 89, 182, 0.6)'
+            ],
+            borderColor: [
+              'rgba(26, 188, 156, 1)',
+              'rgba(52, 152, 219, 1)',
+              'rgba(231, 76, 60, 1)',
+              'rgba(243, 156, 18, 1)',
+              'rgba(155, 89, 182, 1)'
+            ],
+            borderWidth: 1
+          }]
         },
         options: {
           indexAxis: 'y',
@@ -579,11 +748,11 @@
           maintainAspectRatio: false,
           scales: {
             x: {
-              stacked: true,
+              beginAtZero: true,
               ticks: {
-                color: '#ffffff',
+                color: 'white',
                 callback: function(value) {
-                  return '$' + formatCurrency(value);
+                  return '$' + value.toLocaleString('en-US');
                 }
               },
               grid: {
@@ -591,9 +760,8 @@
               }
             },
             y: {
-              stacked: true,
               ticks: {
-                color: '#ffffff'
+                color: 'white'
               },
               grid: {
                 display: false
@@ -602,16 +770,12 @@
           },
           plugins: {
             legend: {
-              labels: {
-                color: '#ffffff'
-              }
+              display: false
             },
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  const label = context.dataset.label || '';
-                  const value = context.raw || 0;
-                  return `${label}: $${formatCurrency(value)}`;
+                  return context.dataset.label + ': $' + formatNumber(context.parsed.x);
                 }
               }
             }
@@ -620,16 +784,52 @@
       });
     }
 
-    function formatCurrency(value) {
-      return parseFloat(value).toLocaleString('es-ES', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+    // Generar reporte
+    async function generateReport() {
+      const month = parseInt(document.getElementById('reportMonth').value);
+      const year = parseInt(document.getElementById('reportYear').value);
+      
+      const reportData = await getReportData(month, year);
+      updateUI(reportData);
+    }
+
+    // Función para imprimir el reporte
+    function setupPrintButton() {
+      document.getElementById('printReport').addEventListener('click', function() {
+        // Antes de imprimir, asegurarse de que los gráficos estén renderizados
+        if (pieChart) pieChart.resize();
+        if (barChart) barChart.resize();
+        
+        setTimeout(() => {
+          window.print();
+        }, 500);
       });
     }
 
-    function showLoading(show) {
-      document.getElementById('loading').style.display = show ? 'block' : 'none';
-    }
+    // Inicializar la aplicación
+    document.addEventListener('DOMContentLoaded', () => {
+      // Configurar selectores de fecha
+      populateDateSelectors();
+      
+      // Configurar botón de impresión
+      setupPrintButton();
+      
+      // Escuchar cambios en el estado de autenticación
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          
+          // Generar reporte para el mes actual
+          generateReport();
+        } else {
+          // Redirigir a login si no está autenticado
+          window.location.href = 'index.html';
+        }
+      });
+      
+      // Configurar evento del botón de generar reporte
+      document.getElementById('generateReport').addEventListener('click', generateReport);
+    });
   </script>
 </body>
 </html>
