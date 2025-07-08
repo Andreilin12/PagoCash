@@ -151,6 +151,30 @@
       color: white;
     }
 
+
+    .sidebar .nav-enlace {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      color: var(--text-color);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+    }
+
+    .sidebar .nav-enlace i {
+      margin-right: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .sidebar .nav-enlace:hover,
+    .sidebar .nav-enlace.active {
+      background-color: var(--primary-color);
+      border-left-color: var(--primary-dark);
+      color: white;
+    }
+
+
     /* Mobile Navigation */
     .mobile-nav {
       display: none;
@@ -1154,7 +1178,7 @@
         </a>
       </li>    
       <li class="nav-item">
-        <a href="Reporte-General.html">
+        <a href="Reporte-General.html"class="nav-enlace">
           <i class="fas fa-file"></i> Reportes
         </a>
       </li>
