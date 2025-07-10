@@ -648,24 +648,14 @@
         // Actualizar el usuario actual
         batch.update(userRef, {
           linkedUsers: arrayUnion(tokenData.userId),
-          linkedAccounts: arrayUnion({
-            userId: tokenData.userId,
-            email: tokenData.email,
-            displayName: tokenData.displayName,
-            linkedAt: serverTimestamp()
-          })
+          lastActive: serverTimestamp()
         });
         
         // Actualizar el otro usuario
         const otherUserRef = doc(db, "users", tokenData.userId);
         batch.update(otherUserRef, {
           linkedUsers: arrayUnion(currentUser.uid),
-          linkedAccounts: arrayUnion({
-            userId: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName || "Usuario",
-            linkedAt: serverTimestamp()
-          })
+          lastActive: serverTimestamp()
         });
         
         // Actualizar todos los préstamos del usuario actual para incluir al otro usuario
@@ -696,6 +686,25 @@
         
         // Ejecutar todas las operaciones en lote
         await batch.commit();
+        
+        // Actualizar los datos de la cuenta vinculada (sin serverTimestamp en arrayUnion)
+        await updateDoc(userRef, {
+          linkedAccounts: arrayUnion({
+            userId: tokenData.userId,
+            email: tokenData.email,
+            displayName: tokenData.displayName,
+            linkedAt: new Date().toISOString()
+          })
+        });
+        
+        await updateDoc(otherUserRef, {
+          linkedAccounts: arrayUnion({
+            userId: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Usuario",
+            linkedAt: new Date().toISOString()
+          })
+        });
         
         hideLoader();
         showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos préstamos.`, 'success');
@@ -800,7 +809,7 @@
               userId: account.userId,
               displayName: account.displayName || "Usuario",
               email: account.email,
-              linkedAt: account.linkedAt?.toDate() || null,
+              linkedAt: account.linkedAt ? new Date(account.linkedAt) : null,
               lastActive: userData.lastActive?.toDate() || null
             });
             
@@ -808,7 +817,7 @@
             userItem.className = 'user-item';
             
             const isActive = userData.lastActive && 
-                            (new Date() - userData.linkedAt.toDate()) < 300000; // 5 minutos
+                            (new Date() - userData.lastActive.toDate()) < 300000; // 5 minutos
             
             userItem.innerHTML = `
               <div class="user-info">
