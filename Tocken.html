@@ -981,7 +981,7 @@
       
       if (!confirm) return;
       
-      showLoader('Desvinculando usuario...');
+      showLoader('Desvinculando usuario y eliminando accesos...');
       
       try {
         // Obtener información del usuario vinculado
@@ -992,8 +992,7 @@
         const batch = writeBatch(db);
         
         // 1. Restaurar la configuración original del usuario actual
-        const userRef = doc(db, "users", currentUser.uid);
-        batch.update(userRef, {
+        batch.update(doc(db, "users", currentUser.uid), {
           linkedUsers: arrayRemove(userId),
           linkedAccounts: arrayRemove({
             userId: userId
@@ -1025,7 +1024,7 @@
           lastSync: serverTimestamp()
         });
         
-        // 4. Actualizar los préstamos para que vuelvan al usuario original
+        // 4. Eliminar todos los préstamos compartidos con este usuario
         const loansQuery = query(
           collection(db, "Loans"),
           where("userId", "==", otherUserData.masterUserId || userId),
@@ -1039,8 +1038,7 @@
           });
         });
         
-        // 5. Eliminar cualquier acceso compartido en otros documentos
-        // Por ejemplo, si hay colecciones adicionales que necesitan ser actualizadas
+        // 5. Eliminar cualquier otro dato compartido con este usuario
         const sharedDataQuery = query(
           collection(db, "SharedData"),
           where("sharedWith", "array-contains", currentUser.uid)
@@ -1053,6 +1051,32 @@
           });
         });
         
+        // 6. Eliminar datos específicos que puedan haber sido compartidos
+        // Buscar y eliminar documentos donde el usuario actual tenga acceso
+        const userAccessQuery = query(
+          collection(db, "UserAccess"),
+          where("userId", "==", userId),
+          where("sharedWith", "==", currentUser.uid)
+        );
+        const userAccessSnapshot = await getDocs(userAccessQuery);
+        
+        userAccessSnapshot.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+        
+        // 7. Eliminar cualquier referencia en otras colecciones
+        const referencesQuery = query(
+          collection(db, "References"),
+          where("targetUserId", "==", currentUser.uid),
+          where("sourceUserId", "==", userId)
+        );
+        const referencesSnapshot = await getDocs(referencesQuery);
+        
+        referencesSnapshot.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+        
+        // Ejecutar todas las operaciones en lote
         await batch.commit();
         
         hideLoader();
