@@ -17,6 +17,7 @@
       --card-bg: #34495e;
       --danger-color: #e74c3c;
       --success-color: #2ecc71;
+      --warning-color: #f39c12;
     }
 
     body {
@@ -38,6 +39,7 @@
       padding: 2rem;
       width: 100%;
       max-width: 500px;
+      position: relative;
     }
 
     h1 {
@@ -53,6 +55,7 @@
       margin-bottom: 1.5rem;
       text-align: center;
       position: relative;
+      border: 1px solid var(--primary-color);
     }
 
     .token-value {
@@ -60,10 +63,14 @@
       font-weight: bold;
       margin: 1rem 0;
       word-break: break-all;
+      color: var(--primary-color);
+      padding: 10px;
+      background-color: rgba(26, 188, 156, 0.1);
+      border-radius: 6px;
     }
 
     .token-timer {
-      color: var(--primary-color);
+      color: var(--text-light);
       font-size: 0.9rem;
     }
 
@@ -100,6 +107,10 @@
       color: white;
     }
 
+    .btn-success:hover {
+      background-color: #27ae60;
+    }
+
     .form-group {
       margin-bottom: 1.5rem;
     }
@@ -108,6 +119,7 @@
       display: block;
       margin-bottom: 0.5rem;
       color: var(--text-light);
+      font-weight: 500;
     }
 
     .form-control {
@@ -117,6 +129,7 @@
       border: 1px solid var(--border-color);
       background-color: var(--background-color);
       color: var(--text-color);
+      font-size: 1rem;
     }
 
     .linked-users {
@@ -136,6 +149,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .user-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .user-info {
@@ -145,13 +164,15 @@
     }
 
     .user-avatar {
-      width: 30px;
-      height: 30px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background-color: var(--primary-color);
       display: flex;
       align-items: center;
       justify-content: center;
+      color: white;
+      font-weight: bold;
     }
 
     .status-badge {
@@ -167,6 +188,114 @@
     .status-inactive {
       background-color: var(--danger-color);
     }
+
+    /* Estilos para alertas personalizadas */
+    .custom-alert {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 25px;
+      border-radius: 8px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { top: -50px; opacity: 0; }
+      to { top: 20px; opacity: 1; }
+    }
+
+    .alert-success {
+      background-color: var(--success-color);
+      border-left: 5px solid #27ae60;
+    }
+
+    .alert-error {
+      background-color: var(--danger-color);
+      border-left: 5px solid #c0392b;
+    }
+
+    .alert-warning {
+      background-color: var(--warning-color);
+      border-left: 5px solid #e67e22;
+    }
+
+    .alert-close {
+      margin-left: 15px;
+      cursor: pointer;
+    }
+
+    /* Loader styles */
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      display: none;
+    }
+
+    .loader {
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 5px solid var(--primary-color);
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loader-message {
+      color: white;
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    /* Tooltip para el token */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      text-align: center;
+      border-radius: 6px;
+      padding: 10px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      border: 1px solid var(--primary-color);
+      font-size: 0.9rem;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -174,8 +303,11 @@
     <h1><i class="fas fa-key"></i> Sistema de Tokens</h1>
     
     <div class="token-display">
-      <div>Tu token actual:</div>
-      <div class="token-value" id="currentToken">Generando...</div>
+      <div>Tu token de vinculación:</div>
+      <div class="tooltip">
+        <div class="token-value" id="currentToken">Generando...</div>
+        <span class="tooltiptext">Comparte este token con otro usuario para vincular cuentas y compartir préstamos</span>
+      </div>
       <div class="token-timer" id="tokenTimer">Renueva en: 60 segundos</div>
       
       <div class="token-actions">
@@ -192,15 +324,23 @@
       <label for="tokenInput"><i class="fas fa-link"></i> Vincular con otro usuario</label>
       <input type="text" id="tokenInput" class="form-control" placeholder="Ingresa el token del otro usuario">
       <button class="btn btn-success" id="validateTokenBtn" style="margin-top: 10px; width: 100%;">
-        <i class="fas fa-check-circle"></i> Validar Token
+        <i class="fas fa-check-circle"></i> Validar Token y Compartir Préstamos
       </button>
     </div>
     
     <div class="linked-users">
       <h3><i class="fas fa-users"></i> Usuarios Vinculados</h3>
       <ul class="user-list" id="linkedUsersList">
-        <!-- Se llenará dinámicamente -->
+        <li style="text-align: center; color: var(--text-light);">No hay usuarios vinculados</li>
       </ul>
+    </div>
+  </div>
+
+  <!-- Loader overlay -->
+  <div class="loader-overlay" id="loaderOverlay">
+    <div style="text-align: center;">
+      <div class="loader"></div>
+      <div class="loader-message" id="loaderMessage">Vinculando cuentas...</div>
     </div>
   </div>
 
@@ -212,9 +352,11 @@
       getDoc, 
       setDoc, 
       updateDoc,
-      onSnapshot,
+      collection,
+      query,
+      where,
+      getDocs,
       arrayUnion,
-      arrayRemove,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
@@ -238,6 +380,43 @@
     let timeLeft = 60;
     let currentToken = null;
     let linkedUsers = [];
+
+    // Mostrar alerta personalizada
+    function showAlert(message, type = 'success') {
+      const alert = document.createElement('div');
+      alert.className = `custom-alert alert-${type}`;
+      
+      let icon = '';
+      switch(type) {
+        case 'success': icon = '<i class="fas fa-check-circle"></i>'; break;
+        case 'error': icon = '<i class="fas fa-exclamation-circle"></i>'; break;
+        case 'warning': icon = '<i class="fas fa-exclamation-triangle"></i>'; break;
+      }
+      
+      alert.innerHTML = `
+        ${icon}
+        <span>${message}</span>
+        <span class="alert-close" onclick="this.parentElement.remove()">&times;</span>
+      `;
+      
+      document.body.appendChild(alert);
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+
+    // Mostrar loader con mensaje
+    function showLoader(message) {
+      document.getElementById('loaderMessage').textContent = message;
+      document.getElementById('loaderOverlay').style.display = 'flex';
+    }
+
+    // Ocultar loader
+    function hideLoader() {
+      document.getElementById('loaderOverlay').style.display = 'none';
+    }
 
     function generateToken() {
       // Genera un token aleatorio de 8 caracteres alfanuméricos
@@ -286,37 +465,38 @@
     async function validateToken() {
       const tokenInput = document.getElementById('tokenInput').value.trim();
       if (!tokenInput) {
-        alert('Por favor ingresa un token válido');
+        showAlert('Por favor ingresa un token válido', 'error');
         return;
       }
       
+      showLoader('Validando token y vinculando cuentas...');
+      
       try {
         // Buscar el token en la colección userTokens
-        const tokensQuery = collection(db, "userTokens");
-        const querySnapshot = await getDocs(tokensQuery);
+        const tokensRef = collection(db, "userTokens");
+        const q = query(tokensRef, where("token", "==", tokenInput));
+        const querySnapshot = await getDocs(q);
         
-        let tokenFound = false;
-        let tokenOwner = null;
-        
-        querySnapshot.forEach((doc) => {
-          const tokenData = doc.data();
-          if (tokenData.token === tokenInput) {
-            tokenFound = true;
-            tokenOwner = {
-              userId: tokenData.userId,
-              displayName: tokenData.displayName,
-              email: tokenData.email
-            };
-          }
-        });
-        
-        if (!tokenFound) {
-          alert('Token no válido o expirado');
+        if (querySnapshot.empty) {
+          hideLoader();
+          showAlert('Token no válido o expirado', 'error');
           return;
         }
         
-        if (tokenOwner.userId === currentUser.uid) {
-          alert('No puedes vincularte a ti mismo');
+        let tokenData = null;
+        querySnapshot.forEach((doc) => {
+          tokenData = doc.data();
+        });
+        
+        if (!tokenData) {
+          hideLoader();
+          showAlert('Error al validar el token', 'error');
+          return;
+        }
+        
+        if (tokenData.userId === currentUser.uid) {
+          hideLoader();
+          showAlert('No puedes vincularte a ti mismo', 'warning');
           return;
         }
         
@@ -324,31 +504,93 @@
         const userRef = doc(db, "users", currentUser.uid);
         const userSnap = await getDoc(userRef);
         
-        if (userSnap.exists() && userSnap.data().linkedUsers?.includes(tokenOwner.userId)) {
-          alert('Ya estás vinculado con este usuario');
+        if (userSnap.exists() && userSnap.data().linkedUsers?.includes(tokenData.userId)) {
+          hideLoader();
+          showAlert('Ya estás vinculado con este usuario', 'warning');
           return;
         }
         
         // Vincular usuarios en ambas direcciones
         await updateDoc(userRef, {
-          linkedUsers: arrayUnion(tokenOwner.userId)
+          linkedUsers: arrayUnion(tokenData.userId)
         }, { merge: true });
         
-        await updateDoc(doc(db, "users", tokenOwner.userId), {
+        await updateDoc(doc(db, "users", tokenData.userId), {
           linkedUsers: arrayUnion(currentUser.uid)
         }, { merge: true });
         
-        alert(`Vinculación exitosa con ${tokenOwner.displayName}`);
+        // Compartir préstamos entre usuarios
+        await shareLoansBetweenUsers(currentUser.uid, tokenData.userId);
+        
+        hideLoader();
+        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Préstamos compartidos.`, 'success');
         loadLinkedUsers();
         
       } catch (error) {
         console.error("Error validando token:", error);
-        alert('Error al validar el token');
+        hideLoader();
+        showAlert('Error al validar el token: ' + error.message, 'error');
+      }
+    }
+
+    async function shareLoansBetweenUsers(userId1, userId2) {
+      try {
+        // Obtener préstamos del usuario actual
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", userId1)
+        );
+        const loansSnapshot = await getDocs(loansQuery);
+        
+        // Compartir cada préstamo con el otro usuario
+        const batch = [];
+        loansSnapshot.forEach((doc) => {
+          const loanData = doc.data();
+          // Crear una copia compartida del préstamo
+          const sharedLoanRef = doc(db, "SharedLoans", `${userId2}_${doc.id}`);
+          batch.push(setDoc(sharedLoanRef, {
+            ...loanData,
+            originalUserId: userId1,
+            sharedWithUserId: userId2,
+            sharedAt: serverTimestamp(),
+            isActive: true
+          }));
+        });
+        
+        // Obtener préstamos del otro usuario
+        const otherLoansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", userId2)
+        );
+        const otherLoansSnapshot = await getDocs(otherLoansQuery);
+        
+        // Compartir cada préstamo con el usuario actual
+        otherLoansSnapshot.forEach((doc) => {
+          const loanData = doc.data();
+          // Crear una copia compartida del préstamo
+          const sharedLoanRef = doc(db, "SharedLoans", `${userId1}_${doc.id}`);
+          batch.push(setDoc(sharedLoanRef, {
+            ...loanData,
+            originalUserId: userId2,
+            sharedWithUserId: userId1,
+            sharedAt: serverTimestamp(),
+            isActive: true
+          }));
+        });
+        
+        // Ejecutar todas las operaciones
+        await Promise.all(batch);
+        
+      } catch (error) {
+        console.error("Error compartiendo préstamos:", error);
+        throw new Error("Error al compartir préstamos");
       }
     }
 
     async function loadLinkedUsers() {
       if (!currentUser) return;
+      
+      showLoader('Cargando usuarios vinculados...');
       
       const userRef = doc(db, "users", currentUser.uid);
       const userSnap = await getDoc(userRef);
@@ -402,6 +644,8 @@
       if (linkedUsers.length === 0) {
         linkedUsersList.innerHTML = '<li style="text-align: center; color: var(--text-light);">No hay usuarios vinculados</li>';
       }
+      
+      hideLoader();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -424,12 +668,13 @@
           document.getElementById('copyTokenBtn').addEventListener('click', () => {
             if (currentToken) {
               navigator.clipboard.writeText(currentToken);
-              alert('Token copiado al portapapeles');
+              showAlert('Token copiado al portapapeles');
             }
           });
           
           document.getElementById('refreshTokenBtn').addEventListener('click', async () => {
             await updateToken();
+            showAlert('Token actualizado correctamente');
           });
           
           document.getElementById('validateTokenBtn').addEventListener('click', validateToken);
@@ -453,6 +698,9 @@
         clearInterval(tokenInterval);
       }
     });
+
+    // Hacer la función showAlert disponible globalmente para el cierre de alertas
+    window.showAlert = showAlert;
   </script>
 </body>
 </html>
