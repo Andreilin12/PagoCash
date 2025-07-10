@@ -132,7 +132,6 @@
 
     .form-group {
       margin-bottom: 1.5rem;
-      position: relative;
     }
 
     .form-group label {
@@ -393,104 +392,6 @@
       justify-content: center;
       gap: 15px;
     }
-
-    /* Modal de ayuda */
-    .help-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1002;
-      display: none;
-    }
-
-    .help-content {
-      background-color: var(--secondary-color);
-      padding: 2rem;
-      border-radius: 10px;
-      max-width: 500px;
-      width: 90%;
-      max-height: 80vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .help-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .help-title {
-      font-size: 1.5rem;
-      color: var(--primary-color);
-      margin: 0;
-    }
-
-    .help-close {
-      background: none;
-      border: none;
-      color: var(--text-light);
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    .help-body {
-      overflow-y: auto;
-      flex-grow: 1;
-      padding-right: 10px;
-    }
-
-    .help-section {
-      margin-bottom: 1.5rem;
-    }
-
-    .help-section h3 {
-      color: var(--primary-color);
-      margin-top: 0;
-      margin-bottom: 0.5rem;
-    }
-
-    .help-section p {
-      margin-top: 0;
-      color: var(--text-light);
-    }
-
-    .help-icon {
-      position: absolute;
-      right: 10px;
-      top: 10px;
-      background: none;
-      border: none;
-      color: var(--primary-color);
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-
-    /* Scrollbar personalizada para el modal de ayuda */
-    .help-body::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .help-body::-webkit-scrollbar-track {
-      background: var(--background-color);
-      border-radius: 10px;
-    }
-
-    .help-body::-webkit-scrollbar-thumb {
-      background: var(--primary-color);
-      border-radius: 10px;
-    }
-
-    .help-body::-webkit-scrollbar-thumb:hover {
-      background: var(--primary-dark);
-    }
   </style>
 </head>
 <body>
@@ -501,7 +402,7 @@
       <div>Tu token de vinculación:</div>
       <div class="tooltip">
         <div class="token-value" id="currentToken">Generando...</div>
-        <span class="tooltiptext">Comparte este token con otro usuario para permitirle acceder a tus datos</span>
+        <span class="tooltiptext">Comparte este token con otro usuario para vincular cuentas y compartir préstamos</span>
       </div>
       <div class="token-timer" id="tokenTimer">Renueva en: 60 segundos</div>
       
@@ -517,12 +418,9 @@
     
     <div class="form-group">
       <label for="tokenInput"><i class="fas fa-link"></i> Vincular con otro usuario</label>
-      <button class="help-icon" id="helpTokenBtn">
-        <i class="fas fa-question-circle"></i>
-      </button>
-      <input type="text" id="tokenInput" class="form-control" placeholder="Ingresa el token del usuario cuyos datos quieres ver">
+      <input type="text" id="tokenInput" class="form-control" placeholder="Ingresa el token del otro usuario">
       <button class="btn btn-success" id="validateTokenBtn" style="margin-top: 10px; width: 100%;">
-        <i class="fas fa-check-circle"></i> Validar Token y Acceder a Datos
+        <i class="fas fa-check-circle"></i> Validar Token y Vincular Cuentas
       </button>
     </div>
     
@@ -545,56 +443,10 @@
   <!-- Modal de confirmación -->
   <div class="confirmation-modal" id="confirmationModal">
     <div class="confirmation-content">
-      <div class="confirmation-message" id="confirmationMessage">¿Estás seguro que deseas desvincular este usuario? Perderás acceso a sus datos.</div>
+      <div class="confirmation-message" id="confirmationMessage">¿Estás seguro que deseas desvincular este usuario?</div>
       <div class="confirmation-buttons">
         <button class="btn btn-danger" id="confirmUnlinkBtn">Sí, Desvincular</button>
         <button class="btn btn-primary" id="cancelUnlinkBtn">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal de ayuda -->
-  <div class="help-modal" id="helpModal">
-    <div class="help-content">
-      <div class="help-header">
-        <h2 class="help-title"><i class="fas fa-question-circle"></i> Guía de Uso</h2>
-        <button class="help-close" id="helpCloseBtn">&times;</button>
-      </div>
-      <div class="help-body">
-        <div class="help-section">
-          <h3>¿Cómo funciona el sistema de tokens?</h3>
-          <p>Este sistema permite compartir datos entre usuarios de forma segura mediante tokens temporales.</p>
-        </div>
-        
-        <div class="help-section">
-          <h3>Para compartir tus datos:</h3>
-          <p>1. Copia tu token de vinculación (cambia cada 60 segundos por seguridad).</p>
-          <p>2. Envíale este token al usuario que quieres que vea tus datos.</p>
-          <p>3. El otro usuario debe ingresar tu token en su aplicación para vincularse.</p>
-        </div>
-        
-        <div class="help-section">
-          <h3>Para ver datos de otro usuario:</h3>
-          <p>1. Pídele al usuario dueño de los datos que te comparta su token.</p>
-          <p>2. Ingresa el token en el campo "Vincular con otro usuario".</p>
-          <p>3. Haz clic en "Validar Token y Acceder a Datos".</p>
-          <p>4. Una vez vinculado, podrás ver sus datos en tu aplicación.</p>
-        </div>
-        
-        <div class="help-section">
-          <h3>Seguridad:</h3>
-          <p>- Los tokens son temporales y caducan después de 60 segundos.</p>
-          <p>- Solo comparte tu token con usuarios de confianza.</p>
-          <p>- Puedes actualizar tu token manualmente en cualquier momento.</p>
-          <p>- Si desvinculas a un usuario, perderás acceso a sus datos inmediatamente.</p>
-        </div>
-        
-        <div class="help-section">
-          <h3>Administrar usuarios vinculados:</h3>
-          <p>- En la sección "Usuarios Vinculados" verás todos los usuarios con cuyos datos tienes acceso.</p>
-          <p>- Puedes desvincular a cualquier usuario cuando ya no necesites ver sus datos.</p>
-          <p>- Desvincular a un usuario no afecta sus datos, solo tu acceso a ellos.</p>
-        </div>
       </div>
     </div>
   </div>
@@ -614,8 +466,7 @@
       arrayUnion,
       arrayRemove,
       serverTimestamp,
-      writeBatch,
-      deleteDoc
+      writeBatch
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
@@ -699,16 +550,6 @@
       document.getElementById('confirmationModal').style.display = 'none';
     }
 
-    // Mostrar modal de ayuda
-    function showHelpModal() {
-      document.getElementById('helpModal').style.display = 'flex';
-    }
-
-    // Ocultar modal de ayuda
-    function hideHelpModal() {
-      document.getElementById('helpModal').style.display = 'none';
-    }
-
     function generateToken() {
       // Genera un token aleatorio de 8 caracteres alfanuméricos
       return Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -760,7 +601,7 @@
         return;
       }
       
-      showLoader('Validando token y configurando acceso...');
+      showLoader('Validando token y vinculando cuentas...');
       
       try {
         // Buscar el token en la colección userTokens
@@ -797,115 +638,173 @@
         
         if (userSnap.exists() && userSnap.data().linkedUsers?.includes(tokenData.userId)) {
           hideLoader();
-          showAlert('Ya tienes acceso a los datos de este usuario', 'warning');
+          showAlert('Ya estás vinculado con este usuario', 'warning');
           return;
         }
         
-        // Vincular usuarios (el usuario actual accederá a los datos del otro usuario)
+        // Vincular usuarios en ambas direcciones
         const batch = writeBatch(db);
         
-        // 1. Actualizar el usuario actual para indicar que tiene acceso a los datos del otro usuario
+        // 1. Actualizar el usuario actual para usar el mismo userId que el usuario vinculado
         batch.update(userRef, {
           linkedUsers: arrayUnion(tokenData.userId),
           linkedAccounts: arrayUnion({
             userId: tokenData.userId,
             email: tokenData.email,
             displayName: tokenData.displayName,
-            linkedAt: new Date().toISOString(),
-            isDataOwner: false // Indica que este usuario es el que accede a los datos, no el dueño
+            linkedAt: new Date().toISOString()
           }),
+          // Establecer el mismo userId que el usuario vinculado
+          masterUserId: tokenData.userId,
           lastActive: serverTimestamp()
         });
         
-        // 2. Actualizar el otro usuario para indicar que comparte sus datos con el usuario actual
-        const dataOwnerRef = doc(db, "users", tokenData.userId);
-        batch.update(dataOwnerRef, {
-          sharedWith: arrayUnion(currentUser.uid),
-          sharedAccounts: arrayUnion({
+        // 2. Actualizar el otro usuario para compartir su userId
+        const otherUserRef = doc(db, "users", tokenData.userId);
+        batch.update(otherUserRef, {
+          linkedUsers: arrayUnion(currentUser.uid),
+          linkedAccounts: arrayUnion({
             userId: currentUser.uid,
             email: currentUser.email,
             displayName: currentUser.displayName || "Usuario",
-            sharedAt: new Date().toISOString()
+            linkedAt: new Date().toISOString()
           }),
+          // Mantener su userId como master
+          masterUserId: tokenData.userId,
           lastActive: serverTimestamp()
         });
         
-        // 3. Crear registro de acceso en una colección separada
-        const accessRef = doc(db, "dataAccess", `${tokenData.userId}_${currentUser.uid}`);
-        batch.set(accessRef, {
-          dataOwnerId: tokenData.userId,
-          accessUserId: currentUser.uid,
-          grantedAt: serverTimestamp(),
-          isActive: true
+        // 3. Actualizar todos los préstamos del usuario actual para usar el mismo userId
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", currentUser.uid)
+        );
+        const loansSnapshot = await getDocs(loansQuery);
+        
+        loansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            userId: tokenData.userId, // Cambiar el userId al del usuario vinculado
+            sharedWith: arrayUnion(tokenData.userId)
+          });
         });
+        
+        // 4. Actualizar todos los préstamos del otro usuario para compartir con el usuario actual
+        const otherLoansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", tokenData.userId)
+        );
+        const otherLoansSnapshot = await getDocs(otherLoansQuery);
+        
+        otherLoansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayUnion(currentUser.uid)
+          });
+        });
+        
+        // 5. Actualizar la configuración de cuenta para compartir datos
+        const userSettingsRef = doc(db, "userSettings", currentUser.uid);
+        batch.set(userSettingsRef, {
+          masterUserId: tokenData.userId,
+          isLinkedAccount: true,
+          originalUserId: currentUser.uid,
+          lastSync: serverTimestamp()
+        }, { merge: true });
+        
+        const otherUserSettingsRef = doc(db, "userSettings", tokenData.userId);
+        batch.set(otherUserSettingsRef, {
+          masterUserId: tokenData.userId,
+          isMasterAccount: true,
+          linkedAccounts: arrayUnion(currentUser.uid),
+          lastSync: serverTimestamp()
+        }, { merge: true });
         
         // Ejecutar todas las operaciones en lote
         await batch.commit();
         
         hideLoader();
-        showAlert(`Acceso configurado correctamente. Ahora puedes ver los datos de ${tokenData.displayName}`, 'success');
+        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos datos.`, 'success');
         loadLinkedUsers();
         
       } catch (error) {
         console.error("Error validando token:", error);
         hideLoader();
-        showAlert('Error al configurar el acceso: ' + error.message, 'error');
+        showAlert('Error al validar el token: ' + error.message, 'error');
       }
     }
 
     async function unlinkUser(userId) {
-      const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario? Perderás acceso a sus datos.`);
+      const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario? Todos los datos compartidos dejarán de estar disponibles.`);
       
       if (!confirm) return;
       
-      showLoader('Revocando acceso a datos...');
+      showLoader('Desvinculando usuario...');
       
       try {
+        // Obtener información del usuario vinculado
+        const otherUserRef = doc(db, "users", userId);
+        const otherUserSnap = await getDoc(otherUserRef);
+        const otherUserData = otherUserSnap.data();
+        
         const batch = writeBatch(db);
         
-        // 1. Eliminar la vinculación en el usuario actual
+        // 1. Restaurar la configuración original del usuario actual
         const userRef = doc(db, "users", currentUser.uid);
         batch.update(userRef, {
           linkedUsers: arrayRemove(userId),
           linkedAccounts: arrayRemove({
             userId: userId
           }),
+          masterUserId: currentUser.uid, // Restaurar su propio userId
           lastActive: serverTimestamp()
         });
         
-        // 2. Eliminar el acceso en el usuario dueño de los datos
-        const dataOwnerRef = doc(db, "users", userId);
-        batch.update(dataOwnerRef, {
-          sharedWith: arrayRemove(currentUser.uid),
-          sharedAccounts: arrayRemove({
+        // 2. Actualizar el otro usuario
+        batch.update(otherUserRef, {
+          linkedUsers: arrayRemove(currentUser.uid),
+          linkedAccounts: arrayRemove({
             userId: currentUser.uid
           }),
           lastActive: serverTimestamp()
         });
         
-        // 3. Eliminar el registro de acceso
-        const accessRef = doc(db, "dataAccess", `${userId}_${currentUser.uid}`);
-        batch.delete(accessRef);
+        // 3. Actualizar la configuración de cuenta
+        const userSettingsRef = doc(db, "userSettings", currentUser.uid);
+        batch.update(userSettingsRef, {
+          masterUserId: currentUser.uid,
+          isLinkedAccount: false,
+          lastSync: serverTimestamp()
+        });
         
-        // 4. Eliminar cualquier dato compartido que haya sido copiado localmente
-        const sharedDataRef = collection(db, "users", currentUser.uid, "sharedData");
-        const sharedDataQuery = query(sharedDataRef, where("originalOwnerId", "==", userId));
-        const sharedDataSnapshot = await getDocs(sharedDataQuery);
+        const otherUserSettingsRef = doc(db, "userSettings", userId);
+        batch.update(otherUserSettingsRef, {
+          linkedAccounts: arrayRemove(currentUser.uid),
+          lastSync: serverTimestamp()
+        });
         
-        sharedDataSnapshot.forEach((doc) => {
-          batch.delete(doc.ref);
+        // 4. Actualizar los préstamos para que vuelvan al usuario original
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", otherUserData.masterUserId || userId),
+          where("sharedWith", "array-contains", currentUser.uid)
+        );
+        const loansSnapshot = await getDocs(loansQuery);
+        
+        loansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayRemove(currentUser.uid)
+          });
         });
         
         await batch.commit();
         
         hideLoader();
-        showAlert('Acceso revocado correctamente. Ya no podrás ver los datos de este usuario.', 'success');
+        showAlert('Usuario desvinculado correctamente', 'success');
         loadLinkedUsers();
         
       } catch (error) {
         console.error("Error desvinculando usuario:", error);
         hideLoader();
-        showAlert('Error al revocar el acceso: ' + error.message, 'error');
+        showAlert('Error al desvincular usuario: ' + error.message, 'error');
       }
     }
 
@@ -936,7 +835,7 @@
               email: account.email,
               linkedAt: account.linkedAt ? new Date(account.linkedAt) : null,
               lastActive: userData.lastActive?.toDate() || null,
-              isDataOwner: account.isDataOwner || false
+              isMaster: userData.masterUserId === account.userId
             });
             
             const userItem = document.createElement('li');
@@ -951,7 +850,9 @@
                   ${account.displayName?.charAt(0) || account.email?.charAt(0) || 'U'}
                 </div>
                 <div class="user-details">
-                  <div class="user-name">${account.displayName || "Usuario"}</div>
+                  <div class="user-name">${account.displayName || "Usuario"} 
+                    ${userData.masterUserId === account.userId ? '<span class="status-badge status-active">Principal</span>' : ''}
+                  </div>
                   <div class="user-email">${account.email}</div>
                 </div>
                 <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
@@ -998,7 +899,16 @@
             email: user.email,
             lastActive: serverTimestamp(),
             linkedUsers: [],
-            linkedAccounts: []
+            linkedAccounts: [],
+            masterUserId: user.uid // Por defecto, cada usuario es su propio master
+          }, { merge: true });
+          
+          // Crear configuración inicial de usuario
+          const userSettingsRef = doc(db, "userSettings", user.uid);
+          await setDoc(userSettingsRef, {
+            masterUserId: user.uid,
+            isLinkedAccount: false,
+            lastSync: serverTimestamp()
           }, { merge: true });
           
           startTokenCycle();
@@ -1018,10 +928,6 @@
           });
           
           document.getElementById('validateTokenBtn').addEventListener('click', validateToken);
-          
-          // Botón de ayuda
-          document.getElementById('helpTokenBtn').addEventListener('click', showHelpModal);
-          document.getElementById('helpCloseBtn').addEventListener('click', hideHelpModal);
           
           // Actualizar última actividad cada minuto
           setInterval(async () => {
