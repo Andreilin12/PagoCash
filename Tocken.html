@@ -645,20 +645,36 @@
         // Vincular usuarios en ambas direcciones
         const batch = writeBatch(db);
         
-        // Actualizar el usuario actual
+        // 1. Actualizar el usuario actual para usar el mismo userId que el usuario vinculado
         batch.update(userRef, {
           linkedUsers: arrayUnion(tokenData.userId),
+          linkedAccounts: arrayUnion({
+            userId: tokenData.userId,
+            email: tokenData.email,
+            displayName: tokenData.displayName,
+            linkedAt: new Date().toISOString()
+          }),
+          // Establecer el mismo userId que el usuario vinculado
+          masterUserId: tokenData.userId,
           lastActive: serverTimestamp()
         });
         
-        // Actualizar el otro usuario
+        // 2. Actualizar el otro usuario para compartir su userId
         const otherUserRef = doc(db, "users", tokenData.userId);
         batch.update(otherUserRef, {
           linkedUsers: arrayUnion(currentUser.uid),
+          linkedAccounts: arrayUnion({
+            userId: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Usuario",
+            linkedAt: new Date().toISOString()
+          }),
+          // Mantener su userId como master
+          masterUserId: tokenData.userId,
           lastActive: serverTimestamp()
         });
         
-        // Actualizar todos los préstamos del usuario actual para incluir al otro usuario
+        // 3. Actualizar todos los préstamos del usuario actual para usar el mismo userId
         const loansQuery = query(
           collection(db, "Loans"),
           where("userId", "==", currentUser.uid)
@@ -667,11 +683,12 @@
         
         loansSnapshot.forEach((loanDoc) => {
           batch.update(loanDoc.ref, {
+            userId: tokenData.userId, // Cambiar el userId al del usuario vinculado
             sharedWith: arrayUnion(tokenData.userId)
           });
         });
         
-        // Actualizar todos los préstamos del otro usuario para incluir al usuario actual
+        // 4. Actualizar todos los préstamos del otro usuario para compartir con el usuario actual
         const otherLoansQuery = query(
           collection(db, "Loans"),
           where("userId", "==", tokenData.userId)
@@ -684,30 +701,28 @@
           });
         });
         
+        // 5. Actualizar la configuración de cuenta para compartir datos
+        const userSettingsRef = doc(db, "userSettings", currentUser.uid);
+        batch.set(userSettingsRef, {
+          masterUserId: tokenData.userId,
+          isLinkedAccount: true,
+          originalUserId: currentUser.uid,
+          lastSync: serverTimestamp()
+        }, { merge: true });
+        
+        const otherUserSettingsRef = doc(db, "userSettings", tokenData.userId);
+        batch.set(otherUserSettingsRef, {
+          masterUserId: tokenData.userId,
+          isMasterAccount: true,
+          linkedAccounts: arrayUnion(currentUser.uid),
+          lastSync: serverTimestamp()
+        }, { merge: true });
+        
         // Ejecutar todas las operaciones en lote
         await batch.commit();
         
-        // Actualizar los datos de la cuenta vinculada (sin serverTimestamp en arrayUnion)
-        await updateDoc(userRef, {
-          linkedAccounts: arrayUnion({
-            userId: tokenData.userId,
-            email: tokenData.email,
-            displayName: tokenData.displayName,
-            linkedAt: new Date().toISOString()
-          })
-        });
-        
-        await updateDoc(otherUserRef, {
-          linkedAccounts: arrayUnion({
-            userId: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName || "Usuario",
-            linkedAt: new Date().toISOString()
-          })
-        });
-        
         hideLoader();
-        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos préstamos.`, 'success');
+        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos datos.`, 'success');
         loadLinkedUsers();
         
       } catch (error) {
@@ -718,54 +733,63 @@
     }
 
     async function unlinkUser(userId) {
-      const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario? Todos los préstamos compartidos dejarán de estar disponibles.`);
+      const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario? Todos los datos compartidos dejarán de estar disponibles.`);
       
       if (!confirm) return;
       
       showLoader('Desvinculando usuario...');
       
       try {
+        // Obtener información del usuario vinculado
+        const otherUserRef = doc(db, "users", userId);
+        const otherUserSnap = await getDoc(otherUserRef);
+        const otherUserData = otherUserSnap.data();
+        
         const batch = writeBatch(db);
         
-        // 1. Eliminar la vinculación en el usuario actual
+        // 1. Restaurar la configuración original del usuario actual
         const userRef = doc(db, "users", currentUser.uid);
         batch.update(userRef, {
           linkedUsers: arrayRemove(userId),
           linkedAccounts: arrayRemove({
             userId: userId
-          })
+          }),
+          masterUserId: currentUser.uid, // Restaurar su propio userId
+          lastActive: serverTimestamp()
         });
         
-        // 2. Eliminar la vinculación en el otro usuario
-        const otherUserRef = doc(db, "users", userId);
+        // 2. Actualizar el otro usuario
         batch.update(otherUserRef, {
           linkedUsers: arrayRemove(currentUser.uid),
           linkedAccounts: arrayRemove({
             userId: currentUser.uid
-          })
+          }),
+          lastActive: serverTimestamp()
         });
         
-        // 3. Eliminar el acceso compartido a los préstamos del usuario actual
+        // 3. Actualizar la configuración de cuenta
+        const userSettingsRef = doc(db, "userSettings", currentUser.uid);
+        batch.update(userSettingsRef, {
+          masterUserId: currentUser.uid,
+          isLinkedAccount: false,
+          lastSync: serverTimestamp()
+        });
+        
+        const otherUserSettingsRef = doc(db, "userSettings", userId);
+        batch.update(otherUserSettingsRef, {
+          linkedAccounts: arrayRemove(currentUser.uid),
+          lastSync: serverTimestamp()
+        });
+        
+        // 4. Actualizar los préstamos para que vuelvan al usuario original
         const loansQuery = query(
           collection(db, "Loans"),
-          where("userId", "==", currentUser.uid)
+          where("userId", "==", otherUserData.masterUserId || userId),
+          where("sharedWith", "array-contains", currentUser.uid)
         );
         const loansSnapshot = await getDocs(loansQuery);
         
         loansSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            sharedWith: arrayRemove(userId)
-          });
-        });
-        
-        // 4. Eliminar el acceso compartido a los préstamos del otro usuario
-        const otherLoansQuery = query(
-          collection(db, "Loans"),
-          where("userId", "==", userId)
-        );
-        const otherLoansSnapshot = await getDocs(otherLoansQuery);
-        
-        otherLoansSnapshot.forEach((loanDoc) => {
           batch.update(loanDoc.ref, {
             sharedWith: arrayRemove(currentUser.uid)
           });
@@ -810,7 +834,8 @@
               displayName: account.displayName || "Usuario",
               email: account.email,
               linkedAt: account.linkedAt ? new Date(account.linkedAt) : null,
-              lastActive: userData.lastActive?.toDate() || null
+              lastActive: userData.lastActive?.toDate() || null,
+              isMaster: userData.masterUserId === account.userId
             });
             
             const userItem = document.createElement('li');
@@ -825,7 +850,9 @@
                   ${account.displayName?.charAt(0) || account.email?.charAt(0) || 'U'}
                 </div>
                 <div class="user-details">
-                  <div class="user-name">${account.displayName || "Usuario"}</div>
+                  <div class="user-name">${account.displayName || "Usuario"} 
+                    ${userData.masterUserId === account.userId ? '<span class="status-badge status-active">Principal</span>' : ''}
+                  </div>
                   <div class="user-email">${account.email}</div>
                 </div>
                 <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
@@ -872,7 +899,16 @@
             email: user.email,
             lastActive: serverTimestamp(),
             linkedUsers: [],
-            linkedAccounts: []
+            linkedAccounts: [],
+            masterUserId: user.uid // Por defecto, cada usuario es su propio master
+          }, { merge: true });
+          
+          // Crear configuración inicial de usuario
+          const userSettingsRef = doc(db, "userSettings", user.uid);
+          await setDoc(userSettingsRef, {
+            masterUserId: user.uid,
+            isLinkedAccount: false,
+            lastSync: serverTimestamp()
           }, { merge: true });
           
           startTokenCycle();
