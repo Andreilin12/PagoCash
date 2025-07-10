@@ -19,6 +19,7 @@
       --success-color: #2ecc71;
       --warning-color: #f39c12;
       --info-color: #3498db;
+      --help-color: #9b59b6;
     }
 
     body {
@@ -43,10 +44,38 @@
       position: relative;
     }
 
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
     h1 {
       color: var(--primary-color);
-      margin-bottom: 1.5rem;
+      margin: 0;
       text-align: center;
+      flex-grow: 1;
+    }
+
+    .help-btn {
+      background-color: var(--help-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-left: 10px;
+    }
+
+    .help-btn:hover {
+      background-color: #8e44ad;
+      transform: scale(1.1);
     }
 
     .token-display {
@@ -130,6 +159,15 @@
       background-color: #2980b9;
     }
 
+    .btn-help {
+      background-color: var(--help-color);
+      color: white;
+    }
+
+    .btn-help:hover {
+      background-color: #8e44ad;
+    }
+
     .form-group {
       margin-bottom: 1.5rem;
     }
@@ -158,6 +196,23 @@
     .user-list {
       list-style: none;
       padding: 0;
+      max-height: 300px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary-color) var(--secondary-color);
+    }
+
+    .user-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .user-list::-webkit-scrollbar-track {
+      background: var(--secondary-color);
+    }
+
+    .user-list::-webkit-scrollbar-thumb {
+      background-color: var(--primary-color);
+      border-radius: 10px;
     }
 
     .user-item {
@@ -243,6 +298,10 @@
 
     .status-inactive {
       background-color: var(--danger-color);
+    }
+
+    .status-master {
+      background-color: var(--help-color);
     }
 
     /* Estilos para alertas personalizadas */
@@ -380,11 +439,19 @@
       max-width: 400px;
       width: 90%;
       text-align: center;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .confirmation-message {
       margin-bottom: 1.5rem;
       font-size: 1.1rem;
+      line-height: 1.5;
     }
 
     .confirmation-buttons {
@@ -392,17 +459,121 @@
       justify-content: center;
       gap: 15px;
     }
+
+    /* Modal de ayuda */
+    .help-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1002;
+      display: none;
+    }
+
+    .help-content {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    .help-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .help-title {
+      margin: 0;
+      color: var(--primary-color);
+      font-size: 1.5rem;
+    }
+
+    .help-close {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .help-close:hover {
+      color: var(--danger-color);
+    }
+
+    .help-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .help-section {
+      margin-bottom: 2rem;
+    }
+
+    .help-section-title {
+      color: var(--primary-color);
+      margin-top: 0;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .help-step {
+      margin-bottom: 1.5rem;
+      padding-left: 1.5rem;
+      border-left: 3px solid var(--primary-color);
+    }
+
+    .help-step-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-light);
+      margin-bottom: 0.5rem;
+    }
+
+    .help-step-icon {
+      color: var(--primary-color);
+    }
+
+    .help-footer {
+      padding: 1rem;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
   <div class="token-container">
-    <h1><i class="fas fa-key"></i> Sistema de Tokens</h1>
+    <div class="header-container">
+      <h1><i class="fas fa-key"></i> Sistema de Tokens</h1>
+      <button class="help-btn" id="helpBtn">
+        <i class="fas fa-question"></i>
+      </button>
+    </div>
     
     <div class="token-display">
       <div>Tu token de vinculación:</div>
       <div class="tooltip">
         <div class="token-value" id="currentToken">Generando...</div>
-        <span class="tooltiptext">Comparte este token con otro usuario para vincular cuentas y compartir préstamos</span>
+        <span class="tooltiptext">Comparte este token con otro usuario para vincular cuentas y compartir datos</span>
       </div>
       <div class="token-timer" id="tokenTimer">Renueva en: 60 segundos</div>
       
@@ -443,10 +614,72 @@
   <!-- Modal de confirmación -->
   <div class="confirmation-modal" id="confirmationModal">
     <div class="confirmation-content">
-      <div class="confirmation-message" id="confirmationMessage">¿Estás seguro que deseas desvincular este usuario?</div>
+      <div class="confirmation-message" id="confirmationMessage">¿Estás seguro que deseas desvincular este usuario? Todos los datos compartidos dejarán de estar disponibles.</div>
       <div class="confirmation-buttons">
-        <button class="btn btn-danger" id="confirmUnlinkBtn">Sí, Desvincular</button>
-        <button class="btn btn-primary" id="cancelUnlinkBtn">Cancelar</button>
+        <button class="btn btn-danger" id="confirmUnlinkBtn">
+          <i class="fas fa-unlink"></i> Sí, Desvincular
+        </button>
+        <button class="btn btn-primary" id="cancelUnlinkBtn">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de ayuda -->
+  <div class="help-modal" id="helpModal">
+    <div class="help-content">
+      <div class="help-header">
+        <h2 class="help-title"><i class="fas fa-question-circle"></i> Guía de Usuario</h2>
+        <button class="help-close" id="helpCloseBtn">&times;</button>
+      </div>
+      <div class="help-body">
+        <div class="help-section">
+          <h3 class="help-section-title"><i class="fas fa-key"></i> Funcionamiento de los Tokens</h3>
+          <div class="help-step">
+            <h4 class="help-step-title"><i class="fas fa-sync-alt help-step-icon"></i> Tokens Temporales</h4>
+            <p>Tu token de vinculación se renueva automáticamente cada 60 segundos para mayor seguridad.</p>
+          </div>
+          <div class="help-step">
+            <h4 class="help-step-title"><i class="fas fa-copy help-step-icon"></i> Compartir Token</h4>
+            <p>Usa el botón "Copiar Token" para compartir tu código con otro usuario que quieras vincular.</p>
+          </div>
+          <div class="help-step">
+            <h4 class="help-step-title"><i class="fas fa-link help-step-icon"></i> Vincular Cuentas</h4>
+            <p>Para vincular con otro usuario, ingresa su token en el campo correspondiente y haz clic en "Validar Token".</p>
+          </div>
+        </div>
+        
+        <div class="help-section">
+          <h3 class="help-section-title"><i class="fas fa-users"></i> Usuarios Vinculados</h3>
+          <div class="help-step">
+            <h4 class="help-step-title"><i class="fas fa-user-shield help-step-icon"></i> Cuenta Principal</h4>
+            <p>El primer usuario en generar el token se convierte en la cuenta principal (indicado con el badge "Principal").</p>
+          </div>
+          <div class="help-step">
+            <h4 class="help-step-title"><i class="fas fa-exchange-alt help-step-icon"></i> Compartir Datos</h4>
+            <p>Al vincular cuentas, ambos usuarios tendrán acceso a los mismos datos y préstamos.</p>
+          </div>
+          <div class="help-step">
+            <h4 class="help-step-title"><i class="fas fa-unlink help-step-icon"></i> Desvincular</h4>
+            <p>Puedes desvincular a un usuario en cualquier momento usando el icono <i class="fas fa-unlink"></i>. Esto eliminará todo acceso compartido.</p>
+          </div>
+        </div>
+        
+        <div class="help-section">
+          <h3 class="help-section-title"><i class="fas fa-info-circle"></i> Información Adicional</h3>
+          <div class="help-step">
+            <h4 class="help-step-title"><i class="fas fa-shield-alt help-step-icon"></i> Seguridad</h4>
+            <p>Los tokens son temporales y únicos, lo que garantiza que solo las personas con tu token actual puedan vincularse.</p>
+          </div>
+          <div class="help-step">
+            <h4 class="help-step-title"><i class="fas fa-redo help-step-icon"></i> Re-vincular</h4>
+            <p>Si desvinculas a un usuario, puedes volver a vincularlo en cualquier momento usando un nuevo token.</p>
+          </div>
+        </div>
+      </div>
+      <div class="help-footer">
+        PlusMoney - Sistema de Gestión de Préstamos
       </div>
     </div>
   </div>
@@ -466,7 +699,8 @@
       arrayUnion,
       arrayRemove,
       serverTimestamp,
-      writeBatch
+      writeBatch,
+      deleteField
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
@@ -491,7 +725,118 @@
     let linkedUsers = [];
     let userToUnlink = null;
 
-    // [Mantener todas las funciones auxiliares iguales hasta validateToken]
+    // Mostrar alerta personalizada
+    function showAlert(message, type = 'success') {
+      const alert = document.createElement('div');
+      alert.className = `custom-alert alert-${type}`;
+      
+      let icon = '';
+      switch(type) {
+        case 'success': icon = '<i class="fas fa-check-circle"></i>'; break;
+        case 'error': icon = '<i class="fas fa-exclamation-circle"></i>'; break;
+        case 'warning': icon = '<i class="fas fa-exclamation-triangle"></i>'; break;
+        case 'info': icon = '<i class="fas fa-info-circle"></i>'; break;
+      }
+      
+      alert.innerHTML = `
+        ${icon}
+        <span>${message}</span>
+        <span class="alert-close" onclick="this.parentElement.remove()">&times;</span>
+      `;
+      
+      document.body.appendChild(alert);
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+
+    // Mostrar loader con mensaje
+    function showLoader(message) {
+      document.getElementById('loaderMessage').textContent = message;
+      document.getElementById('loaderOverlay').style.display = 'flex';
+    }
+
+    // Ocultar loader
+    function hideLoader() {
+      document.getElementById('loaderOverlay').style.display = 'none';
+    }
+
+    // Mostrar modal de confirmación
+    function showConfirmationModal(message) {
+      document.getElementById('confirmationMessage').textContent = message;
+      document.getElementById('confirmationModal').style.display = 'flex';
+      return new Promise((resolve) => {
+        document.getElementById('confirmUnlinkBtn').onclick = () => {
+          hideConfirmationModal();
+          resolve(true);
+        };
+        document.getElementById('cancelUnlinkBtn').onclick = () => {
+          hideConfirmationModal();
+          resolve(false);
+        };
+      });
+    }
+
+    // Ocultar modal de confirmación
+    function hideConfirmationModal() {
+      document.getElementById('confirmationModal').style.display = 'none';
+    }
+
+    // Mostrar modal de ayuda
+    function showHelpModal() {
+      document.getElementById('helpModal').style.display = 'flex';
+    }
+
+    // Ocultar modal de ayuda
+    function hideHelpModal() {
+      document.getElementById('helpModal').style.display = 'none';
+    }
+
+    function generateToken() {
+      // Genera un token aleatorio de 8 caracteres alfanuméricos
+      return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+
+    async function updateToken() {
+      if (!currentUser) return;
+      
+      currentToken = generateToken();
+      document.getElementById('currentToken').textContent = currentToken;
+      timeLeft = 60;
+      updateTimerDisplay();
+      
+      // Guardar el token en Firebase
+      const tokenRef = doc(db, "userTokens", currentUser.uid);
+      await setDoc(tokenRef, {
+        token: currentToken,
+        userId: currentUser.uid,
+        email: currentUser.email,
+        displayName: currentUser.displayName || "Usuario",
+        timestamp: serverTimestamp(),
+        expiresAt: new Date(Date.now() + 60000) // Expira en 1 minuto
+      }, { merge: true });
+    }
+
+    function updateTimerDisplay() {
+      document.getElementById('tokenTimer').textContent = `Renueva en: ${timeLeft} segundos`;
+    }
+
+    async function startTokenCycle() {
+      // Generar el primer token inmediatamente
+      await updateToken();
+      
+      // Configurar el intervalo para renovar cada 60 segundos
+      tokenInterval = setInterval(async () => {
+        timeLeft--;
+        updateTimerDisplay();
+        
+        if (timeLeft <= 0) {
+          await updateToken();
+        }
+      }, 1000);
+    }
 
     async function validateToken() {
       const tokenInput = document.getElementById('tokenInput').value.trim();
@@ -551,7 +896,7 @@
             userId: tokenData.userId,
             email: tokenData.email,
             displayName: tokenData.displayName,
-            linkedAt: serverTimestamp()
+            linkedAt: new Date().toISOString()
           }),
           lastActive: serverTimestamp()
         });
@@ -564,18 +909,35 @@
             userId: currentUser.uid,
             email: currentUser.email,
             displayName: currentUser.displayName || "Usuario",
-            linkedAt: serverTimestamp()
+            linkedAt: new Date().toISOString()
           }),
           lastActive: serverTimestamp()
         });
         
-        // 3. Actualizar la configuración de vinculación
-        const linkRef = doc(db, "userLinks", `${currentUser.uid}_${tokenData.userId}`);
-        batch.set(linkRef, {
-          user1: currentUser.uid,
-          user2: tokenData.userId,
-          createdAt: serverTimestamp(),
-          active: true
+        // 3. Actualizar todos los préstamos del usuario actual para compartir con el otro usuario
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", currentUser.uid)
+        );
+        const loansSnapshot = await getDocs(loansQuery);
+        
+        loansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayUnion(tokenData.userId)
+          });
+        });
+        
+        // 4. Actualizar todos los préstamos del otro usuario para compartir con el usuario actual
+        const otherLoansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", tokenData.userId)
+        );
+        const otherLoansSnapshot = await getDocs(otherLoansQuery);
+        
+        otherLoansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayUnion(currentUser.uid)
+          });
         });
         
         // Ejecutar todas las operaciones en lote
@@ -622,28 +984,27 @@
           lastActive: serverTimestamp()
         });
         
-        // 3. Marcar el enlace como inactivo
-        const linkRef1 = doc(db, "userLinks", `${currentUser.uid}_${userId}`);
-        const linkRef2 = doc(db, "userLinks", `${userId}_${currentUser.uid}`);
-        
-        batch.set(linkRef1, {
-          active: false,
-          disconnectedAt: serverTimestamp()
-        }, { merge: true });
-        
-        batch.set(linkRef2, {
-          active: false,
-          disconnectedAt: serverTimestamp()
-        }, { merge: true });
-        
-        // 4. Eliminar accesos compartidos en préstamos
+        // 3. Eliminar el acceso compartido a los préstamos del usuario actual
         const loansQuery = query(
           collection(db, "Loans"),
-          where("sharedWith", "array-contains", currentUser.uid)
+          where("userId", "==", currentUser.uid)
         );
         const loansSnapshot = await getDocs(loansQuery);
         
         loansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayRemove(userId)
+          });
+        });
+        
+        // 4. Eliminar el acceso compartido a los préstamos del otro usuario
+        const otherLoansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", userId)
+        );
+        const otherLoansSnapshot = await getDocs(otherLoansQuery);
+        
+        otherLoansSnapshot.forEach((loanDoc) => {
           batch.update(loanDoc.ref, {
             sharedWith: arrayRemove(currentUser.uid)
           });
@@ -662,6 +1023,19 @@
           });
         });
         
+        // 6. Eliminar datos específicos compartidos con este usuario
+        const userSharedDocsQuery = query(
+          collection(db, "UserSharedData"),
+          where("ownerId", "==", userId),
+          where("sharedWith", "==", currentUser.uid)
+        );
+        const userSharedDocsSnapshot = await getDocs(userSharedDocsQuery);
+        
+        userSharedDocsSnapshot.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+        
+        // Ejecutar todas las operaciones en lote
         await batch.commit();
         
         hideLoader();
@@ -680,104 +1054,149 @@
       
       showLoader('Cargando usuarios vinculados...');
       
-      try {
-        const userRef = doc(db, "users", currentUser.uid);
-        const userSnap = await getDoc(userRef);
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      
+      linkedUsers = [];
+      const linkedUsersList = document.getElementById('linkedUsersList');
+      linkedUsersList.innerHTML = '';
+      
+      if (userSnap.exists() && userSnap.data().linkedAccounts) {
+        const linkedAccounts = userSnap.data().linkedAccounts;
         
-        linkedUsers = [];
-        const linkedUsersList = document.getElementById('linkedUsersList');
-        linkedUsersList.innerHTML = '';
-        
-        if (userSnap.exists() && userSnap.data().linkedAccounts) {
-          const linkedAccounts = userSnap.data().linkedAccounts;
+        for (const account of linkedAccounts) {
+          const linkedUserRef = doc(db, "users", account.userId);
+          const linkedUserSnap = await getDoc(linkedUserRef);
           
-          // Verificar que los enlaces sigan activos
-          const activeLinks = await Promise.all(linkedAccounts.map(async account => {
-            const linkRef = doc(db, "userLinks", `${currentUser.uid}_${account.userId}`);
-            const linkSnap = await getDoc(linkRef);
-            return linkSnap.exists() && linkSnap.data().active !== false;
-          }));
-          
-          // Filtrar solo los usuarios con enlaces activos
-          const activeAccounts = linkedAccounts.filter((_, index) => activeLinks[index]);
-          
-          // Actualizar la lista en Firestore si hay diferencias
-          if (activeAccounts.length !== linkedAccounts.length) {
-            await updateDoc(userRef, {
-              linkedAccounts: activeAccounts,
-              linkedUsers: activeAccounts.map(acc => acc.userId)
+          if (linkedUserSnap.exists()) {
+            const userData = linkedUserSnap.data();
+            linkedUsers.push({
+              userId: account.userId,
+              displayName: account.displayName || "Usuario",
+              email: account.email,
+              linkedAt: account.linkedAt ? new Date(account.linkedAt) : null,
+              lastActive: userData.lastActive?.toDate() || null
             });
-          }
-          
-          // Mostrar solo los usuarios activamente vinculados
-          for (const account of activeAccounts) {
-            const linkedUserRef = doc(db, "users", account.userId);
-            const linkedUserSnap = await getDoc(linkedUserRef);
             
-            if (linkedUserSnap.exists()) {
-              const userData = linkedUserSnap.data();
-              linkedUsers.push({
-                userId: account.userId,
-                displayName: account.displayName || "Usuario",
-                email: account.email,
-                linkedAt: account.linkedAt?.toDate() || null,
-                lastActive: userData.lastActive?.toDate() || null
-              });
-              
-              const userItem = document.createElement('li');
-              userItem.className = 'user-item';
-              
-              const isActive = userData.lastActive && 
-                              (new Date() - userData.lastActive.toDate()) < 300000; // 5 minutos
-              
-              userItem.innerHTML = `
-                <div class="user-info">
-                  <div class="user-avatar">
-                    ${account.displayName?.charAt(0) || account.email?.charAt(0) || 'U'}
-                  </div>
-                  <div class="user-details">
-                    <div class="user-name">${account.displayName || "Usuario"}</div>
-                    <div class="user-email">${account.email}</div>
-                  </div>
-                  <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
-                    ${isActive ? 'Activo' : 'Inactivo'}
-                  </span>
+            const userItem = document.createElement('li');
+            userItem.className = 'user-item';
+            
+            const isActive = userData.lastActive && 
+                            (new Date() - userData.lastActive.toDate()) < 300000; // 5 minutos
+            
+            userItem.innerHTML = `
+              <div class="user-info">
+                <div class="user-avatar">
+                  ${account.displayName?.charAt(0) || account.email?.charAt(0) || 'U'}
                 </div>
-                <div class="user-actions">
-                  <button class="action-btn action-btn-danger" data-user-id="${account.userId}" title="Desvincular">
-                    <i class="fas fa-unlink"></i>
-                  </button>
+                <div class="user-details">
+                  <div class="user-name">${account.displayName || "Usuario"}</div>
+                  <div class="user-email">${account.email}</div>
                 </div>
-              `;
-              
-              linkedUsersList.appendChild(userItem);
-            }
+                <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
+                  ${isActive ? 'Activo' : 'Inactivo'}
+                </span>
+              </div>
+              <div class="user-actions">
+                <button class="action-btn action-btn-danger" data-user-id="${account.userId}" title="Desvincular">
+                  <i class="fas fa-unlink"></i>
+                </button>
+              </div>
+            `;
+            
+            linkedUsersList.appendChild(userItem);
           }
         }
-        
-        if (linkedUsers.length === 0) {
-          linkedUsersList.innerHTML = '<li style="text-align: center; color: var(--text-light);">No hay usuarios vinculados</li>';
-        } else {
-          // Agregar event listeners a los botones de desvincular
-          document.querySelectorAll('.action-btn-danger').forEach(button => {
-            button.addEventListener('click', (e) => {
-              e.stopPropagation();
-              const userId = button.getAttribute('data-user-id');
-              unlinkUser(userId);
-            });
-          });
-        }
-        
-      } catch (error) {
-        console.error("Error cargando usuarios vinculados:", error);
-        showAlert('Error al cargar usuarios vinculados', 'error');
-      } finally {
-        hideLoader();
       }
+      
+      if (linkedUsers.length === 0) {
+        linkedUsersList.innerHTML = '<li style="text-align: center; color: var(--text-light);">No hay usuarios vinculados</li>';
+      } else {
+        // Agregar event listeners a los botones de desvincular
+        document.querySelectorAll('.action-btn-danger').forEach(button => {
+          button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const userId = button.getAttribute('data-user-id');
+            unlinkUser(userId);
+          });
+        });
+      }
+      
+      hideLoader();
     }
 
-    // [Mantener el resto del código igual]
-    // ...
+    document.addEventListener('DOMContentLoaded', () => {
+      // Configurar el botón de ayuda
+      document.getElementById('helpBtn').addEventListener('click', showHelpModal);
+      document.getElementById('helpCloseBtn').addEventListener('click', hideHelpModal);
+      
+      // Cerrar modal al hacer clic fuera del contenido
+      document.getElementById('helpModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('helpModal')) {
+          hideHelpModal();
+        }
+      });
+      
+      document.getElementById('confirmationModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('confirmationModal')) {
+          hideConfirmationModal();
+        }
+      });
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          currentUser = user;
+          
+          // Crear/actualizar registro de usuario si no existe
+          const userRef = doc(db, "users", user.uid);
+          await setDoc(userRef, {
+            displayName: user.displayName || "Usuario",
+            email: user.email,
+            lastActive: serverTimestamp(),
+            linkedUsers: [],
+            linkedAccounts: []
+          }, { merge: true });
+          
+          startTokenCycle();
+          loadLinkedUsers();
+          
+          // Configurar listeners para los botones
+          document.getElementById('copyTokenBtn').addEventListener('click', () => {
+            if (currentToken) {
+              navigator.clipboard.writeText(currentToken);
+              showAlert('Token copiado al portapapeles');
+            }
+          });
+          
+          document.getElementById('refreshTokenBtn').addEventListener('click', async () => {
+            await updateToken();
+            showAlert('Token actualizado correctamente');
+          });
+          
+          document.getElementById('validateTokenBtn').addEventListener('click', validateToken);
+          
+          // Actualizar última actividad cada minuto
+          setInterval(async () => {
+            await updateDoc(userRef, {
+              lastActive: serverTimestamp()
+            }, { merge: true });
+          }, 60000);
+          
+        } else {
+          window.location.href = 'index.html';
+        }
+      });
+    });
+
+    // Limpiar el intervalo cuando la página se cierre
+    window.addEventListener('beforeunload', () => {
+      if (tokenInterval) {
+        clearInterval(tokenInterval);
+      }
+    });
+
+    // Hacer la función showAlert disponible globalmente para el cierre de alertas
+    window.showAlert = showAlert;
   </script>
 </body>
 </html>
