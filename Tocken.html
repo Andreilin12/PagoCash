@@ -547,9 +547,9 @@
     </div>
     
     <div class="linked-users">
-      <h3><i class="fas fa-users"></i> Accesos Concedidos</h3>
+      <h3><i class="fas fa-users"></i> Usuarios Vinculados</h3>
       <ul class="user-list" id="linkedUsersList">
-        <li style="text-align: center; color: var(--text-light);">No hay usuarios con acceso</li>
+        <li style="text-align: center; color: var(--text-light);">No hay usuarios vinculados</li>
       </ul>
     </div>
   </div>
@@ -565,9 +565,9 @@
   <!-- Modal de confirmación -->
   <div class="confirmation-modal" id="confirmationModal">
     <div class="confirmation-content">
-      <div class="confirmation-message" id="confirmationMessage">¿Estás seguro que deseas revocar el acceso a este usuario?</div>
+      <div class="confirmation-message" id="confirmationMessage">¿Estás seguro que deseas desvincular este usuario?</div>
       <div class="confirmation-buttons">
-        <button class="btn btn-danger" id="confirmUnlinkBtn">Sí, Revocar</button>
+        <button class="btn btn-danger" id="confirmUnlinkBtn">Sí, Desvincular</button>
         <button class="btn btn-primary" id="cancelUnlinkBtn">Cancelar</button>
       </div>
     </div>
@@ -609,31 +609,11 @@
         
         <div class="help-section">
           <h3>3. Administrar accesos</h3>
-          <p>En la sección "Accesos Concedidos" puedes:</p>
+          <p>En la sección "Usuarios Vinculados" puedes:</p>
           <ul>
             <li>Ver quién tiene acceso a tus datos</li>
             <li>Revocar el acceso cuando lo desees</li>
             <li>Ver el estado de actividad de cada usuario</li>
-          </ul>
-        </div>
-        
-        <div class="help-section">
-          <h3>Seguridad</h3>
-          <p>Por tu seguridad:</p>
-          <ul>
-            <li>Los tokens expiran después de 60 segundos</li>
-            <li>Solo comparte tu token con usuarios de confianza</li>
-            <li>Puedes revocar accesos en cualquier momento</li>
-            <li>Al revocar acceso, el usuario perderá inmediatamente el acceso a tus datos</li>
-          </ul>
-        </div>
-        
-        <div class="help-section">
-          <h3>Notas importantes</h3>
-          <ul>
-            <li>El dueño de los datos siempre mantiene el control</li>
-            <li>Al acceder a datos de otro usuario, verás sus datos pero los tuyos permanecerán privados</li>
-            <li>Puedes tener acceso a múltiples usuarios simultáneamente</li>
           </ul>
         </div>
       </div>
@@ -658,8 +638,7 @@
       arrayUnion,
       arrayRemove,
       serverTimestamp,
-      writeBatch,
-      deleteDoc
+      writeBatch
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
@@ -804,7 +783,7 @@
         return;
       }
       
-      showLoader('Validando token y solicitando acceso...');
+      showLoader('Validando token y vinculando cuentas...');
       
       try {
         // Buscar el token en la colección userTokens
@@ -831,62 +810,86 @@
         
         if (tokenData.userId === currentUser.uid) {
           hideLoader();
-          showAlert('No puedes acceder a tu propia cuenta', 'warning');
+          showAlert('No puedes vincularte a ti mismo', 'warning');
           return;
         }
         
-        // Verificar si ya está vinculado
+        // Verificar si ya están vinculados
         const userRef = doc(db, "users", currentUser.uid);
         const userSnap = await getDoc(userRef);
         
         if (userSnap.exists() && userSnap.data().linkedUsers?.includes(tokenData.userId)) {
           hideLoader();
-          showAlert('Ya tienes acceso a este usuario', 'warning');
+          showAlert('Ya estás vinculado con este usuario', 'warning');
           return;
         }
         
-        // Vincular usuarios - el usuario actual accederá a los datos del otro usuario
+        // Vincular usuarios en ambas direcciones
         const batch = writeBatch(db);
         
-        // 1. Actualizar el usuario actual (quien solicita acceso)
+        // Actualizar el usuario actual
         batch.update(userRef, {
           linkedUsers: arrayUnion(tokenData.userId),
-          linkedAccounts: arrayUnion({
-            userId: tokenData.userId,
-            email: tokenData.email,
-            displayName: tokenData.displayName,
-            linkedAt: new Date().toISOString(),
-            isDataOwner: false // Indica que este usuario accede a datos de otro
-          }),
           lastActive: serverTimestamp()
         });
         
-        // 2. Actualizar el otro usuario (dueño de los datos)
+        // Actualizar el otro usuario
         const otherUserRef = doc(db, "users", tokenData.userId);
         batch.update(otherUserRef, {
-          grantedAccess: arrayUnion({
-            userId: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName || "Usuario",
-            grantedAt: new Date().toISOString()
-          }),
+          linkedUsers: arrayUnion(currentUser.uid),
           lastActive: serverTimestamp()
         });
         
-        // 3. Crear registro de acceso compartido
-        const accessRef = doc(db, "sharedAccess", `${tokenData.userId}_${currentUser.uid}`);
-        batch.set(accessRef, {
-          ownerId: tokenData.userId,
-          accessUserId: currentUser.uid,
-          grantedAt: serverTimestamp(),
-          isActive: true
+        // Actualizar todos los préstamos del usuario actual para incluir al otro usuario
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", currentUser.uid)
+        );
+        const loansSnapshot = await getDocs(loansQuery);
+        
+        loansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayUnion(tokenData.userId)
+          });
+        });
+        
+        // Actualizar todos los préstamos del otro usuario para incluir al usuario actual
+        const otherLoansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", tokenData.userId)
+        );
+        const otherLoansSnapshot = await getDocs(otherLoansQuery);
+        
+        otherLoansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayUnion(currentUser.uid)
+          });
         });
         
         // Ejecutar todas las operaciones en lote
         await batch.commit();
         
+        // Actualizar los datos de la cuenta vinculada
+        await updateDoc(userRef, {
+          linkedAccounts: arrayUnion({
+            userId: tokenData.userId,
+            email: tokenData.email,
+            displayName: tokenData.displayName,
+            linkedAt: new Date().toISOString()
+          })
+        });
+        
+        await updateDoc(otherUserRef, {
+          linkedAccounts: arrayUnion({
+            userId: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Usuario",
+            linkedAt: new Date().toISOString()
+          })
+        });
+        
         hideLoader();
-        showAlert(`Acceso concedido a los datos de ${tokenData.displayName}.`, 'success');
+        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos préstamos.`, 'success');
         loadLinkedUsers();
         
       } catch (error) {
@@ -897,67 +900,76 @@
     }
 
     async function unlinkUser(userId) {
-      const confirm = await showConfirmationModal(`¿Estás seguro que deseas revocar el acceso a este usuario? Perderá acceso a tus datos inmediatamente.`);
+      const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario? Todos los préstamos compartidos dejarán de estar disponibles.`);
       
       if (!confirm) return;
       
-      showLoader('Revocando acceso...');
+      showLoader('Desvinculando usuario...');
       
       try {
         const batch = writeBatch(db);
         
-        // 1. Eliminar la vinculación del usuario actual
+        // 1. Eliminar la vinculación en el usuario actual
         const userRef = doc(db, "users", currentUser.uid);
         batch.update(userRef, {
           linkedUsers: arrayRemove(userId),
           linkedAccounts: arrayRemove({
             userId: userId
-          }),
-          lastActive: serverTimestamp()
+          })
         });
         
-        // 2. Eliminar el acceso concedido del otro usuario
+        // 2. Eliminar la vinculación en el otro usuario
         const otherUserRef = doc(db, "users", userId);
         batch.update(otherUserRef, {
-          grantedAccess: arrayRemove({
+          linkedUsers: arrayRemove(currentUser.uid),
+          linkedAccounts: arrayRemove({
             userId: currentUser.uid
-          }),
-          lastActive: serverTimestamp()
+          })
         });
         
-        // 3. Eliminar el registro de acceso compartido
-        const accessRef = doc(db, "sharedAccess", `${currentUser.uid}_${userId}`);
-        batch.delete(accessRef);
-        
-        // 4. Eliminar cualquier dato compartido que el usuario haya copiado
-        const copiedDataQuery = query(
+        // 3. Eliminar el acceso compartido a los préstamos del usuario actual
+        const loansQuery = query(
           collection(db, "Loans"),
-          where("originalOwner", "==", currentUser.uid),
+          where("userId", "==", currentUser.uid)
+        );
+        const loansSnapshot = await getDocs(loansQuery);
+        
+        loansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayRemove(userId)
+          });
+        });
+        
+        // 4. Eliminar el acceso compartido a los préstamos del otro usuario
+        const otherLoansQuery = query(
+          collection(db, "Loans"),
           where("userId", "==", userId)
         );
-        const copiedDataSnapshot = await getDocs(copiedDataQuery);
+        const otherLoansSnapshot = await getDocs(otherLoansQuery);
         
-        copiedDataSnapshot.forEach((doc) => {
-          batch.delete(doc.ref);
+        otherLoansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayRemove(currentUser.uid)
+          });
         });
         
         await batch.commit();
         
         hideLoader();
-        showAlert('Acceso revocado correctamente', 'success');
+        showAlert('Usuario desvinculado correctamente', 'success');
         loadLinkedUsers();
         
       } catch (error) {
-        console.error("Error revocando acceso:", error);
+        console.error("Error desvinculando usuario:", error);
         hideLoader();
-        showAlert('Error al revocar acceso: ' + error.message, 'error');
+        showAlert('Error al desvincular usuario: ' + error.message, 'error');
       }
     }
 
     async function loadLinkedUsers() {
       if (!currentUser) return;
       
-      showLoader('Cargando usuarios con acceso...');
+      showLoader('Cargando usuarios vinculados...');
       
       const userRef = doc(db, "users", currentUser.uid);
       const userSnap = await getDoc(userRef);
@@ -980,8 +992,7 @@
               displayName: account.displayName || "Usuario",
               email: account.email,
               linkedAt: account.linkedAt ? new Date(account.linkedAt) : null,
-              lastActive: userData.lastActive?.toDate() || null,
-              isDataOwner: account.isDataOwner || false
+              lastActive: userData.lastActive?.toDate() || null
             });
             
             const userItem = document.createElement('li');
@@ -1004,7 +1015,7 @@
                 </span>
               </div>
               <div class="user-actions">
-                <button class="action-btn action-btn-danger" data-user-id="${account.userId}" title="Revocar acceso">
+                <button class="action-btn action-btn-danger" data-user-id="${account.userId}" title="Desvincular">
                   <i class="fas fa-unlink"></i>
                 </button>
               </div>
@@ -1016,7 +1027,7 @@
       }
       
       if (linkedUsers.length === 0) {
-        linkedUsersList.innerHTML = '<li style="text-align: center; color: var(--text-light);">No hay usuarios con acceso</li>';
+        linkedUsersList.innerHTML = '<li style="text-align: center; color: var(--text-light);">No hay usuarios vinculados</li>';
       } else {
         // Agregar event listeners a los botones de desvincular
         document.querySelectorAll('.action-btn-danger').forEach(button => {
@@ -1047,8 +1058,7 @@
             email: user.email,
             lastActive: serverTimestamp(),
             linkedUsers: [],
-            linkedAccounts: [],
-            grantedAccess: []
+            linkedAccounts: []
           }, { merge: true });
           
           startTokenCycle();
