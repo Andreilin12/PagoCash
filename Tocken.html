@@ -1149,13 +1149,22 @@
           
           // Crear/actualizar registro de usuario si no existe
           const userRef = doc(db, "users", user.uid);
-          await setDoc(userRef, {
-            displayName: user.displayName || "Usuario",
-            email: user.email,
-            lastActive: serverTimestamp(),
-            linkedUsers: [],
-            linkedAccounts: []
-          }, { merge: true });
+          const userDoc = await getDoc(userRef);
+          
+          if (!userDoc.exists()) {
+            await setDoc(userRef, {
+              displayName: user.displayName || "Usuario",
+              email: user.email,
+              lastActive: serverTimestamp(),
+              linkedUsers: [],
+              linkedAccounts: []
+            });
+          } else {
+            // Actualizar última actividad
+            await updateDoc(userRef, {
+              lastActive: serverTimestamp()
+            });
+          }
           
           startTokenCycle();
           loadLinkedUsers();
@@ -1179,7 +1188,7 @@
           setInterval(async () => {
             await updateDoc(userRef, {
               lastActive: serverTimestamp()
-            }, { merge: true });
+            });
           }, 60000);
           
         } else {
