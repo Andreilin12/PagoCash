@@ -564,6 +564,47 @@
       color: var(--text-light);
       font-size: 0.9rem;
     }
+
+    /* Datos compartidos */
+    .shared-data-container {
+      margin-top: 2rem;
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--primary-color);
+    }
+
+    .shared-data-title {
+      color: var(--primary-color);
+      margin-top: 0;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .data-item {
+      background-color: rgba(26, 188, 156, 0.1);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .data-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .data-owner {
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .data-content {
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
@@ -606,6 +647,13 @@
       <ul class="user-list" id="linkedUsersList">
         <li style="text-align: center; color: var(--text-light);">No hay usuarios vinculados</li>
       </ul>
+    </div>
+
+    <div class="shared-data-container" id="sharedDataContainer">
+      <h3 class="shared-data-title"><i class="fas fa-database"></i> Datos Compartidos</h3>
+      <div id="sharedDataList">
+        <div style="text-align: center; color: var(--text-light);">No hay datos compartidos disponibles</div>
+      </div>
     </div>
   </div>
 
@@ -926,30 +974,28 @@
           lastActive: serverTimestamp()
         });
         
-        // 3. Actualizar todos los préstamos del usuario actual para compartir con el otro usuario
-        const loansQuery = query(
-          collection(db, "Loans"),
-          where("userId", "==", currentUser.uid)
-        );
-        const loansSnapshot = await getDocs(loansQuery);
-        
-        loansSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            sharedWith: arrayUnion(tokenData.userId)
-          });
+        // 3. Crear un documento de datos compartidos
+        const sharedDataRef = doc(collection(db, "sharedData"));
+        batch.set(sharedDataRef, {
+          ownerId: currentUser.uid,
+          sharedWith: [tokenData.userId],
+          createdAt: serverTimestamp(),
+          data: {
+            message: "Datos compartidos iniciales",
+            exampleField: "Este es un ejemplo de dato compartido"
+          }
         });
         
-        // 4. Actualizar todos los préstamos del otro usuario para compartir con el usuario actual
-        const otherLoansQuery = query(
-          collection(db, "Loans"),
-          where("userId", "==", tokenData.userId)
-        );
-        const otherLoansSnapshot = await getDocs(otherLoansQuery);
-        
-        otherLoansSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            sharedWith: arrayUnion(currentUser.uid)
-          });
+        // 4. Crear un documento de datos compartidos para el otro usuario
+        const otherSharedDataRef = doc(collection(db, "sharedData"));
+        batch.set(otherSharedDataRef, {
+          ownerId: tokenData.userId,
+          sharedWith: [currentUser.uid],
+          createdAt: serverTimestamp(),
+          data: {
+            message: "Datos compartidos iniciales",
+            exampleField: "Este es un ejemplo de dato compartido"
+          }
         });
         
         // Ejecutar todas las operaciones en lote
@@ -959,6 +1005,7 @@
         showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos datos.`, 'success');
         document.getElementById('tokenInput').value = '';
         loadLinkedUsers();
+        loadSharedData();
         
       } catch (error) {
         console.error("Error validando token:", error);
@@ -1013,55 +1060,32 @@
           }
         }
         
-        // 3. Eliminar el acceso compartido a los préstamos del usuario actual
-        const loansQuery = query(
-          collection(db, "Loans"),
-          where("userId", "==", currentUser.uid)
-        );
-        const loansSnapshot = await getDocs(loansQuery);
-        
-        loansSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            sharedWith: arrayRemove(userId)
-          });
-        });
-        
-        // 4. Eliminar el acceso compartido a los préstamos del otro usuario
-        const otherLoansQuery = query(
-          collection(db, "Loans"),
-          where("userId", "==", userId)
-        );
-        const otherLoansSnapshot = await getDocs(otherLoansQuery);
-        
-        otherLoansSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            sharedWith: arrayRemove(currentUser.uid)
-          });
-        });
-        
-        // 5. Eliminar cualquier otro dato compartido
+        // 3. Eliminar los datos compartidos
         const sharedDataQuery = query(
-          collection(db, "SharedData"),
-          where("sharedWith", "array-contains", currentUser.uid)
+          collection(db, "sharedData"),
+          where("ownerId", "==", currentUser.uid),
+          where("sharedWith", "array-contains", userId)
         );
         const sharedDataSnapshot = await getDocs(sharedDataQuery);
         
         sharedDataSnapshot.forEach((doc) => {
           batch.update(doc.ref, {
-            sharedWith: arrayRemove(currentUser.uid)
+            sharedWith: arrayRemove(userId)
           });
         });
         
-        // 6. Eliminar datos específicos compartidos con este usuario
-        const userSharedDocsQuery = query(
-          collection(db, "UserSharedData"),
+        // 4. Eliminar los datos compartidos del otro usuario
+        const otherSharedDataQuery = query(
+          collection(db, "sharedData"),
           where("ownerId", "==", userId),
-          where("sharedWith", "==", currentUser.uid)
+          where("sharedWith", "array-contains", currentUser.uid)
         );
-        const userSharedDocsSnapshot = await getDocs(userSharedDocsQuery);
+        const otherSharedDataSnapshot = await getDocs(otherSharedDataQuery);
         
-        userSharedDocsSnapshot.forEach((doc) => {
-          batch.delete(doc.ref);
+        otherSharedDataSnapshot.forEach((doc) => {
+          batch.update(doc.ref, {
+            sharedWith: arrayRemove(currentUser.uid)
+          });
         });
         
         // Ejecutar todas las operaciones en lote
@@ -1070,6 +1094,7 @@
         hideLoader();
         showAlert('Usuario desvinculado correctamente. Todos los accesos compartidos han sido eliminados.', 'success');
         loadLinkedUsers();
+        loadSharedData();
         
       } catch (error) {
         console.error("Error desvinculando usuario:", error);
@@ -1175,6 +1200,87 @@
       hideLoader();
     }
 
+    async function loadSharedData() {
+      if (!currentUser) return;
+      
+      showLoader('Cargando datos compartidos...');
+      
+      const sharedDataList = document.getElementById('sharedDataList');
+      sharedDataList.innerHTML = '';
+      
+      try {
+        // Obtener datos compartidos por otros usuarios con el usuario actual
+        const sharedDataQuery = query(
+          collection(db, "sharedData"),
+          where("sharedWith", "array-contains", currentUser.uid)
+        );
+        
+        const querySnapshot = await getDocs(sharedDataQuery);
+        
+        if (querySnapshot.empty) {
+          sharedDataList.innerHTML = '<div style="text-align: center; color: var(--text-light);">No hay datos compartidos disponibles</div>';
+          hideLoader();
+          return;
+        }
+        
+        // Obtener información de los usuarios propietarios de los datos
+        const ownerIds = querySnapshot.docs.map(doc => doc.data().ownerId);
+        const uniqueOwnerIds = [...new Set(ownerIds)];
+        
+        const ownersInfo = {};
+        for (const ownerId of uniqueOwnerIds) {
+          const ownerDoc = await getDoc(doc(db, "users", ownerId));
+          if (ownerDoc.exists()) {
+            ownersInfo[ownerId] = ownerDoc.data();
+          }
+        }
+        
+        // Mostrar los datos compartidos
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const ownerInfo = ownersInfo[data.ownerId] || {
+            displayName: "Usuario desconocido",
+            email: "Desconocido"
+          };
+          
+          const dataItem = document.createElement('div');
+          dataItem.className = 'data-item';
+          
+          const formattedDate = data.createdAt?.toDate 
+            ? data.createdAt.toDate().toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            : 'Fecha desconocida';
+          
+          dataItem.innerHTML = `
+            <div class="data-header">
+              <div class="data-owner">
+                <i class="fas fa-user"></i> ${ownerInfo.displayName || "Usuario"}
+              </div>
+              <div style="font-size: 0.8rem; color: var(--text-light);">
+                ${formattedDate}
+              </div>
+            </div>
+            <div class="data-content">
+              <pre>${JSON.stringify(data.data, null, 2)}</pre>
+            </div>
+          `;
+          
+          sharedDataList.appendChild(dataItem);
+        });
+        
+      } catch (error) {
+        console.error("Error cargando datos compartidos:", error);
+        sharedDataList.innerHTML = '<div style="text-align: center; color: var(--danger-color);">Error al cargar datos compartidos</div>';
+      }
+      
+      hideLoader();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       // Configurar el botón de ayuda
       document.getElementById('helpBtn').addEventListener('click', showHelpModal);
@@ -1218,6 +1324,7 @@
           
           startTokenCycle();
           loadLinkedUsers();
+          loadSharedData();
           
           // Configurar listeners para los botones
           document.getElementById('copyTokenBtn').addEventListener('click', () => {
