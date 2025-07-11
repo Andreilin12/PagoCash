@@ -6,6 +6,7 @@
   <title>PlusMoney - Sistema de Tokens</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    /* Estilos permanecen exactamente iguales */
     :root {
       --primary-color: #1abc9c;
       --primary-dark: #16a085;
@@ -391,6 +392,7 @@
   </style>
 </head>
 <body>
+  <!-- Estructura HTML permanece igual -->
   <div class="token-container">
     <h1><i class="fas fa-key"></i> Sistema de Tokens</h1>
     
@@ -489,6 +491,7 @@
     let realTimeListeners = [];
     let masterUserId = null;
 
+    // Funciones de utilidad (showAlert, showLoader, hideLoader, etc.) permanecen iguales
     function showAlert(message, type = 'success') {
       const alert = document.createElement('div');
       alert.className = `custom-alert alert-${type}`;
@@ -609,6 +612,7 @@
       realTimeListeners.push(loansListener);
     }
 
+    // FUNCIÓN PRINCIPAL CORREGIDA - VALIDATE TOKEN
     async function validateToken() {
       const tokenInput = document.getElementById('tokenInput').value.trim();
       if (!tokenInput) {
@@ -619,6 +623,7 @@
       showLoader('Validando token y vinculando cuentas...');
       
       try {
+        // 1. Buscar el token en la base de datos
         const tokensRef = collection(db, "userTokens");
         const q = query(tokensRef, where("token", "==", tokenInput));
         const querySnapshot = await getDocs(q);
@@ -640,12 +645,14 @@
           return;
         }
         
+        // 2. Verificar que no sea el mismo usuario
         if (tokenData.userId === currentUser.uid) {
           hideLoader();
           showAlert('No puedes vincularte a ti mismo', 'warning');
           return;
         }
         
+        // 3. Verificar que no estén ya vinculados
         const userRef = doc(db, "users", currentUser.uid);
         const userSnap = await getDoc(userRef);
         
@@ -655,45 +662,38 @@
           return;
         }
         
-        // 1. Determinar el userId maestro (usaremos el del usuario que está siendo vinculado)
-        masterUserId = tokenData.userId;
+        // 4. Determinar el usuario maestro (siempre será el que está vinculando)
+        masterUserId = currentUser.uid;
+        const userToLinkId = tokenData.userId;
         
         const batch = writeBatch(db);
         
-        // 2. Copiar todos los datos del usuario actual al usuario maestro
-        const masterUserRef = doc(db, "users", masterUserId);
+        // 5. Actualizar el usuario actual (maestro)
+        batch.update(userRef, {
+          linkedUsers: arrayUnion(userToLinkId),
+          linkedAccounts: arrayUnion({
+            userId: userToLinkId,
+            email: tokenData.email,
+            displayName: tokenData.displayName,
+            linkedAt: new Date().toISOString()
+          }),
+          lastActive: serverTimestamp()
+        });
         
-        // Si el usuario actual tiene datos, los fusionamos
-        if (userSnap.exists()) {
-          batch.set(masterUserRef, {
-            ...userSnap.data(),
-            linkedUsers: arrayUnion(currentUser.uid, tokenData.userId),
+        // 6. Migrar todos los datos del usuario a vincular al usuario maestro
+        const userToLinkRef = doc(db, "users", userToLinkId);
+        
+        // 6.1. Copiar los datos del usuario a vincular
+        const userToLinkSnap = await getDoc(userToLinkRef);
+        if (userToLinkSnap.exists()) {
+          const userToLinkData = userToLinkSnap.data();
+          
+          // Fusionar los datos del usuario vinculado con el maestro
+          batch.update(userRef, {
+            ...userToLinkData,
+            linkedUsers: arrayUnion(userToLinkId),
             linkedAccounts: arrayUnion({
-              userId: currentUser.uid,
-              email: currentUser.email,
-              displayName: currentUser.displayName || "Usuario",
-              linkedAt: new Date().toISOString()
-            }, {
-              userId: tokenData.userId,
-              email: tokenData.email,
-              displayName: tokenData.displayName,
-              linkedAt: new Date().toISOString()
-            })
-          }, { merge: true });
-        } else {
-          // Si no tiene datos, creamos uno nuevo
-          batch.set(masterUserRef, {
-            displayName: currentUser.displayName || "Usuario",
-            email: currentUser.email,
-            lastActive: serverTimestamp(),
-            linkedUsers: arrayUnion(currentUser.uid, tokenData.userId),
-            linkedAccounts: arrayUnion({
-              userId: currentUser.uid,
-              email: currentUser.email,
-              displayName: currentUser.displayName || "Usuario",
-              linkedAt: new Date().toISOString()
-            }, {
-              userId: tokenData.userId,
+              userId: userToLinkId,
               email: tokenData.email,
               displayName: tokenData.displayName,
               linkedAt: new Date().toISOString()
@@ -701,49 +701,52 @@
           });
         }
         
-        // 3. Mover todos los préstamos del usuario actual al userId maestro
+        // 6.2. Migrar todos los préstamos del usuario vinculado
         const loansQuery = query(
           collection(db, "Loans"),
-          where("userId", "==", currentUser.uid)
+          where("userId", "==", userToLinkId)
         );
         const loansSnapshot = await getDocs(loansQuery);
         
         loansSnapshot.forEach((loanDoc) => {
-          const newLoanRef = doc(db, "Loans", loanDoc.id);
-          batch.update(newLoanRef, {
-            userId: masterUserId
+          const newLoanRef = doc(db, "Loans", loanDoc.id.replace(userToLinkId, masterUserId));
+          batch.set(newLoanRef, {
+            ...loanDoc.data(),
+            userId: masterUserId,
+            originalUserId: userToLinkId
           });
+          batch.delete(loanDoc.ref);
         });
         
-        // 4. Actualizar el token del usuario actual para usar el userId maestro
-        const tokenRef = doc(db, "userTokens", currentUser.uid);
-        batch.update(tokenRef, {
+        // 7. Actualizar el usuario vinculado para que apunte al maestro
+        batch.set(userToLinkRef, {
+          masterUserId: masterUserId,
+          originalUserId: userToLinkId,
+          linkedUsers: arrayUnion(masterUserId),
+          linkedAccounts: arrayUnion({
+            userId: masterUserId,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Usuario",
+            linkedAt: new Date().toISOString()
+          }),
+          lastActive: serverTimestamp()
+        }, { merge: true });
+        
+        // 8. Actualizar el token del usuario vinculado
+        const tokenToUpdateRef = doc(db, "userTokens", userToLinkId);
+        batch.update(tokenToUpdateRef, {
           userId: masterUserId
         });
         
-        // 5. Actualizar el documento del usuario actual para que apunte al maestro
-        batch.update(userRef, {
-          masterUserId: masterUserId,
-          linkedUsers: arrayUnion(tokenData.userId),
-          linkedAccounts: arrayUnion({
-            userId: tokenData.userId,
-            email: tokenData.email,
-            displayName: tokenData.displayName,
-            linkedAt: new Date().toISOString()
-          })
-        });
-        
+        // 9. Ejecutar todas las operaciones
         await batch.commit();
         
-        // Configurar listeners para el userId maestro
+        // 10. Configurar listeners en tiempo real
         cleanupRealTimeListeners();
         await setupRealTimeListeners(masterUserId);
         
-        // Actualizar el currentUser local para usar el userId maestro en futuras operaciones
-        currentUser = { ...currentUser, uid: masterUserId };
-        
         hideLoader();
-        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartes el mismo ID de usuario y todos los datos.`, 'success');
+        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartes el mismo ID de usuario (${masterUserId}) y todos los datos se sincronizan en tiempo real.`, 'success');
         loadLinkedUsers();
         
       } catch (error) {
@@ -753,6 +756,7 @@
       }
     }
 
+    // FUNCIÓN PARA DESVINCULAR USUARIOS
     async function unlinkUser(userId) {
       const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario? Esto separará los datos de ambos usuarios.`);
       
@@ -771,62 +775,64 @@
         
         const batch = writeBatch(db);
         
-        // 2. Restaurar el userId original para el usuario actual
-        const originalUserId = currentUser.uid === masterUserId ? 
-          masterUserSnap.data().linkedAccounts.find(acc => acc.userId !== userId)?.userId : 
-          currentUser.uid;
+        // 2. Restaurar el usuario vinculado
+        const userToUnlinkRef = doc(db, "users", userId);
+        const userToUnlinkSnap = await getDoc(userToUnlinkRef);
+        
+        if (userToUnlinkSnap.exists()) {
+          const originalUserId = userToUnlinkSnap.data().originalUserId || userId;
           
-        if (!originalUserId) {
-          throw new Error("No se pudo determinar el ID original del usuario");
-        }
-        
-        // 3. Crear un nuevo documento para el usuario actual con sus datos originales
-        const newUserRef = doc(db, "users", originalUserId);
-        batch.set(newUserRef, {
-          displayName: currentUser.displayName || "Usuario",
-          email: currentUser.email,
-          lastActive: serverTimestamp(),
-          linkedUsers: [],
-          linkedAccounts: []
-        });
-        
-        // 4. Actualizar el token del usuario actual para usar su userId original
-        const tokenRef = doc(db, "userTokens", masterUserId);
-        batch.update(tokenRef, {
-          userId: originalUserId
-        });
-        
-        // 5. Si hay otro usuario vinculado, actualizar su información
-        const otherUserId = masterUserSnap.data().linkedAccounts.find(acc => acc.userId !== originalUserId)?.userId;
-        if (otherUserId) {
-          const otherUserRef = doc(db, "users", otherUserId);
-          batch.update(otherUserRef, {
-            masterUserId: deleteField(),
-            linkedUsers: arrayRemove(originalUserId),
-            linkedAccounts: arrayRemove({
-              userId: originalUserId
-            })
+          // 2.1. Crear un nuevo documento con su ID original
+          const newUserRef = doc(db, "users", originalUserId);
+          batch.set(newUserRef, {
+            displayName: userToUnlinkSnap.data().displayName || "Usuario",
+            email: userToUnlinkSnap.data().email,
+            lastActive: serverTimestamp(),
+            linkedUsers: [],
+            linkedAccounts: []
           });
-        } else {
-          // Si no hay más usuarios vinculados, eliminar el documento maestro
-          batch.delete(masterUserRef);
+          
+          // 2.2. Migrar los préstamos de vuelta al usuario original
+          const loansQuery = query(
+            collection(db, "Loans"),
+            where("originalUserId", "==", originalUserId)
+          );
+          const loansSnapshot = await getDocs(loansQuery);
+          
+          loansSnapshot.forEach((loanDoc) => {
+            const newLoanRef = doc(db, "Loans", loanDoc.id.replace(masterUserId, originalUserId));
+            batch.set(newLoanRef, {
+              ...loanDoc.data(),
+              userId: originalUserId,
+              originalUserId: deleteField()
+            });
+            batch.delete(loanDoc.ref);
+          });
+          
+          // 2.3. Actualizar el token del usuario
+          const tokenRef = doc(db, "userTokens", userId);
+          batch.update(tokenRef, {
+            userId: originalUserId
+          });
         }
         
+        // 3. Actualizar el usuario maestro
+        batch.update(masterUserRef, {
+          linkedUsers: arrayRemove(userId),
+          linkedAccounts: arrayRemove({
+            userId: userId
+          })
+        });
+        
+        // 4. Ejecutar todas las operaciones
         await batch.commit();
         
-        // Limpiar listeners
+        // 5. Limpiar listeners y actualizar UI
         cleanupRealTimeListeners();
-        
-        // Actualizar el currentUser local para usar el userId original
-        currentUser = { ...currentUser, uid: originalUserId };
-        masterUserId = null;
-        
-        // Reiniciar el ciclo de tokens
-        clearInterval(tokenInterval);
-        await startTokenCycle();
+        await setupRealTimeListeners(masterUserId);
         
         hideLoader();
-        showAlert('Desvinculación exitosa. Ahora cada usuario tiene sus datos separados.', 'success');
+        showAlert('Desvinculación exitosa. Los usuarios ahora tienen sus datos separados.', 'success');
         loadLinkedUsers();
         
       } catch (error) {
@@ -836,6 +842,7 @@
       }
     }
 
+    // FUNCIÓN PARA CARGAR USUARIOS VINCULADOS
     async function loadLinkedUsers() {
       if (!currentUser) return;
       
@@ -914,27 +921,28 @@
       hideLoader();
     }
 
+    // INICIALIZACIÓN DE LA APLICACIÓN
     document.addEventListener('DOMContentLoaded', () => {
       onAuthStateChanged(auth, async (user) => {
         if (user) {
           currentUser = user;
           
-          // Verificar si este usuario está vinculado a otro
+          // Verificar si este usuario está vinculado a un maestro
           const userRef = doc(db, "users", user.uid);
           const userSnap = await getDoc(userRef);
           
           if (userSnap.exists() && userSnap.data().masterUserId) {
-            // El usuario está vinculado, usar el userId maestro
+            // El usuario es secundario, usar el ID maestro
             masterUserId = userSnap.data().masterUserId;
             
-            // Configurar listeners para el userId maestro
+            // Configurar listeners para el maestro
             cleanupRealTimeListeners();
             await setupRealTimeListeners(masterUserId);
           } else {
-            // Usuario no vinculado, usar su propio userId
-            masterUserId = null;
+            // El usuario es maestro o no está vinculado
+            masterUserId = user.uid;
             
-            // Crear/actualizar registro de usuario si no existe
+            // Crear/actualizar registro de usuario
             await setDoc(userRef, {
               displayName: user.displayName || "Usuario",
               email: user.email,
@@ -942,11 +950,17 @@
               linkedUsers: [],
               linkedAccounts: []
             }, { merge: true });
+            
+            // Configurar listeners
+            cleanupRealTimeListeners();
+            await setupRealTimeListeners(masterUserId);
           }
           
+          // Iniciar ciclo de tokens
           startTokenCycle();
           loadLinkedUsers();
           
+          // Configurar eventos de los botones
           document.getElementById('copyTokenBtn').addEventListener('click', () => {
             if (currentToken) {
               navigator.clipboard.writeText(currentToken);
@@ -961,6 +975,7 @@
           
           document.getElementById('validateTokenBtn').addEventListener('click', validateToken);
           
+          // Actualizar actividad cada minuto
           setInterval(async () => {
             const ref = doc(db, "users", masterUserId || currentUser.uid);
             await updateDoc(ref, {
@@ -974,6 +989,7 @@
       });
     });
 
+    // Limpieza al cerrar la página
     window.addEventListener('beforeunload', () => {
       if (tokenInterval) {
         clearInterval(tokenInterval);
