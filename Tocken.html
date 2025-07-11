@@ -898,29 +898,31 @@
         const currentDate = new Date().toISOString();
         
         // 1. Actualizar el usuario actual
+        const userAccountData = {
+          userId: tokenData.userId,
+          email: tokenData.email,
+          displayName: tokenData.displayName,
+          linkedAt: currentDate
+        };
+        
         batch.update(userRef, {
           linkedUsers: arrayUnion(tokenData.userId),
-          linkedAccounts: arrayUnion({
-            userId: tokenData.userId,
-            email: tokenData.email,
-            displayName: tokenData.displayName,
-            linkedAt: currentDate,
-            lastActive: serverTimestamp()
-          }),
+          linkedAccounts: arrayUnion(userAccountData),
           lastActive: serverTimestamp()
         });
         
         // 2. Actualizar el otro usuario
         const otherUserRef = doc(db, "users", tokenData.userId);
+        const otherUserAccountData = {
+          userId: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName || "Usuario",
+          linkedAt: currentDate
+        };
+        
         batch.update(otherUserRef, {
           linkedUsers: arrayUnion(currentUser.uid),
-          linkedAccounts: arrayUnion({
-            userId: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName || "Usuario",
-            linkedAt: currentDate,
-            lastActive: serverTimestamp()
-          }),
+          linkedAccounts: arrayUnion(otherUserAccountData),
           lastActive: serverTimestamp()
         });
         
