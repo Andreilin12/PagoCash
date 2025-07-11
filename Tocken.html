@@ -464,6 +464,7 @@
       query,
       where,
       getDocs,
+      onSnapshot,
       arrayUnion,
       arrayRemove,
       serverTimestamp,
@@ -491,6 +492,8 @@
     let currentToken = null;
     let linkedUsers = [];
     let userToUnlink = null;
+    let realTimeListeners = [];
+    let sharedGroupId = null;
 
     // Mostrar alerta personalizada
     function showAlert(message, type = 'success') {
@@ -556,6 +559,11 @@
       return Math.random().toString(36).substring(2, 10).toUpperCase();
     }
 
+    function generateGroupId() {
+      // Genera un ID de grupo único para usuarios vinculados
+      return 'group_' + Math.random().toString(36).substring(2, 15);
+    }
+
     async function updateToken() {
       if (!currentUser) return;
       
@@ -593,6 +601,43 @@
           await updateToken();
         }
       }, 1000);
+    }
+
+    // Limpiar todos los listeners en tiempo real
+    function cleanupRealTimeListeners() {
+      realTimeListeners.forEach(unsubscribe => unsubscribe());
+      realTimeListeners = [];
+    }
+
+    // Configurar listeners en tiempo real para datos compartidos
+    async function setupRealTimeListeners(groupId) {
+      // Listener para usuarios vinculados
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("groupId", "==", groupId));
+      
+      const usersListener = onSnapshot(q, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === "modified") {
+            // Actualizar UI si es necesario
+            loadLinkedUsers();
+          }
+        });
+      });
+      realTimeListeners.push(usersListener);
+      
+      // Listener para préstamos compartidos
+      const loansRef = collection(db, "Loans");
+      const loansQuery = query(loansRef, where("groupId", "==", groupId));
+      
+      const loansListener = onSnapshot(loansQuery, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === "added" || change.type === "modified") {
+            // Aquí puedes actualizar la UI con los nuevos cambios
+            console.log("Cambio en préstamo compartido:", change.doc.data());
+          }
+        });
+      });
+      realTimeListeners.push(loansListener);
     }
 
     async function validateToken() {
@@ -643,23 +688,29 @@
           return;
         }
         
+        // Crear un ID de grupo único para los usuarios vinculados
+        sharedGroupId = generateGroupId();
+        
         // Vincular usuarios en ambas direcciones
         const batch = writeBatch(db);
         
-        // 1. Actualizar el usuario actual para incluir al usuario vinculado
+        // 1. Actualizar el usuario actual
         batch.update(userRef, {
           linkedUsers: arrayUnion(tokenData.userId),
+          groupId: sharedGroupId,
           lastActive: serverTimestamp()
         });
         
-        // 2. Actualizar el usuario que se está vinculando para incluir al usuario actual
+        // 2. Actualizar el otro usuario
         const userToLinkRef = doc(db, "users", tokenData.userId);
         batch.update(userToLinkRef, {
           linkedUsers: arrayUnion(currentUser.uid),
+          groupId: sharedGroupId,
           lastActive: serverTimestamp()
         });
         
-        // 3. Duplicar los préstamos del usuario actual para el usuario vinculado
+        // 3. Actualizar todos los préstamos existentes para incluir el groupId
+        // Préstamos del usuario actual
         const loansQuery = query(
           collection(db, "Loans"),
           where("userId", "==", currentUser.uid)
@@ -667,24 +718,13 @@
         const loansSnapshot = await getDocs(loansQuery);
         
         loansSnapshot.forEach((loanDoc) => {
-          const loanData = loanDoc.data();
-          const newLoanRef = doc(collection(db, "Loans"));
-          
-          batch.set(newLoanRef, {
-            ...loanData,
-            userId: tokenData.userId, // Asignar al usuario vinculado
-            originalUserId: currentUser.uid, // Guardar referencia al usuario original
-            sharedWith: arrayUnion(currentUser.uid, tokenData.userId),
-            createdAt: serverTimestamp()
-          });
-          
-          // Actualizar el préstamo original para marcar que está compartido
           batch.update(loanDoc.ref, {
+            groupId: sharedGroupId,
             sharedWith: arrayUnion(tokenData.userId)
           });
         });
         
-        // 4. Duplicar los préstamos del usuario vinculado para el usuario actual
+        // Préstamos del otro usuario
         const otherLoansQuery = query(
           collection(db, "Loans"),
           where("userId", "==", tokenData.userId)
@@ -692,19 +732,8 @@
         const otherLoansSnapshot = await getDocs(otherLoansQuery);
         
         otherLoansSnapshot.forEach((loanDoc) => {
-          const loanData = loanDoc.data();
-          const newLoanRef = doc(collection(db, "Loans"));
-          
-          batch.set(newLoanRef, {
-            ...loanData,
-            userId: currentUser.uid, // Asignar al usuario actual
-            originalUserId: tokenData.userId, // Guardar referencia al usuario original
-            sharedWith: arrayUnion(currentUser.uid, tokenData.userId),
-            createdAt: serverTimestamp()
-          });
-          
-          // Actualizar el préstamo original para marcar que está compartido
           batch.update(loanDoc.ref, {
+            groupId: sharedGroupId,
             sharedWith: arrayUnion(currentUser.uid)
           });
         });
@@ -731,8 +760,12 @@
           })
         });
         
+        // Configurar listeners en tiempo real para los datos compartidos
+        cleanupRealTimeListeners();
+        await setupRealTimeListeners(sharedGroupId);
+        
         hideLoader();
-        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos préstamos.`, 'success');
+        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos datos en tiempo real.`, 'success');
         loadLinkedUsers();
         
       } catch (error) {
@@ -752,69 +785,50 @@
       try {
         const batch = writeBatch(db);
         
-        // 1. Eliminar la vinculación en el usuario actual
+        // 1. Obtener información del grupo actual
         const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        const currentGroupId = userSnap.data()?.groupId;
+        
+        // 2. Eliminar la vinculación en el usuario actual
         batch.update(userRef, {
           linkedUsers: arrayRemove(userId),
           linkedAccounts: arrayRemove({
             userId: userId
-          })
+          }),
+          groupId: null // Eliminar el groupId
         });
         
-        // 2. Eliminar la vinculación en el otro usuario
+        // 3. Eliminar la vinculación en el otro usuario
         const otherUserRef = doc(db, "users", userId);
         batch.update(otherUserRef, {
           linkedUsers: arrayRemove(currentUser.uid),
           linkedAccounts: arrayRemove({
             userId: currentUser.uid
-          })
+          }),
+          groupId: null // Eliminar el groupId
         });
         
-        // 3. Eliminar los préstamos duplicados del usuario actual
-        const loansQuery = query(
-          collection(db, "Loans"),
-          where("userId", "==", currentUser.uid),
-          where("originalUserId", "==", userId)
-        );
-        const loansSnapshot = await getDocs(loansQuery);
-        
-        loansSnapshot.forEach((loanDoc) => {
-          batch.delete(loanDoc.ref);
-        });
-        
-        // 4. Eliminar los préstamos duplicados del otro usuario
-        const otherLoansQuery = query(
-          collection(db, "Loans"),
-          where("userId", "==", userId),
-          where("originalUserId", "==", currentUser.uid)
-        );
-        const otherLoansSnapshot = await getDocs(otherLoansQuery);
-        
-        otherLoansSnapshot.forEach((loanDoc) => {
-          batch.delete(loanDoc.ref);
-        });
-        
-        // 5. Eliminar el acceso compartido a los préstamos originales
-        const originalLoansQuery = query(
-          collection(db, "Loans"),
-          where("userId", "in", [currentUser.uid, userId])
-        );
-        const originalLoansSnapshot = await getDocs(originalLoansQuery);
-        
-        originalLoansSnapshot.forEach((loanDoc) => {
-          const loanData = loanDoc.data();
-          if (loanData.userId === currentUser.uid) {
+        // 4. Eliminar el groupId de los préstamos compartidos
+        if (currentGroupId) {
+          const loansQuery = query(
+            collection(db, "Loans"),
+            where("groupId", "==", currentGroupId)
+          );
+          const loansSnapshot = await getDocs(loansQuery);
+          
+          loansSnapshot.forEach((loanDoc) => {
             batch.update(loanDoc.ref, {
-              sharedWith: arrayRemove(userId)
+              groupId: null,
+              sharedWith: arrayRemove(currentUser.uid, userId)
             });
-          } else {
-            batch.update(loanDoc.ref, {
-              sharedWith: arrayRemove(currentUser.uid)
-            });
-          }
-        });
+          });
+        }
         
         await batch.commit();
+        
+        // Limpiar listeners en tiempo real
+        cleanupRealTimeListeners();
         
         hideLoader();
         showAlert('Usuario desvinculado correctamente', 'success');
@@ -910,12 +924,21 @@
           
           // Crear/actualizar registro de usuario si no existe
           const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists() && userSnap.data().groupId) {
+            // Si el usuario ya está en un grupo, configurar listeners en tiempo real
+            sharedGroupId = userSnap.data().groupId;
+            cleanupRealTimeListeners();
+            setupRealTimeListeners(sharedGroupId);
+          }
+          
           await setDoc(userRef, {
             displayName: user.displayName || "Usuario",
             email: user.email,
             lastActive: serverTimestamp(),
-            linkedUsers: [],
-            linkedAccounts: []
+            linkedUsers: userSnap.exists() ? userSnap.data().linkedUsers || [] : [],
+            linkedAccounts: userSnap.exists() ? userSnap.data().linkedAccounts || [] : []
           }, { merge: true });
           
           startTokenCycle();
@@ -949,11 +972,12 @@
       });
     });
 
-    // Limpiar el intervalo cuando la página se cierre
+    // Limpiar el intervalo y listeners cuando la página se cierre
     window.addEventListener('beforeunload', () => {
       if (tokenInterval) {
         clearInterval(tokenInterval);
       }
+      cleanupRealTimeListeners();
     });
 
     // Hacer la función showAlert disponible globalmente para el cierre de alertas
