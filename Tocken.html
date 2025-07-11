@@ -19,7 +19,6 @@
       --success-color: #2ecc71;
       --warning-color: #f39c12;
       --info-color: #3498db;
-      --help-color: #9b59b6;
     }
 
     body {
@@ -44,38 +43,10 @@
       position: relative;
     }
 
-    .header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
     h1 {
       color: var(--primary-color);
-      margin: 0;
+      margin-bottom: 1.5rem;
       text-align: center;
-      flex-grow: 1;
-    }
-
-    .help-btn {
-      background-color: var(--help-color);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-left: 10px;
-    }
-
-    .help-btn:hover {
-      background-color: #8e44ad;
-      transform: scale(1.1);
     }
 
     .token-display {
@@ -159,15 +130,6 @@
       background-color: #2980b9;
     }
 
-    .btn-help {
-      background-color: var(--help-color);
-      color: white;
-    }
-
-    .btn-help:hover {
-      background-color: #8e44ad;
-    }
-
     .form-group {
       margin-bottom: 1.5rem;
     }
@@ -196,23 +158,6 @@
     .user-list {
       list-style: none;
       padding: 0;
-      max-height: 300px;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: var(--primary-color) var(--secondary-color);
-    }
-
-    .user-list::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .user-list::-webkit-scrollbar-track {
-      background: var(--secondary-color);
-    }
-
-    .user-list::-webkit-scrollbar-thumb {
-      background-color: var(--primary-color);
-      border-radius: 10px;
     }
 
     .user-item {
@@ -298,10 +243,6 @@
 
     .status-inactive {
       background-color: var(--danger-color);
-    }
-
-    .status-master {
-      background-color: var(--help-color);
     }
 
     /* Estilos para alertas personalizadas */
@@ -439,19 +380,11 @@
       max-width: 400px;
       width: 90%;
       text-align: center;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-      animation: modalFadeIn 0.3s ease-out;
-    }
-
-    @keyframes modalFadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .confirmation-message {
       margin-bottom: 1.5rem;
       font-size: 1.1rem;
-      line-height: 1.5;
     }
 
     .confirmation-buttons {
@@ -459,121 +392,17 @@
       justify-content: center;
       gap: 15px;
     }
-
-    /* Modal de ayuda */
-    .help-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1002;
-      display: none;
-    }
-
-    .help-content {
-      background-color: var(--secondary-color);
-      border-radius: 12px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 80vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-      animation: modalFadeIn 0.3s ease-out;
-    }
-
-    .help-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .help-title {
-      margin: 0;
-      color: var(--primary-color);
-      font-size: 1.5rem;
-    }
-
-    .help-close {
-      background: none;
-      border: none;
-      color: var(--text-light);
-      font-size: 1.5rem;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-
-    .help-close:hover {
-      color: var(--danger-color);
-    }
-
-    .help-body {
-      padding: 1.5rem;
-      overflow-y: auto;
-      flex-grow: 1;
-    }
-
-    .help-section {
-      margin-bottom: 2rem;
-    }
-
-    .help-section-title {
-      color: var(--primary-color);
-      margin-top: 0;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .help-step {
-      margin-bottom: 1.5rem;
-      padding-left: 1.5rem;
-      border-left: 3px solid var(--primary-color);
-    }
-
-    .help-step-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-light);
-      margin-bottom: 0.5rem;
-    }
-
-    .help-step-icon {
-      color: var(--primary-color);
-    }
-
-    .help-footer {
-      padding: 1rem;
-      border-top: 1px solid var(--border-color);
-      text-align: center;
-      color: var(--text-light);
-      font-size: 0.9rem;
-    }
   </style>
 </head>
 <body>
   <div class="token-container">
-    <div class="header-container">
-      <h1><i class="fas fa-key"></i> Sistema de Tokens</h1>
-      <button class="help-btn" id="helpBtn">
-        <i class="fas fa-question"></i>
-      </button>
-    </div>
+    <h1><i class="fas fa-key"></i> Sistema de Tokens</h1>
     
     <div class="token-display">
       <div>Tu token de vinculación:</div>
       <div class="tooltip">
         <div class="token-value" id="currentToken">Generando...</div>
-        <span class="tooltiptext">Comparte este token con otro usuario para vincular cuentas y compartir datos</span>
+        <span class="tooltiptext">Comparte este token con otro usuario para vincular cuentas y compartir préstamos</span>
       </div>
       <div class="token-timer" id="tokenTimer">Renueva en: 60 segundos</div>
       
@@ -614,72 +443,10 @@
   <!-- Modal de confirmación -->
   <div class="confirmation-modal" id="confirmationModal">
     <div class="confirmation-content">
-      <div class="confirmation-message" id="confirmationMessage">¿Estás seguro que deseas desvincular este usuario? Todos los datos compartidos dejarán de estar disponibles.</div>
+      <div class="confirmation-message" id="confirmationMessage">¿Estás seguro que deseas desvincular este usuario?</div>
       <div class="confirmation-buttons">
-        <button class="btn btn-danger" id="confirmUnlinkBtn">
-          <i class="fas fa-unlink"></i> Sí, Desvincular
-        </button>
-        <button class="btn btn-primary" id="cancelUnlinkBtn">
-          <i class="fas fa-times"></i> Cancelar
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal de ayuda -->
-  <div class="help-modal" id="helpModal">
-    <div class="help-content">
-      <div class="help-header">
-        <h2 class="help-title"><i class="fas fa-question-circle"></i> Guía de Usuario</h2>
-        <button class="help-close" id="helpCloseBtn">&times;</button>
-      </div>
-      <div class="help-body">
-        <div class="help-section">
-          <h3 class="help-section-title"><i class="fas fa-key"></i> Funcionamiento de los Tokens</h3>
-          <div class="help-step">
-            <h4 class="help-step-title"><i class="fas fa-sync-alt help-step-icon"></i> Tokens Temporales</h4>
-            <p>Tu token de vinculación se renueva automáticamente cada 60 segundos para mayor seguridad.</p>
-          </div>
-          <div class="help-step">
-            <h4 class="help-step-title"><i class="fas fa-copy help-step-icon"></i> Compartir Token</h4>
-            <p>Usa el botón "Copiar Token" para compartir tu código con otro usuario que quieras vincular.</p>
-          </div>
-          <div class="help-step">
-            <h4 class="help-step-title"><i class="fas fa-link help-step-icon"></i> Vincular Cuentas</h4>
-            <p>Para vincular con otro usuario, ingresa su token en el campo correspondiente y haz clic en "Validar Token".</p>
-          </div>
-        </div>
-        
-        <div class="help-section">
-          <h3 class="help-section-title"><i class="fas fa-users"></i> Usuarios Vinculados</h3>
-          <div class="help-step">
-            <h4 class="help-step-title"><i class="fas fa-user-shield help-step-icon"></i> Cuenta Principal</h4>
-            <p>El primer usuario en generar el token se convierte en la cuenta principal (indicado con el badge "Principal").</p>
-          </div>
-          <div class="help-step">
-            <h4 class="help-step-title"><i class="fas fa-exchange-alt help-step-icon"></i> Compartir Datos</h4>
-            <p>Al vincular cuentas, ambos usuarios tendrán acceso a los mismos datos y préstamos.</p>
-          </div>
-          <div class="help-step">
-            <h4 class="help-step-title"><i class="fas fa-unlink help-step-icon"></i> Desvincular</h4>
-            <p>Puedes desvincular a un usuario en cualquier momento usando el icono <i class="fas fa-unlink"></i>. Esto eliminará todo acceso compartido.</p>
-          </div>
-        </div>
-        
-        <div class="help-section">
-          <h3 class="help-section-title"><i class="fas fa-info-circle"></i> Información Adicional</h3>
-          <div class="help-step">
-            <h4 class="help-step-title"><i class="fas fa-shield-alt help-step-icon"></i> Seguridad</h4>
-            <p>Los tokens son temporales y únicos, lo que garantiza que solo las personas con tu token actual puedan vincularse.</p>
-          </div>
-          <div class="help-step">
-            <h4 class="help-step-title"><i class="fas fa-redo help-step-icon"></i> Re-vincular</h4>
-            <p>Si desvinculas a un usuario, puedes volver a vincularlo en cualquier momento usando un nuevo token.</p>
-          </div>
-        </div>
-      </div>
-      <div class="help-footer">
-        PlusMoney - Sistema de Gestión de Préstamos
+        <button class="btn btn-danger" id="confirmUnlinkBtn">Sí, Desvincular</button>
+        <button class="btn btn-primary" id="cancelUnlinkBtn">Cancelar</button>
       </div>
     </div>
   </div>
@@ -699,8 +466,7 @@
       arrayUnion,
       arrayRemove,
       serverTimestamp,
-      writeBatch,
-      deleteField
+      writeBatch
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
@@ -782,16 +548,6 @@
     // Ocultar modal de confirmación
     function hideConfirmationModal() {
       document.getElementById('confirmationModal').style.display = 'none';
-    }
-
-    // Mostrar modal de ayuda
-    function showHelpModal() {
-      document.getElementById('helpModal').style.display = 'flex';
-    }
-
-    // Ocultar modal de ayuda
-    function hideHelpModal() {
-      document.getElementById('helpModal').style.display = 'none';
     }
 
     function generateToken() {
@@ -889,32 +645,20 @@
         // Vincular usuarios en ambas direcciones
         const batch = writeBatch(db);
         
-        // 1. Actualizar el usuario actual
+        // Actualizar el usuario actual
         batch.update(userRef, {
           linkedUsers: arrayUnion(tokenData.userId),
-          linkedAccounts: arrayUnion({
-            userId: tokenData.userId,
-            email: tokenData.email,
-            displayName: tokenData.displayName,
-            linkedAt: new Date().toISOString()
-          }),
           lastActive: serverTimestamp()
         });
         
-        // 2. Actualizar el otro usuario
+        // Actualizar el otro usuario
         const otherUserRef = doc(db, "users", tokenData.userId);
         batch.update(otherUserRef, {
           linkedUsers: arrayUnion(currentUser.uid),
-          linkedAccounts: arrayUnion({
-            userId: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName || "Usuario",
-            linkedAt: new Date().toISOString()
-          }),
           lastActive: serverTimestamp()
         });
         
-        // 3. Actualizar todos los préstamos del usuario actual para compartir con el otro usuario
+        // Actualizar todos los préstamos del usuario actual para incluir al otro usuario
         const loansQuery = query(
           collection(db, "Loans"),
           where("userId", "==", currentUser.uid)
@@ -927,7 +671,7 @@
           });
         });
         
-        // 4. Actualizar todos los préstamos del otro usuario para compartir con el usuario actual
+        // Actualizar todos los préstamos del otro usuario para incluir al usuario actual
         const otherLoansQuery = query(
           collection(db, "Loans"),
           where("userId", "==", tokenData.userId)
@@ -943,8 +687,27 @@
         // Ejecutar todas las operaciones en lote
         await batch.commit();
         
+        // Actualizar los datos de la cuenta vinculada (sin serverTimestamp en arrayUnion)
+        await updateDoc(userRef, {
+          linkedAccounts: arrayUnion({
+            userId: tokenData.userId,
+            email: tokenData.email,
+            displayName: tokenData.displayName,
+            linkedAt: new Date().toISOString()
+          })
+        });
+        
+        await updateDoc(otherUserRef, {
+          linkedAccounts: arrayUnion({
+            userId: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Usuario",
+            linkedAt: new Date().toISOString()
+          })
+        });
+        
         hideLoader();
-        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos datos.`, 'success');
+        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos préstamos.`, 'success');
         loadLinkedUsers();
         
       } catch (error) {
@@ -955,11 +718,11 @@
     }
 
     async function unlinkUser(userId) {
-      const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario? Todos los datos compartidos dejarán de estar disponibles.`);
+      const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario? Todos los préstamos compartidos dejarán de estar disponibles.`);
       
       if (!confirm) return;
       
-      showLoader('Desvinculando usuario y eliminando accesos...');
+      showLoader('Desvinculando usuario...');
       
       try {
         const batch = writeBatch(db);
@@ -970,8 +733,7 @@
           linkedUsers: arrayRemove(userId),
           linkedAccounts: arrayRemove({
             userId: userId
-          }),
-          lastActive: serverTimestamp()
+          })
         });
         
         // 2. Eliminar la vinculación en el otro usuario
@@ -980,8 +742,7 @@
           linkedUsers: arrayRemove(currentUser.uid),
           linkedAccounts: arrayRemove({
             userId: currentUser.uid
-          }),
-          lastActive: serverTimestamp()
+          })
         });
         
         // 3. Eliminar el acceso compartido a los préstamos del usuario actual
@@ -1010,36 +771,10 @@
           });
         });
         
-        // 5. Eliminar cualquier otro dato compartido
-        const sharedDataQuery = query(
-          collection(db, "SharedData"),
-          where("sharedWith", "array-contains", currentUser.uid)
-        );
-        const sharedDataSnapshot = await getDocs(sharedDataQuery);
-        
-        sharedDataSnapshot.forEach((doc) => {
-          batch.update(doc.ref, {
-            sharedWith: arrayRemove(currentUser.uid)
-          });
-        });
-        
-        // 6. Eliminar datos específicos compartidos con este usuario
-        const userSharedDocsQuery = query(
-          collection(db, "UserSharedData"),
-          where("ownerId", "==", userId),
-          where("sharedWith", "==", currentUser.uid)
-        );
-        const userSharedDocsSnapshot = await getDocs(userSharedDocsQuery);
-        
-        userSharedDocsSnapshot.forEach((doc) => {
-          batch.delete(doc.ref);
-        });
-        
-        // Ejecutar todas las operaciones en lote
         await batch.commit();
         
         hideLoader();
-        showAlert('Usuario desvinculado correctamente. Todos los accesos compartidos han sido eliminados.', 'success');
+        showAlert('Usuario desvinculado correctamente', 'success');
         loadLinkedUsers();
         
       } catch (error) {
@@ -1126,45 +861,19 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Configurar el botón de ayuda
-      document.getElementById('helpBtn').addEventListener('click', showHelpModal);
-      document.getElementById('helpCloseBtn').addEventListener('click', hideHelpModal);
-      
-      // Cerrar modal al hacer clic fuera del contenido
-      document.getElementById('helpModal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('helpModal')) {
-          hideHelpModal();
-        }
-      });
-      
-      document.getElementById('confirmationModal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('confirmationModal')) {
-          hideConfirmationModal();
-        }
-      });
-
       onAuthStateChanged(auth, async (user) => {
         if (user) {
           currentUser = user;
           
           // Crear/actualizar registro de usuario si no existe
           const userRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userRef);
-          
-          if (!userDoc.exists()) {
-            await setDoc(userRef, {
-              displayName: user.displayName || "Usuario",
-              email: user.email,
-              lastActive: serverTimestamp(),
-              linkedUsers: [],
-              linkedAccounts: []
-            });
-          } else {
-            // Actualizar última actividad
-            await updateDoc(userRef, {
-              lastActive: serverTimestamp()
-            });
-          }
+          await setDoc(userRef, {
+            displayName: user.displayName || "Usuario",
+            email: user.email,
+            lastActive: serverTimestamp(),
+            linkedUsers: [],
+            linkedAccounts: []
+          }, { merge: true });
           
           startTokenCycle();
           loadLinkedUsers();
@@ -1188,7 +897,7 @@
           setInterval(async () => {
             await updateDoc(userRef, {
               lastActive: serverTimestamp()
-            });
+            }, { merge: true });
           }, 60000);
           
         } else {
