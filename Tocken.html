@@ -6,6 +6,7 @@
   <title>PlusMoney - Sistema de Tokens</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    /* Estilos CSS permanecen iguales */
     :root {
       --primary-color: #1abc9c;
       --primary-dark: #16a085;
@@ -645,49 +646,20 @@
         // Vincular usuarios en ambas direcciones
         const batch = writeBatch(db);
         
-        // 1. Actualizar el usuario que se está vinculando para que tenga el mismo userID que el usuario principal
-        const userToLinkRef = doc(db, "users", tokenData.userId);
-        batch.update(userToLinkRef, {
-          userId: currentUser.uid, // Actualizar el userID al del usuario principal
-          linkedUsers: arrayUnion(currentUser.uid),
-          lastActive: serverTimestamp()
-        });
-        
-        // 2. Actualizar el usuario principal para incluir al usuario vinculado
+        // 1. Actualizar el usuario actual para incluir al usuario vinculado
         batch.update(userRef, {
           linkedUsers: arrayUnion(tokenData.userId),
           lastActive: serverTimestamp()
         });
         
-        // 3. Actualizar todos los documentos donde aparezca el userID antiguo para que usen el nuevo userID
-        // Actualizar préstamos del usuario que se está vinculando
-        const loansToUpdateQuery = query(
-          collection(db, "Loans"),
-          where("userId", "==", tokenData.userId)
-        );
-        const loansToUpdateSnapshot = await getDocs(loansToUpdateQuery);
-        
-        loansToUpdateSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            userId: currentUser.uid, // Actualizar el userID al del usuario principal
-            sharedWith: arrayUnion(currentUser.uid)
-          });
+        // 2. Actualizar el usuario que se está vinculando para incluir al usuario actual
+        const userToLinkRef = doc(db, "users", tokenData.userId);
+        batch.update(userToLinkRef, {
+          linkedUsers: arrayUnion(currentUser.uid),
+          lastActive: serverTimestamp()
         });
         
-        // Actualizar tokens del usuario que se está vinculando
-        const tokensToUpdateQuery = query(
-          collection(db, "userTokens"),
-          where("userId", "==", tokenData.userId)
-        );
-        const tokensToUpdateSnapshot = await getDocs(tokensToUpdateQuery);
-        
-        tokensToUpdateSnapshot.forEach((tokenDoc) => {
-          batch.update(tokenDoc.ref, {
-            userId: currentUser.uid // Actualizar el userID al del usuario principal
-          });
-        });
-        
-        // 4. Actualizar todos los préstamos del usuario principal para incluir al otro usuario
+        // 3. Duplicar los préstamos del usuario actual para el usuario vinculado
         const loansQuery = query(
           collection(db, "Loans"),
           where("userId", "==", currentUser.uid)
@@ -695,15 +667,52 @@
         const loansSnapshot = await getDocs(loansQuery);
         
         loansSnapshot.forEach((loanDoc) => {
+          const loanData = loanDoc.data();
+          const newLoanRef = doc(collection(db, "Loans"));
+          
+          batch.set(newLoanRef, {
+            ...loanData,
+            userId: tokenData.userId, // Asignar al usuario vinculado
+            originalUserId: currentUser.uid, // Guardar referencia al usuario original
+            sharedWith: arrayUnion(currentUser.uid, tokenData.userId),
+            createdAt: serverTimestamp()
+          });
+          
+          // Actualizar el préstamo original para marcar que está compartido
           batch.update(loanDoc.ref, {
             sharedWith: arrayUnion(tokenData.userId)
+          });
+        });
+        
+        // 4. Duplicar los préstamos del usuario vinculado para el usuario actual
+        const otherLoansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", tokenData.userId)
+        );
+        const otherLoansSnapshot = await getDocs(otherLoansQuery);
+        
+        otherLoansSnapshot.forEach((loanDoc) => {
+          const loanData = loanDoc.data();
+          const newLoanRef = doc(collection(db, "Loans"));
+          
+          batch.set(newLoanRef, {
+            ...loanData,
+            userId: currentUser.uid, // Asignar al usuario actual
+            originalUserId: tokenData.userId, // Guardar referencia al usuario original
+            sharedWith: arrayUnion(currentUser.uid, tokenData.userId),
+            createdAt: serverTimestamp()
+          });
+          
+          // Actualizar el préstamo original para marcar que está compartido
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayUnion(currentUser.uid)
           });
         });
         
         // Ejecutar todas las operaciones en lote
         await batch.commit();
         
-        // Actualizar los datos de la cuenta vinculada (sin serverTimestamp en arrayUnion)
+        // Actualizar los datos de la cuenta vinculada
         await updateDoc(userRef, {
           linkedAccounts: arrayUnion({
             userId: tokenData.userId,
@@ -713,10 +722,17 @@
           })
         });
         
-        // No necesitamos actualizar el otro usuario porque ahora comparte el mismo userID
+        await updateDoc(userToLinkRef, {
+          linkedAccounts: arrayUnion({
+            userId: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Usuario",
+            linkedAt: new Date().toISOString()
+          })
+        });
         
         hideLoader();
-        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos préstamos y el mismo ID de usuario.`, 'success');
+        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos préstamos.`, 'success');
         loadLinkedUsers();
         
       } catch (error) {
@@ -754,30 +770,48 @@
           })
         });
         
-        // 3. Eliminar el acceso compartido a los préstamos del usuario actual
+        // 3. Eliminar los préstamos duplicados del usuario actual
         const loansQuery = query(
           collection(db, "Loans"),
-          where("userId", "==", currentUser.uid)
+          where("userId", "==", currentUser.uid),
+          where("originalUserId", "==", userId)
         );
         const loansSnapshot = await getDocs(loansQuery);
         
         loansSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            sharedWith: arrayRemove(userId)
-          });
+          batch.delete(loanDoc.ref);
         });
         
-        // 4. Eliminar el acceso compartido a los préstamos del otro usuario
+        // 4. Eliminar los préstamos duplicados del otro usuario
         const otherLoansQuery = query(
           collection(db, "Loans"),
-          where("userId", "==", userId)
+          where("userId", "==", userId),
+          where("originalUserId", "==", currentUser.uid)
         );
         const otherLoansSnapshot = await getDocs(otherLoansQuery);
         
         otherLoansSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            sharedWith: arrayRemove(currentUser.uid)
-          });
+          batch.delete(loanDoc.ref);
+        });
+        
+        // 5. Eliminar el acceso compartido a los préstamos originales
+        const originalLoansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "in", [currentUser.uid, userId])
+        );
+        const originalLoansSnapshot = await getDocs(originalLoansQuery);
+        
+        originalLoansSnapshot.forEach((loanDoc) => {
+          const loanData = loanDoc.data();
+          if (loanData.userId === currentUser.uid) {
+            batch.update(loanDoc.ref, {
+              sharedWith: arrayRemove(userId)
+            });
+          } else {
+            batch.update(loanDoc.ref, {
+              sharedWith: arrayRemove(currentUser.uid)
+            });
+          }
         });
         
         await batch.commit();
