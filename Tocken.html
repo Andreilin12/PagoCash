@@ -263,6 +263,12 @@
       color: var(--text-light);
     }
 
+    .user-date {
+      font-size: 0.7rem;
+      color: var(--primary-color);
+      margin-top: 3px;
+    }
+
     .user-actions {
       display: flex;
       gap: 5px;
@@ -889,6 +895,8 @@
         // Vincular usuarios en ambas direcciones
         const batch = writeBatch(db);
         
+        const currentDate = new Date().toISOString();
+        
         // 1. Actualizar el usuario actual
         batch.update(userRef, {
           linkedUsers: arrayUnion(tokenData.userId),
@@ -896,7 +904,8 @@
             userId: tokenData.userId,
             email: tokenData.email,
             displayName: tokenData.displayName,
-            linkedAt: new Date().toISOString()
+            linkedAt: currentDate,
+            lastActive: serverTimestamp()
           }),
           lastActive: serverTimestamp()
         });
@@ -909,7 +918,8 @@
             userId: currentUser.uid,
             email: currentUser.email,
             displayName: currentUser.displayName || "Usuario",
-            linkedAt: new Date().toISOString()
+            linkedAt: currentDate,
+            lastActive: serverTimestamp()
           }),
           lastActive: serverTimestamp()
         });
@@ -945,6 +955,7 @@
         
         hideLoader();
         showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos datos.`, 'success');
+        document.getElementById('tokenInput').value = '';
         loadLinkedUsers();
         
       } catch (error) {
@@ -966,23 +977,39 @@
         
         // 1. Eliminar la vinculación en el usuario actual
         const userRef = doc(db, "users", currentUser.uid);
-        batch.update(userRef, {
-          linkedUsers: arrayRemove(userId),
-          linkedAccounts: arrayRemove({
-            userId: userId
-          }),
-          lastActive: serverTimestamp()
-        });
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          // Encontrar la cuenta específica para eliminar
+          const linkedAccounts = userDoc.data().linkedAccounts || [];
+          const accountToRemove = linkedAccounts.find(acc => acc.userId === userId);
+          
+          if (accountToRemove) {
+            batch.update(userRef, {
+              linkedUsers: arrayRemove(userId),
+              linkedAccounts: arrayRemove(accountToRemove),
+              lastActive: serverTimestamp()
+            });
+          }
+        }
         
         // 2. Eliminar la vinculación en el otro usuario
         const otherUserRef = doc(db, "users", userId);
-        batch.update(otherUserRef, {
-          linkedUsers: arrayRemove(currentUser.uid),
-          linkedAccounts: arrayRemove({
-            userId: currentUser.uid
-          }),
-          lastActive: serverTimestamp()
-        });
+        const otherUserDoc = await getDoc(otherUserRef);
+        
+        if (otherUserDoc.exists()) {
+          // Encontrar la cuenta específica para eliminar
+          const otherLinkedAccounts = otherUserDoc.data().linkedAccounts || [];
+          const otherAccountToRemove = otherLinkedAccounts.find(acc => acc.userId === currentUser.uid);
+          
+          if (otherAccountToRemove) {
+            batch.update(otherUserRef, {
+              linkedUsers: arrayRemove(currentUser.uid),
+              linkedAccounts: arrayRemove(otherAccountToRemove),
+              lastActive: serverTimestamp()
+            });
+          }
+        }
         
         // 3. Eliminar el acceso compartido a los préstamos del usuario actual
         const loansQuery = query(
@@ -1064,6 +1091,13 @@
       if (userSnap.exists() && userSnap.data().linkedAccounts) {
         const linkedAccounts = userSnap.data().linkedAccounts;
         
+        // Ordenar por fecha de vinculación (más reciente primero)
+        linkedAccounts.sort((a, b) => {
+          const dateA = a.linkedAt ? new Date(a.linkedAt) : new Date(0);
+          const dateB = b.linkedAt ? new Date(b.linkedAt) : new Date(0);
+          return dateB - dateA;
+        });
+        
         for (const account of linkedAccounts) {
           const linkedUserRef = doc(db, "users", account.userId);
           const linkedUserSnap = await getDoc(linkedUserRef);
@@ -1084,6 +1118,19 @@
             const isActive = userData.lastActive && 
                             (new Date() - userData.lastActive.toDate()) < 300000; // 5 minutos
             
+            // Formatear fecha de vinculación
+            let linkedDate = 'Fecha desconocida';
+            if (account.linkedAt) {
+              const date = new Date(account.linkedAt);
+              linkedDate = date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+            }
+            
             userItem.innerHTML = `
               <div class="user-info">
                 <div class="user-avatar">
@@ -1092,6 +1139,7 @@
                 <div class="user-details">
                   <div class="user-name">${account.displayName || "Usuario"}</div>
                   <div class="user-email">${account.email}</div>
+                  <div class="user-date">Vinculado el: ${linkedDate}</div>
                 </div>
                 <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
                   ${isActive ? 'Activo' : 'Inactivo'}
@@ -1183,6 +1231,13 @@
           });
           
           document.getElementById('validateTokenBtn').addEventListener('click', validateToken);
+          
+          // Permitir validar con Enter
+          document.getElementById('tokenInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+              validateToken();
+            }
+          });
           
           // Actualizar última actividad cada minuto
           setInterval(async () => {
