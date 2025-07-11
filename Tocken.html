@@ -468,7 +468,8 @@
       arrayUnion,
       arrayRemove,
       serverTimestamp,
-      writeBatch
+      writeBatch,
+      deleteDoc
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
@@ -493,7 +494,7 @@
     let linkedUsers = [];
     let userToUnlink = null;
     let realTimeListeners = [];
-    let sharedGroupId = null;
+    let masterUserId = null;
 
     // Mostrar alerta personalizada
     function showAlert(message, type = 'success') {
@@ -559,11 +560,6 @@
       return Math.random().toString(36).substring(2, 10).toUpperCase();
     }
 
-    function generateGroupId() {
-      // Genera un ID de grupo único para usuarios vinculados
-      return 'group_' + Math.random().toString(36).substring(2, 15);
-    }
-
     async function updateToken() {
       if (!currentUser) return;
       
@@ -576,7 +572,7 @@
       const tokenRef = doc(db, "userTokens", currentUser.uid);
       await setDoc(tokenRef, {
         token: currentToken,
-        userId: currentUser.uid,
+        userId: masterUserId || currentUser.uid,
         email: currentUser.email,
         displayName: currentUser.displayName || "Usuario",
         timestamp: serverTimestamp(),
@@ -610,24 +606,20 @@
     }
 
     // Configurar listeners en tiempo real para datos compartidos
-    async function setupRealTimeListeners(groupId) {
-      // Listener para usuarios vinculados
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("groupId", "==", groupId));
-      
-      const usersListener = onSnapshot(q, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "modified") {
-            // Actualizar UI si es necesario
-            loadLinkedUsers();
-          }
-        });
+    async function setupRealTimeListeners(userId) {
+      // Listener para datos del usuario
+      const userRef = doc(db, "users", userId);
+      const userListener = onSnapshot(userRef, (doc) => {
+        if (doc.exists()) {
+          // Actualizar UI según sea necesario
+          loadLinkedUsers();
+        }
       });
-      realTimeListeners.push(usersListener);
+      realTimeListeners.push(userListener);
       
       // Listener para préstamos compartidos
       const loansRef = collection(db, "Loans");
-      const loansQuery = query(loansRef, where("groupId", "==", groupId));
+      const loansQuery = query(loansRef, where("userId", "==", userId));
       
       const loansListener = onSnapshot(loansQuery, (snapshot) => {
         snapshot.docChanges().forEach((change) => {
@@ -688,29 +680,36 @@
           return;
         }
         
-        // Crear un ID de grupo único para los usuarios vinculados
-        sharedGroupId = generateGroupId();
+        // Determinar el userId maestro (el que ya existe en la base de datos)
+        masterUserId = tokenData.userId; // Usamos el userId del token como maestro
         
-        // Vincular usuarios en ambas direcciones
+        // Vincular usuarios - el usuario actual adoptará el userId maestro
         const batch = writeBatch(db);
         
-        // 1. Actualizar el usuario actual
-        batch.update(userRef, {
-          linkedUsers: arrayUnion(tokenData.userId),
-          groupId: sharedGroupId,
-          lastActive: serverTimestamp()
-        });
+        // 1. Actualizar el documento del usuario actual para usar el userId maestro
+        const newUserRef = doc(db, "users", masterUserId);
+        batch.set(newUserRef, {
+          displayName: currentUser.displayName || "Usuario",
+          email: currentUser.email,
+          lastActive: serverTimestamp(),
+          linkedUsers: arrayUnion(currentUser.uid, tokenData.userId),
+          linkedAccounts: arrayUnion({
+            userId: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Usuario",
+            linkedAt: new Date().toISOString()
+          }, {
+            userId: tokenData.userId,
+            email: tokenData.email,
+            displayName: tokenData.displayName,
+            linkedAt: new Date().toISOString()
+          })
+        }, { merge: true });
         
-        // 2. Actualizar el otro usuario
-        const userToLinkRef = doc(db, "users", tokenData.userId);
-        batch.update(userToLinkRef, {
-          linkedUsers: arrayUnion(currentUser.uid),
-          groupId: sharedGroupId,
-          lastActive: serverTimestamp()
-        });
+        // 2. Eliminar el documento del usuario actual (ya que ahora usaremos el maestro)
+        batch.delete(userRef);
         
-        // 3. Actualizar todos los préstamos existentes para incluir el groupId
-        // Préstamos del usuario actual
+        // 3. Actualizar todos los préstamos del usuario actual para usar el userId maestro
         const loansQuery = query(
           collection(db, "Loans"),
           where("userId", "==", currentUser.uid)
@@ -718,13 +717,28 @@
         const loansSnapshot = await getDocs(loansQuery);
         
         loansSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            groupId: sharedGroupId,
-            sharedWith: arrayUnion(tokenData.userId)
+          const newLoanRef = doc(db, "Loans", loanDoc.id.replace(currentUser.uid, masterUserId));
+          batch.set(newLoanRef, {
+            ...loanDoc.data(),
+            userId: masterUserId
           });
+          batch.delete(loanDoc.ref);
         });
         
-        // Préstamos del otro usuario
+        // 4. Actualizar el token del usuario actual para usar el userId maestro
+        const tokenRef = doc(db, "userTokens", currentUser.uid);
+        batch.update(tokenRef, {
+          userId: masterUserId
+        });
+        
+        // 5. Actualizar el otro usuario para usar el userId maestro
+        const otherUserRef = doc(db, "users", tokenData.userId);
+        batch.update(otherUserRef, {
+          userId: masterUserId,
+          linkedUsers: arrayUnion(currentUser.uid, tokenData.userId)
+        });
+        
+        // 6. Actualizar los préstamos del otro usuario para usar el userId maestro
         const otherLoansQuery = query(
           collection(db, "Loans"),
           where("userId", "==", tokenData.userId)
@@ -732,40 +746,26 @@
         const otherLoansSnapshot = await getDocs(otherLoansQuery);
         
         otherLoansSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            groupId: sharedGroupId,
-            sharedWith: arrayUnion(currentUser.uid)
+          const newLoanRef = doc(db, "Loans", loanDoc.id.replace(tokenData.userId, masterUserId));
+          batch.set(newLoanRef, {
+            ...loanDoc.data(),
+            userId: masterUserId
           });
+          batch.delete(loanDoc.ref);
         });
         
         // Ejecutar todas las operaciones en lote
         await batch.commit();
         
-        // Actualizar los datos de la cuenta vinculada
-        await updateDoc(userRef, {
-          linkedAccounts: arrayUnion({
-            userId: tokenData.userId,
-            email: tokenData.email,
-            displayName: tokenData.displayName,
-            linkedAt: new Date().toISOString()
-          })
-        });
-        
-        await updateDoc(userToLinkRef, {
-          linkedAccounts: arrayUnion({
-            userId: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName || "Usuario",
-            linkedAt: new Date().toISOString()
-          })
-        });
-        
         // Configurar listeners en tiempo real para los datos compartidos
         cleanupRealTimeListeners();
-        await setupRealTimeListeners(sharedGroupId);
+        await setupRealTimeListeners(masterUserId);
+        
+        // Actualizar el currentUser local para usar el userId maestro
+        currentUser = { ...currentUser, uid: masterUserId };
         
         hideLoader();
-        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos datos en tiempo real.`, 'success');
+        showAlert(`Vinculación exitosa. Ahora compartes el mismo ID de usuario (${masterUserId}) y todos los datos se sincronizan en tiempo real.`, 'success');
         loadLinkedUsers();
         
       } catch (error) {
@@ -776,53 +776,98 @@
     }
 
     async function unlinkUser(userId) {
-      const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario? Todos los préstamos compartidos dejarán de estar disponibles.`);
+      const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario? Esto revertirá la vinculación y cada usuario tendrá sus datos separados.`);
       
       if (!confirm) return;
       
       showLoader('Desvinculando usuario...');
       
       try {
+        // 1. Obtener información del usuario maestro
+        const masterUserRef = doc(db, "users", masterUserId);
+        const masterUserSnap = await getDoc(masterUserRef);
+        
+        if (!masterUserSnap.exists()) {
+          throw new Error("No se encontró el usuario maestro");
+        }
+        
+        const masterUserData = masterUserSnap.data();
+        
+        // 2. Crear un nuevo documento para el usuario actual con sus datos originales
+        const originalUserId = currentUser.uid === masterUserId ? 
+          masterUserData.linkedAccounts.find(acc => acc.userId !== userId)?.userId : 
+          currentUser.uid;
+          
+        if (!originalUserId) {
+          throw new Error("No se pudo determinar el ID original del usuario");
+        }
+        
+        const newUserRef = doc(db, "users", originalUserId);
+        await setDoc(newUserRef, {
+          displayName: currentUser.displayName || "Usuario",
+          email: currentUser.email,
+          lastActive: serverTimestamp(),
+          linkedUsers: [],
+          linkedAccounts: []
+        });
+        
+        // 3. Restaurar los préstamos originales del usuario actual
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", masterUserId)
+        );
+        const loansSnapshot = await getDocs(loansQuery);
+        
         const batch = writeBatch(db);
         
-        // 1. Obtener información del grupo actual
-        const userRef = doc(db, "users", currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        const currentGroupId = userSnap.data()?.groupId;
-        
-        // 2. Eliminar la vinculación en el usuario actual
-        batch.update(userRef, {
-          linkedUsers: arrayRemove(userId),
-          linkedAccounts: arrayRemove({
-            userId: userId
-          }),
-          groupId: null // Eliminar el groupId
-        });
-        
-        // 3. Eliminar la vinculación en el otro usuario
-        const otherUserRef = doc(db, "users", userId);
-        batch.update(otherUserRef, {
-          linkedUsers: arrayRemove(currentUser.uid),
-          linkedAccounts: arrayRemove({
-            userId: currentUser.uid
-          }),
-          groupId: null // Eliminar el groupId
-        });
-        
-        // 4. Eliminar el groupId de los préstamos compartidos
-        if (currentGroupId) {
-          const loansQuery = query(
-            collection(db, "Loans"),
-            where("groupId", "==", currentGroupId)
-          );
-          const loansSnapshot = await getDocs(loansQuery);
-          
-          loansSnapshot.forEach((loanDoc) => {
-            batch.update(loanDoc.ref, {
-              groupId: null,
-              sharedWith: arrayRemove(currentUser.uid, userId)
+        loansSnapshot.forEach((loanDoc) => {
+          const loanData = loanDoc.data();
+          // Solo restaurar los préstamos que pertenecían originalmente a este usuario
+          if (loanData.originalUserId === originalUserId) {
+            const newLoanRef = doc(db, "Loans", loanDoc.id.replace(masterUserId, originalUserId));
+            batch.set(newLoanRef, {
+              ...loanData,
+              userId: originalUserId,
+              sharedWith: arrayRemove(masterUserId)
             });
+            batch.delete(loanDoc.ref);
+          }
+        });
+        
+        // 4. Actualizar el token del usuario actual para usar su userId original
+        const tokenRef = doc(db, "userTokens", masterUserId);
+        batch.update(tokenRef, {
+          userId: originalUserId
+        });
+        
+        // 5. Si hay otro usuario vinculado, actualizar su información
+        const otherUserId = masterUserData.linkedAccounts.find(acc => acc.userId !== originalUserId)?.userId;
+        if (otherUserId) {
+          const otherUserRef = doc(db, "users", otherUserId);
+          batch.update(otherUserRef, {
+            userId: otherUserId,
+            linkedUsers: arrayRemove(originalUserId),
+            linkedAccounts: arrayRemove({
+              userId: originalUserId
+            })
           });
+          
+          // Actualizar sus préstamos
+          loansSnapshot.forEach((loanDoc) => {
+            const loanData = loanDoc.data();
+            if (loanData.originalUserId === otherUserId) {
+              const newLoanRef = doc(db, "Loans", loanDoc.id.replace(masterUserId, otherUserId));
+              batch.set(newLoanRef, {
+                ...loanData,
+                userId: otherUserId,
+                sharedWith: arrayRemove(masterUserId)
+              });
+              batch.delete(loanDoc.ref);
+            }
+          });
+        } else {
+          // Si no hay más usuarios vinculados, eliminar el documento maestro
+          batch.delete(masterUserRef);
         }
         
         await batch.commit();
@@ -830,8 +875,16 @@
         // Limpiar listeners en tiempo real
         cleanupRealTimeListeners();
         
+        // Actualizar el currentUser local para usar el userId original
+        currentUser = { ...currentUser, uid: originalUserId };
+        masterUserId = null;
+        
+        // Reiniciar el ciclo de tokens
+        clearInterval(tokenInterval);
+        await startTokenCycle();
+        
         hideLoader();
-        showAlert('Usuario desvinculado correctamente', 'success');
+        showAlert('Desvinculación exitosa. Ahora cada usuario tiene sus datos separados.', 'success');
         loadLinkedUsers();
         
       } catch (error) {
@@ -846,7 +899,8 @@
       
       showLoader('Cargando usuarios vinculados...');
       
-      const userRef = doc(db, "users", currentUser.uid);
+      const userIdToQuery = masterUserId || currentUser.uid;
+      const userRef = doc(db, "users", userIdToQuery);
       const userSnap = await getDoc(userRef);
       
       linkedUsers = [];
@@ -857,6 +911,9 @@
         const linkedAccounts = userSnap.data().linkedAccounts;
         
         for (const account of linkedAccounts) {
+          // No mostrar al usuario actual en la lista
+          if (account.userId === currentUser.uid) continue;
+          
           const linkedUserRef = doc(db, "users", account.userId);
           const linkedUserSnap = await getDoc(linkedUserRef);
           
@@ -922,24 +979,30 @@
         if (user) {
           currentUser = user;
           
-          // Crear/actualizar registro de usuario si no existe
+          // Verificar si este usuario está vinculado a otro (tiene un userId maestro)
           const userRef = doc(db, "users", user.uid);
           const userSnap = await getDoc(userRef);
           
-          if (userSnap.exists() && userSnap.data().groupId) {
-            // Si el usuario ya está en un grupo, configurar listeners en tiempo real
-            sharedGroupId = userSnap.data().groupId;
+          if (userSnap.exists() && userSnap.data().userId && userSnap.data().userId !== user.uid) {
+            // El usuario está vinculado, usar el userId maestro
+            masterUserId = userSnap.data().userId;
+            
+            // Configurar listeners en tiempo real para el userId maestro
             cleanupRealTimeListeners();
-            setupRealTimeListeners(sharedGroupId);
+            await setupRealTimeListeners(masterUserId);
+          } else {
+            // Usuario no vinculado, usar su propio userId
+            masterUserId = null;
+            
+            // Crear/actualizar registro de usuario si no existe
+            await setDoc(userRef, {
+              displayName: user.displayName || "Usuario",
+              email: user.email,
+              lastActive: serverTimestamp(),
+              linkedUsers: [],
+              linkedAccounts: []
+            }, { merge: true });
           }
-          
-          await setDoc(userRef, {
-            displayName: user.displayName || "Usuario",
-            email: user.email,
-            lastActive: serverTimestamp(),
-            linkedUsers: userSnap.exists() ? userSnap.data().linkedUsers || [] : [],
-            linkedAccounts: userSnap.exists() ? userSnap.data().linkedAccounts || [] : []
-          }, { merge: true });
           
           startTokenCycle();
           loadLinkedUsers();
@@ -961,7 +1024,8 @@
           
           // Actualizar última actividad cada minuto
           setInterval(async () => {
-            await updateDoc(userRef, {
+            const ref = doc(db, "users", masterUserId || currentUser.uid);
+            await updateDoc(ref, {
               lastActive: serverTimestamp()
             }, { merge: true });
           }, 60000);
