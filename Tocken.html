@@ -263,12 +263,6 @@
       color: var(--text-light);
     }
 
-    .user-date {
-      font-size: 0.7rem;
-      color: var(--primary-color);
-      margin-top: 3px;
-    }
-
     .user-actions {
       display: flex;
       gap: 5px;
@@ -564,47 +558,6 @@
       color: var(--text-light);
       font-size: 0.9rem;
     }
-
-    /* Datos compartidos */
-    .shared-data-container {
-      margin-top: 2rem;
-      background-color: var(--card-bg);
-      padding: 1.5rem;
-      border-radius: 8px;
-      border: 1px solid var(--primary-color);
-    }
-
-    .shared-data-title {
-      color: var(--primary-color);
-      margin-top: 0;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .data-item {
-      background-color: rgba(26, 188, 156, 0.1);
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-    }
-
-    .data-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-
-    .data-owner {
-      font-weight: bold;
-      color: var(--primary-color);
-    }
-
-    .data-content {
-      font-size: 0.9rem;
-    }
   </style>
 </head>
 <body>
@@ -647,13 +600,6 @@
       <ul class="user-list" id="linkedUsersList">
         <li style="text-align: center; color: var(--text-light);">No hay usuarios vinculados</li>
       </ul>
-    </div>
-
-    <div class="shared-data-container" id="sharedDataContainer">
-      <h3 class="shared-data-title"><i class="fas fa-database"></i> Datos Compartidos</h3>
-      <div id="sharedDataList">
-        <div style="text-align: center; color: var(--text-light);">No hay datos compartidos disponibles</div>
-      </div>
     </div>
   </div>
 
@@ -943,59 +889,55 @@
         // Vincular usuarios en ambas direcciones
         const batch = writeBatch(db);
         
-        const currentDate = new Date().toISOString();
-        
         // 1. Actualizar el usuario actual
-        const userAccountData = {
-          userId: tokenData.userId,
-          email: tokenData.email,
-          displayName: tokenData.displayName,
-          linkedAt: currentDate
-        };
-        
         batch.update(userRef, {
           linkedUsers: arrayUnion(tokenData.userId),
-          linkedAccounts: arrayUnion(userAccountData),
+          linkedAccounts: arrayUnion({
+            userId: tokenData.userId,
+            email: tokenData.email,
+            displayName: tokenData.displayName,
+            linkedAt: new Date().toISOString()
+          }),
           lastActive: serverTimestamp()
         });
         
         // 2. Actualizar el otro usuario
         const otherUserRef = doc(db, "users", tokenData.userId);
-        const otherUserAccountData = {
-          userId: currentUser.uid,
-          email: currentUser.email,
-          displayName: currentUser.displayName || "Usuario",
-          linkedAt: currentDate
-        };
-        
         batch.update(otherUserRef, {
           linkedUsers: arrayUnion(currentUser.uid),
-          linkedAccounts: arrayUnion(otherUserAccountData),
+          linkedAccounts: arrayUnion({
+            userId: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Usuario",
+            linkedAt: new Date().toISOString()
+          }),
           lastActive: serverTimestamp()
         });
         
-        // 3. Crear un documento de datos compartidos
-        const sharedDataRef = doc(collection(db, "sharedData"));
-        batch.set(sharedDataRef, {
-          ownerId: currentUser.uid,
-          sharedWith: [tokenData.userId],
-          createdAt: serverTimestamp(),
-          data: {
-            message: "Datos compartidos iniciales",
-            exampleField: "Este es un ejemplo de dato compartido"
-          }
+        // 3. Actualizar todos los préstamos del usuario actual para compartir con el otro usuario
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", currentUser.uid)
+        );
+        const loansSnapshot = await getDocs(loansQuery);
+        
+        loansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayUnion(tokenData.userId)
+          });
         });
         
-        // 4. Crear un documento de datos compartidos para el otro usuario
-        const otherSharedDataRef = doc(collection(db, "sharedData"));
-        batch.set(otherSharedDataRef, {
-          ownerId: tokenData.userId,
-          sharedWith: [currentUser.uid],
-          createdAt: serverTimestamp(),
-          data: {
-            message: "Datos compartidos iniciales",
-            exampleField: "Este es un ejemplo de dato compartido"
-          }
+        // 4. Actualizar todos los préstamos del otro usuario para compartir con el usuario actual
+        const otherLoansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", tokenData.userId)
+        );
+        const otherLoansSnapshot = await getDocs(otherLoansQuery);
+        
+        otherLoansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayUnion(currentUser.uid)
+          });
         });
         
         // Ejecutar todas las operaciones en lote
@@ -1003,9 +945,7 @@
         
         hideLoader();
         showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán los mismos datos.`, 'success');
-        document.getElementById('tokenInput').value = '';
         loadLinkedUsers();
-        loadSharedData();
         
       } catch (error) {
         console.error("Error validando token:", error);
@@ -1026,66 +966,73 @@
         
         // 1. Eliminar la vinculación en el usuario actual
         const userRef = doc(db, "users", currentUser.uid);
-        const userDoc = await getDoc(userRef);
-        
-        if (userDoc.exists()) {
-          // Encontrar la cuenta específica para eliminar
-          const linkedAccounts = userDoc.data().linkedAccounts || [];
-          const accountToRemove = linkedAccounts.find(acc => acc.userId === userId);
-          
-          if (accountToRemove) {
-            batch.update(userRef, {
-              linkedUsers: arrayRemove(userId),
-              linkedAccounts: arrayRemove(accountToRemove),
-              lastActive: serverTimestamp()
-            });
-          }
-        }
+        batch.update(userRef, {
+          linkedUsers: arrayRemove(userId),
+          linkedAccounts: arrayRemove({
+            userId: userId
+          }),
+          lastActive: serverTimestamp()
+        });
         
         // 2. Eliminar la vinculación en el otro usuario
         const otherUserRef = doc(db, "users", userId);
-        const otherUserDoc = await getDoc(otherUserRef);
+        batch.update(otherUserRef, {
+          linkedUsers: arrayRemove(currentUser.uid),
+          linkedAccounts: arrayRemove({
+            userId: currentUser.uid
+          }),
+          lastActive: serverTimestamp()
+        });
         
-        if (otherUserDoc.exists()) {
-          // Encontrar la cuenta específica para eliminar
-          const otherLinkedAccounts = otherUserDoc.data().linkedAccounts || [];
-          const otherAccountToRemove = otherLinkedAccounts.find(acc => acc.userId === currentUser.uid);
-          
-          if (otherAccountToRemove) {
-            batch.update(otherUserRef, {
-              linkedUsers: arrayRemove(currentUser.uid),
-              linkedAccounts: arrayRemove(otherAccountToRemove),
-              lastActive: serverTimestamp()
-            });
-          }
-        }
+        // 3. Eliminar el acceso compartido a los préstamos del usuario actual
+        const loansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", currentUser.uid)
+        );
+        const loansSnapshot = await getDocs(loansQuery);
         
-        // 3. Eliminar los datos compartidos
+        loansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayRemove(userId)
+          });
+        });
+        
+        // 4. Eliminar el acceso compartido a los préstamos del otro usuario
+        const otherLoansQuery = query(
+          collection(db, "Loans"),
+          where("userId", "==", userId)
+        );
+        const otherLoansSnapshot = await getDocs(otherLoansQuery);
+        
+        otherLoansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            sharedWith: arrayRemove(currentUser.uid)
+          });
+        });
+        
+        // 5. Eliminar cualquier otro dato compartido
         const sharedDataQuery = query(
-          collection(db, "sharedData"),
-          where("ownerId", "==", currentUser.uid),
-          where("sharedWith", "array-contains", userId)
+          collection(db, "SharedData"),
+          where("sharedWith", "array-contains", currentUser.uid)
         );
         const sharedDataSnapshot = await getDocs(sharedDataQuery);
         
         sharedDataSnapshot.forEach((doc) => {
           batch.update(doc.ref, {
-            sharedWith: arrayRemove(userId)
+            sharedWith: arrayRemove(currentUser.uid)
           });
         });
         
-        // 4. Eliminar los datos compartidos del otro usuario
-        const otherSharedDataQuery = query(
-          collection(db, "sharedData"),
+        // 6. Eliminar datos específicos compartidos con este usuario
+        const userSharedDocsQuery = query(
+          collection(db, "UserSharedData"),
           where("ownerId", "==", userId),
-          where("sharedWith", "array-contains", currentUser.uid)
+          where("sharedWith", "==", currentUser.uid)
         );
-        const otherSharedDataSnapshot = await getDocs(otherSharedDataQuery);
+        const userSharedDocsSnapshot = await getDocs(userSharedDocsQuery);
         
-        otherSharedDataSnapshot.forEach((doc) => {
-          batch.update(doc.ref, {
-            sharedWith: arrayRemove(currentUser.uid)
-          });
+        userSharedDocsSnapshot.forEach((doc) => {
+          batch.delete(doc.ref);
         });
         
         // Ejecutar todas las operaciones en lote
@@ -1094,7 +1041,6 @@
         hideLoader();
         showAlert('Usuario desvinculado correctamente. Todos los accesos compartidos han sido eliminados.', 'success');
         loadLinkedUsers();
-        loadSharedData();
         
       } catch (error) {
         console.error("Error desvinculando usuario:", error);
@@ -1118,13 +1064,6 @@
       if (userSnap.exists() && userSnap.data().linkedAccounts) {
         const linkedAccounts = userSnap.data().linkedAccounts;
         
-        // Ordenar por fecha de vinculación (más reciente primero)
-        linkedAccounts.sort((a, b) => {
-          const dateA = a.linkedAt ? new Date(a.linkedAt) : new Date(0);
-          const dateB = b.linkedAt ? new Date(b.linkedAt) : new Date(0);
-          return dateB - dateA;
-        });
-        
         for (const account of linkedAccounts) {
           const linkedUserRef = doc(db, "users", account.userId);
           const linkedUserSnap = await getDoc(linkedUserRef);
@@ -1145,19 +1084,6 @@
             const isActive = userData.lastActive && 
                             (new Date() - userData.lastActive.toDate()) < 300000; // 5 minutos
             
-            // Formatear fecha de vinculación
-            let linkedDate = 'Fecha desconocida';
-            if (account.linkedAt) {
-              const date = new Date(account.linkedAt);
-              linkedDate = date.toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              });
-            }
-            
             userItem.innerHTML = `
               <div class="user-info">
                 <div class="user-avatar">
@@ -1166,7 +1092,6 @@
                 <div class="user-details">
                   <div class="user-name">${account.displayName || "Usuario"}</div>
                   <div class="user-email">${account.email}</div>
-                  <div class="user-date">Vinculado el: ${linkedDate}</div>
                 </div>
                 <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
                   ${isActive ? 'Activo' : 'Inactivo'}
@@ -1195,87 +1120,6 @@
             unlinkUser(userId);
           });
         });
-      }
-      
-      hideLoader();
-    }
-
-    async function loadSharedData() {
-      if (!currentUser) return;
-      
-      showLoader('Cargando datos compartidos...');
-      
-      const sharedDataList = document.getElementById('sharedDataList');
-      sharedDataList.innerHTML = '';
-      
-      try {
-        // Obtener datos compartidos por otros usuarios con el usuario actual
-        const sharedDataQuery = query(
-          collection(db, "sharedData"),
-          where("sharedWith", "array-contains", currentUser.uid)
-        );
-        
-        const querySnapshot = await getDocs(sharedDataQuery);
-        
-        if (querySnapshot.empty) {
-          sharedDataList.innerHTML = '<div style="text-align: center; color: var(--text-light);">No hay datos compartidos disponibles</div>';
-          hideLoader();
-          return;
-        }
-        
-        // Obtener información de los usuarios propietarios de los datos
-        const ownerIds = querySnapshot.docs.map(doc => doc.data().ownerId);
-        const uniqueOwnerIds = [...new Set(ownerIds)];
-        
-        const ownersInfo = {};
-        for (const ownerId of uniqueOwnerIds) {
-          const ownerDoc = await getDoc(doc(db, "users", ownerId));
-          if (ownerDoc.exists()) {
-            ownersInfo[ownerId] = ownerDoc.data();
-          }
-        }
-        
-        // Mostrar los datos compartidos
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const ownerInfo = ownersInfo[data.ownerId] || {
-            displayName: "Usuario desconocido",
-            email: "Desconocido"
-          };
-          
-          const dataItem = document.createElement('div');
-          dataItem.className = 'data-item';
-          
-          const formattedDate = data.createdAt?.toDate 
-            ? data.createdAt.toDate().toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })
-            : 'Fecha desconocida';
-          
-          dataItem.innerHTML = `
-            <div class="data-header">
-              <div class="data-owner">
-                <i class="fas fa-user"></i> ${ownerInfo.displayName || "Usuario"}
-              </div>
-              <div style="font-size: 0.8rem; color: var(--text-light);">
-                ${formattedDate}
-              </div>
-            </div>
-            <div class="data-content">
-              <pre>${JSON.stringify(data.data, null, 2)}</pre>
-            </div>
-          `;
-          
-          sharedDataList.appendChild(dataItem);
-        });
-        
-      } catch (error) {
-        console.error("Error cargando datos compartidos:", error);
-        sharedDataList.innerHTML = '<div style="text-align: center; color: var(--danger-color);">Error al cargar datos compartidos</div>';
       }
       
       hideLoader();
@@ -1324,7 +1168,6 @@
           
           startTokenCycle();
           loadLinkedUsers();
-          loadSharedData();
           
           // Configurar listeners para los botones
           document.getElementById('copyTokenBtn').addEventListener('click', () => {
@@ -1340,13 +1183,6 @@
           });
           
           document.getElementById('validateTokenBtn').addEventListener('click', validateToken);
-          
-          // Permitir validar con Enter
-          document.getElementById('tokenInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-              validateToken();
-            }
-          });
           
           // Actualizar última actividad cada minuto
           setInterval(async () => {
