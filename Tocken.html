@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlusMoney - Sistema de Tokens</title>
+  <title>PlusMoney - Sistema de Vinculación</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    /* Todos los estilos CSS anteriores permanecen exactamente igual */
     :root {
       --primary-color: #1abc9c;
       --primary-dark: #16a085;
@@ -34,7 +33,7 @@
       min-height: 100vh;
     }
 
-    .token-container {
+    .container {
       background-color: var(--secondary-color);
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -44,25 +43,359 @@
       position: relative;
     }
 
-    /* ... (todos los demás estilos permanecen exactamente igual) ... */
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .token-display {
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      position: relative;
+      border: 1px solid var(--primary-color);
+    }
+
+    .token-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin: 1rem 0;
+      word-break: break-all;
+      color: var(--primary-color);
+      padding: 10px;
+      background-color: rgba(26, 188, 156, 0.1);
+      border-radius: 6px;
+    }
+
+    .token-timer {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .token-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #27ae60;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .linked-users {
+      margin-top: 2rem;
+    }
+
+    .user-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .user-item {
+      background-color: var(--card-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .user-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-grow: 1;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .user-details {
+      flex-grow: 1;
+    }
+
+    .user-name {
+      font-weight: 500;
+    }
+
+    .user-email {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .action-btn:hover {
+      color: var(--primary-color);
+    }
+
+    .action-btn-danger:hover {
+      color: var(--danger-color);
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-left: 10px;
+    }
+
+    .status-active {
+      background-color: var(--success-color);
+    }
+
+    .status-inactive {
+      background-color: var(--danger-color);
+    }
+
+    .custom-alert {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 25px;
+      border-radius: 8px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { top: -50px; opacity: 0; }
+      to { top: 20px; opacity: 1; }
+    }
+
+    .alert-success {
+      background-color: var(--success-color);
+      border-left: 5px solid #27ae60;
+    }
+
+    .alert-error {
+      background-color: var(--danger-color);
+      border-left: 5px solid #c0392b;
+    }
+
+    .alert-warning {
+      background-color: var(--warning-color);
+      border-left: 5px solid #e67e22;
+    }
+
+    .alert-info {
+      background-color: var(--info-color);
+      border-left: 5px solid #2980b9;
+    }
+
+    .alert-close {
+      margin-left: 15px;
+      cursor: pointer;
+    }
+
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      display: none;
+    }
+
+    .loader {
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 5px solid var(--primary-color);
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loader-message {
+      color: white;
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      text-align: center;
+      border-radius: 6px;
+      padding: 10px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      border: 1px solid var(--primary-color);
+      font-size: 0.9rem;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .confirmation-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+      display: none;
+    }
+
+    .confirmation-content {
+      background-color: var(--secondary-color);
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .confirmation-message {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+
+    .confirmation-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
   </style>
 </head>
 <body>
-  <!-- La estructura HTML permanece exactamente igual -->
-  <div class="token-container">
-    <h1><i class="fas fa-key"></i> Sistema de Tokens</h1>
+  <div class="container">
+    <h1><i class="fas fa-link"></i> Vinculación de Usuarios</h1>
     
     <div class="token-display">
-      <div>Tu token de vinculación:</div>
+      <div>Tu código de vinculación:</div>
       <div class="tooltip">
         <div class="token-value" id="currentToken">Generando...</div>
-        <span class="tooltiptext">Comparte este token con otro usuario para vincular cuentas y compartir préstamos</span>
+        <span class="tooltiptext">Comparte este código con otro usuario para vincular cuentas</span>
       </div>
       <div class="token-timer" id="tokenTimer">Renueva en: 60 segundos</div>
       
       <div class="token-actions">
         <button class="btn btn-primary" id="copyTokenBtn">
-          <i class="fas fa-copy"></i> Copiar Token
+          <i class="fas fa-copy"></i> Copiar
         </button>
         <button class="btn btn-primary" id="refreshTokenBtn">
           <i class="fas fa-sync-alt"></i> Actualizar
@@ -71,10 +404,10 @@
     </div>
     
     <div class="form-group">
-      <label for="tokenInput"><i class="fas fa-link"></i> Vincular con otro usuario</label>
-      <input type="text" id="tokenInput" class="form-control" placeholder="Ingresa el token del otro usuario">
+      <label for="tokenInput"><i class="fas fa-user-plus"></i> Vincular con otro usuario</label>
+      <input type="text" id="tokenInput" class="form-control" placeholder="Ingresa el código del otro usuario">
       <button class="btn btn-success" id="validateTokenBtn" style="margin-top: 10px; width: 100%;">
-        <i class="fas fa-check-circle"></i> Validar Token y Vincular Cuentas
+        <i class="fas fa-link"></i> Vincular Cuentas
       </button>
     </div>
     
@@ -89,7 +422,7 @@
   <div class="loader-overlay" id="loaderOverlay">
     <div style="text-align: center;">
       <div class="loader"></div>
-      <div class="loader-message" id="loaderMessage">Vinculando cuentas...</div>
+      <div class="loader-message" id="loaderMessage">Procesando...</div>
     </div>
   </div>
 
@@ -143,6 +476,7 @@
     let linkedUsers = [];
     let userToUnlink = null;
 
+    // Función para mostrar alertas
     function showAlert(message, type = 'success') {
       const alert = document.createElement('div');
       alert.className = `custom-alert alert-${type}`;
@@ -168,15 +502,18 @@
       }, 5000);
     }
 
+    // Función para mostrar el loader
     function showLoader(message) {
       document.getElementById('loaderMessage').textContent = message;
       document.getElementById('loaderOverlay').style.display = 'flex';
     }
 
+    // Función para ocultar el loader
     function hideLoader() {
       document.getElementById('loaderOverlay').style.display = 'none';
     }
 
+    // Función para mostrar modal de confirmación
     function showConfirmationModal(message) {
       document.getElementById('confirmationMessage').textContent = message;
       document.getElementById('confirmationModal').style.display = 'flex';
@@ -192,14 +529,17 @@
       });
     }
 
+    // Función para ocultar modal de confirmación
     function hideConfirmationModal() {
       document.getElementById('confirmationModal').style.display = 'none';
     }
 
+    // Función para generar token de vinculación
     function generateToken() {
       return Math.random().toString(36).substring(2, 10).toUpperCase();
     }
 
+    // Función para actualizar el token
     async function updateToken() {
       if (!currentUser) return;
       
@@ -219,10 +559,12 @@
       }, { merge: true });
     }
 
+    // Función para actualizar el temporizador
     function updateTimerDisplay() {
       document.getElementById('tokenTimer').textContent = `Renueva en: ${timeLeft} segundos`;
     }
 
+    // Función para iniciar el ciclo de tokens
     async function startTokenCycle() {
       await updateToken();
       
@@ -236,14 +578,81 @@
       }, 1000);
     }
 
+    // Función para vincular usuarios
+    async function linkUsers(tokenSenderId) {
+      showLoader('Vinculando cuentas...');
+      
+      try {
+        const batch = writeBatch(db);
+        
+        // 1. Obtener referencia a ambos usuarios
+        const currentUserRef = doc(db, "users", currentUser.uid);
+        const tokenSenderRef = doc(db, "users", tokenSenderId);
+        
+        // 2. Actualizar el usuario actual para usar el userID del token sender
+        batch.update(currentUserRef, {
+          masterUserId: tokenSenderId, // Usamos masterUserId para indicar el ID principal
+          linkedAt: serverTimestamp()
+        });
+        
+        // 3. Actualizar el usuario que envió el token para incluir al usuario actual
+        batch.update(tokenSenderRef, {
+          linkedUsers: arrayUnion(currentUser.uid),
+          lastActive: serverTimestamp()
+        });
+        
+        // 4. Actualizar todos los documentos del usuario actual para usar el masterUserId
+        // a. Actualizar préstamos
+        const loansQuery = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
+        const loansSnapshot = await getDocs(loansQuery);
+        
+        loansSnapshot.forEach((loanDoc) => {
+          batch.update(loanDoc.ref, {
+            masterUserId: tokenSenderId // Usar el ID principal
+          });
+        });
+        
+        // b. Actualizar tokens
+        const userTokenRef = doc(db, "userTokens", currentUser.uid);
+        batch.update(userTokenRef, {
+          masterUserId: tokenSenderId // Usar el ID principal
+        });
+        
+        // 5. Agregar a la lista de cuentas vinculadas
+        batch.update(tokenSenderRef, {
+          linkedAccounts: arrayUnion({
+            userId: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Usuario",
+            linkedAt: new Date().toISOString()
+          })
+        });
+        
+        await batch.commit();
+        
+        // 6. Forzar recarga de la página para aplicar cambios
+        hideLoader();
+        showAlert('Vinculación exitosa. La página se recargará para aplicar los cambios.', 'success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+        
+      } catch (error) {
+        console.error("Error vinculando usuarios:", error);
+        hideLoader();
+        showAlert('Error al vincular usuarios: ' + error.message, 'error');
+      }
+    }
+
+    // Función para validar token
     async function validateToken() {
       const tokenInput = document.getElementById('tokenInput').value.trim();
       if (!tokenInput) {
-        showAlert('Por favor ingresa un token válido', 'error');
+        showAlert('Por favor ingresa un código válido', 'error');
         return;
       }
       
-      showLoader('Validando token y vinculando cuentas...');
+      showLoader('Validando código...');
       
       try {
         const tokensRef = collection(db, "userTokens");
@@ -252,7 +661,7 @@
         
         if (querySnapshot.empty) {
           hideLoader();
-          showAlert('Token no válido o expirado', 'error');
+          showAlert('Código no válido o expirado', 'error');
           return;
         }
         
@@ -263,7 +672,7 @@
         
         if (!tokenData) {
           hideLoader();
-          showAlert('Error al validar el token', 'error');
+          showAlert('Error al validar el código', 'error');
           return;
         }
         
@@ -273,97 +682,33 @@
           return;
         }
         
+        // Verificar si ya están vinculados
         const userRef = doc(db, "users", currentUser.uid);
         const userSnap = await getDoc(userRef);
         
-        if (userSnap.exists() && userSnap.data().linkedUsers?.includes(tokenData.userId)) {
+        if (userSnap.exists() && userSnap.data().masterUserId) {
           hideLoader();
-          showAlert('Ya estás vinculado con este usuario', 'warning');
+          showAlert('Ya estás vinculado a una cuenta principal', 'warning');
           return;
         }
         
-        const tokenSenderRef = doc(db, "users", tokenData.userId);
-        const tokenSenderSnap = await getDoc(tokenSenderRef);
-        
-        if (!tokenSenderSnap.exists()) {
-          hideLoader();
-          showAlert('El usuario que envió el token no existe', 'error');
-          return;
-        }
-        
-        const batch = writeBatch(db);
-        
-        // 1. Actualizar el usuario actual para compartir el mismo userID
-        batch.update(userRef, {
-          sharedUserId: tokenData.userId, // Usar el userID compartido
-          originalUserId: currentUser.uid, // Guardar el ID original
-          linkedUsers: arrayUnion(tokenData.userId),
-          lastActive: serverTimestamp()
-        });
-        
-        // 2. Actualizar el usuario que envió el token
-        batch.update(tokenSenderRef, {
-          sharedUserId: tokenData.userId, // Usar el mismo userID compartido
-          linkedUsers: arrayUnion(currentUser.uid),
-          lastActive: serverTimestamp()
-        });
-        
-        // 3. Actualizar todos los préstamos para que usen el sharedUserId
-        const loansQuery = query(
-          collection(db, "Loans"), 
-          where("userId", "in", [currentUser.uid, tokenData.userId])
-        );
-        const loansSnapshot = await getDocs(loansQuery);
-        
-        loansSnapshot.forEach((loanDoc) => {
-          batch.update(loanDoc.ref, {
-            userId: tokenData.userId // Usar el userID compartido
-          });
-        });
-        
-        // 4. Actualizar tokens para usar el sharedUserId
-        const userTokenRef = doc(db, "userTokens", currentUser.uid);
-        batch.update(userTokenRef, {
-          userId: tokenData.userId // Usar el userID compartido
-        });
-        
-        const senderTokenRef = doc(db, "userTokens", tokenData.userId);
-        batch.update(senderTokenRef, {
-          userId: tokenData.userId // Usar el userID compartido
-        });
-        
-        await batch.commit();
-        
-        // 5. Actualizar linkedAccounts en ambos usuarios
-        await updateDoc(tokenSenderRef, {
-          linkedAccounts: arrayUnion({
-            userId: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName || "Usuario",
-            linkedAt: new Date().toISOString()
-          })
-        });
-        
-        // 6. Actualizar currentUser para reflejar el sharedUserId
-        currentUser = { ...currentUser, uid: tokenData.userId };
-        
-        hideLoader();
-        showAlert(`Vinculación exitosa. Ahora compartes el ID de usuario ${tokenData.userId} con ${tokenData.displayName}`, 'success');
-        loadLinkedUsers();
+        // Proceder con la vinculación
+        await linkUsers(tokenData.userId);
         
       } catch (error) {
         console.error("Error validando token:", error);
         hideLoader();
-        showAlert('Error al vincular usuarios: ' + error.message, 'error');
+        showAlert('Error al validar el código: ' + error.message, 'error');
       }
     }
 
+    // Función para desvincular usuarios
     async function unlinkUser(userId) {
       const confirm = await showConfirmationModal(`¿Estás seguro que deseas desvincular este usuario?`);
       
       if (!confirm) return;
       
-      showLoader('Desvinculando usuario...');
+      showLoader('Desvinculando...');
       
       try {
         const batch = writeBatch(db);
@@ -379,70 +724,77 @@
         
         const userData = userSnap.data();
         
-        // 1. Restaurar el userID original si existe
-        if (userData.originalUserId) {
+        // 1. Si este usuario es el principal, eliminar la vinculación
+        if (userData.linkedUsers?.includes(userId)) {
           batch.update(userRef, {
-            userId: userData.originalUserId,
-            sharedUserId: null,
-            originalUserId: null
+            linkedUsers: arrayRemove(userId),
+            linkedAccounts: arrayRemove({
+              userId: userId
+            })
           });
           
-          // Actualizar préstamos para volver al userID original
-          const loansQuery = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
+          // También actualizar el usuario vinculado
+          const otherUserRef = doc(db, "users", userId);
+          batch.update(otherUserRef, {
+            masterUserId: null
+          });
+          
+          // Actualizar sus préstamos
+          const loansQuery = query(collection(db, "Loans"), where("masterUserId", "==", currentUser.uid));
           const loansSnapshot = await getDocs(loansQuery);
           
           loansSnapshot.forEach((loanDoc) => {
             batch.update(loanDoc.ref, {
-              userId: userData.originalUserId
+              masterUserId: null
             });
           });
+        }
+        // 2. Si este usuario es el vinculado, restaurar su estado
+        else if (userData.masterUserId) {
+          batch.update(userRef, {
+            masterUserId: null
+          });
           
-          // Actualizar token para volver al userID original
-          const userTokenRef = doc(db, "userTokens", currentUser.uid);
-          batch.update(userTokenRef, {
-            userId: userData.originalUserId
+          // Actualizar el usuario principal
+          const masterUserRef = doc(db, "users", userData.masterUserId);
+          batch.update(masterUserRef, {
+            linkedUsers: arrayRemove(currentUser.uid),
+            linkedAccounts: arrayRemove({
+              userId: currentUser.uid
+            })
+          });
+          
+          // Actualizar préstamos
+          const loansQuery = query(collection(db, "Loans"), where("masterUserId", "==", userData.masterUserId));
+          const loansSnapshot = await getDocs(loansQuery);
+          
+          loansSnapshot.forEach((loanDoc) => {
+            batch.update(loanDoc.ref, {
+              masterUserId: null
+            });
           });
         }
-        
-        // 2. Eliminar la vinculación en ambos usuarios
-        batch.update(userRef, {
-          linkedUsers: arrayRemove(userId),
-          linkedAccounts: arrayRemove({
-            userId: userId
-          })
-        });
-        
-        const otherUserRef = doc(db, "users", userId);
-        batch.update(otherUserRef, {
-          linkedUsers: arrayRemove(currentUser.uid),
-          linkedAccounts: arrayRemove({
-            userId: currentUser.uid
-          }),
-          sharedUserId: null
-        });
         
         await batch.commit();
         
-        // 3. Actualizar currentUser si se restauró el ID original
-        if (userData.originalUserId) {
-          currentUser = { ...currentUser, uid: userData.originalUserId };
-        }
-        
         hideLoader();
-        showAlert('Usuario desvinculado correctamente', 'success');
-        loadLinkedUsers();
+        showAlert('Desvinculación exitosa. La página se recargará.', 'success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
         
       } catch (error) {
-        console.error("Error desvinculando usuario:", error);
+        console.error("Error desvinculando:", error);
         hideLoader();
         showAlert('Error al desvincular: ' + error.message, 'error');
       }
     }
 
+    // Función para cargar usuarios vinculados
     async function loadLinkedUsers() {
       if (!currentUser) return;
       
-      showLoader('Cargando usuarios vinculados...');
+      showLoader('Cargando vinculaciones...');
       
       const userRef = doc(db, "users", currentUser.uid);
       const userSnap = await getDoc(userRef);
@@ -451,46 +803,95 @@
       const linkedUsersList = document.getElementById('linkedUsersList');
       linkedUsersList.innerHTML = '';
       
-      if (userSnap.exists() && userSnap.data().linkedAccounts) {
-        const linkedAccounts = userSnap.data().linkedAccounts;
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
         
-        for (const account of linkedAccounts) {
-          const linkedUserRef = doc(db, "users", account.userId);
-          const linkedUserSnap = await getDoc(linkedUserRef);
+        // Caso 1: Este usuario es el principal (tiene linkedUsers)
+        if (userData.linkedUsers && userData.linkedUsers.length > 0) {
+          for (const userId of userData.linkedUsers) {
+            const linkedUserRef = doc(db, "users", userId);
+            const linkedUserSnap = await getDoc(linkedUserRef);
+            
+            if (linkedUserSnap.exists()) {
+              const linkedUserData = linkedUserSnap.data();
+              const linkedAccount = userData.linkedAccounts?.find(acc => acc.userId === userId) || {};
+              
+              linkedUsers.push({
+                userId: userId,
+                displayName: linkedAccount.displayName || "Usuario",
+                email: linkedAccount.email || linkedUserData.email,
+                linkedAt: linkedAccount.linkedAt ? new Date(linkedAccount.linkedAt) : null,
+                lastActive: linkedUserData.lastActive?.toDate() || null
+              });
+              
+              const userItem = document.createElement('li');
+              userItem.className = 'user-item';
+              
+              const isActive = linkedUserData.lastActive && 
+                              (new Date() - linkedUserData.lastActive.toDate()) < 300000;
+              
+              userItem.innerHTML = `
+                <div class="user-info">
+                  <div class="user-avatar">
+                    ${linkedAccount.displayName?.charAt(0) || linkedUserData.email?.charAt(0) || 'U'}
+                  </div>
+                  <div class="user-details">
+                    <div class="user-name">${linkedAccount.displayName || "Usuario"}</div>
+                    <div class="user-email">${linkedAccount.email || linkedUserData.email}</div>
+                  </div>
+                  <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
+                    ${isActive ? 'Activo' : 'Inactivo'}
+                  </span>
+                </div>
+                <div class="user-actions">
+                  <button class="action-btn action-btn-danger" data-user-id="${userId}" title="Desvincular">
+                    <i class="fas fa-unlink"></i>
+                  </button>
+                </div>
+              `;
+              
+              linkedUsersList.appendChild(userItem);
+            }
+          }
+        }
+        // Caso 2: Este usuario está vinculado a otro (tiene masterUserId)
+        else if (userData.masterUserId) {
+          const masterUserRef = doc(db, "users", userData.masterUserId);
+          const masterUserSnap = await getDoc(masterUserRef);
           
-          if (linkedUserSnap.exists()) {
-            const userData = linkedUserSnap.data();
+          if (masterUserSnap.exists()) {
+            const masterUserData = masterUserSnap.data();
+            
             linkedUsers.push({
-              userId: account.userId,
-              displayName: account.displayName || "Usuario",
-              email: account.email,
-              linkedAt: account.linkedAt ? new Date(account.linkedAt) : null,
-              lastActive: userData.lastActive?.toDate() || null,
-              sharedUserId: userData.sharedUserId
+              userId: userData.masterUserId,
+              displayName: masterUserData.displayName || "Usuario Principal",
+              email: masterUserData.email,
+              linkedAt: userData.linkedAt?.toDate() || null,
+              lastActive: masterUserData.lastActive?.toDate() || null,
+              isMaster: true
             });
             
             const userItem = document.createElement('li');
             userItem.className = 'user-item';
             
-            const isActive = userData.lastActive && 
-                            (new Date() - userData.lastActive.toDate()) < 300000;
+            const isActive = masterUserData.lastActive && 
+                            (new Date() - masterUserData.lastActive.toDate()) < 300000;
             
             userItem.innerHTML = `
               <div class="user-info">
                 <div class="user-avatar">
-                  ${account.displayName?.charAt(0) || account.email?.charAt(0) || 'U'}
+                  ${masterUserData.displayName?.charAt(0) || masterUserData.email?.charAt(0) || 'P'}
                 </div>
                 <div class="user-details">
-                  <div class="user-name">${account.displayName || "Usuario"}</div>
-                  <div class="user-email">${account.email}</div>
-                  ${userData.sharedUserId ? `<div class="user-shared-id">ID Compartido: ${userData.sharedUserId}</div>` : ''}
+                  <div class="user-name">${masterUserData.displayName || "Usuario Principal"}</div>
+                  <div class="user-email">${masterUserData.email}</div>
                 </div>
                 <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
                   ${isActive ? 'Activo' : 'Inactivo'}
                 </span>
               </div>
               <div class="user-actions">
-                <button class="action-btn action-btn-danger" data-user-id="${account.userId}" title="Desvincular">
+                <button class="action-btn action-btn-danger" data-user-id="${userData.masterUserId}" title="Desvincular">
                   <i class="fas fa-unlink"></i>
                 </button>
               </div>
@@ -516,6 +917,7 @@
       hideLoader();
     }
 
+    // Inicialización
     document.addEventListener('DOMContentLoaded', () => {
       onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -526,9 +928,7 @@
             userId: user.uid,
             displayName: user.displayName || "Usuario",
             email: user.email,
-            lastActive: serverTimestamp(),
-            linkedUsers: [],
-            linkedAccounts: []
+            lastActive: serverTimestamp()
           }, { merge: true });
           
           startTokenCycle();
@@ -537,22 +937,16 @@
           document.getElementById('copyTokenBtn').addEventListener('click', () => {
             if (currentToken) {
               navigator.clipboard.writeText(currentToken);
-              showAlert('Token copiado al portapapeles');
+              showAlert('Código copiado al portapapeles');
             }
           });
           
           document.getElementById('refreshTokenBtn').addEventListener('click', async () => {
             await updateToken();
-            showAlert('Token actualizado correctamente');
+            showAlert('Código actualizado');
           });
           
           document.getElementById('validateTokenBtn').addEventListener('click', validateToken);
-          
-          setInterval(async () => {
-            await updateDoc(userRef, {
-              lastActive: serverTimestamp()
-            }, { merge: true });
-          }, 60000);
           
         } else {
           window.location.href = 'index.html';
