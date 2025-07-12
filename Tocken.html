@@ -6,7 +6,6 @@
   <title>PlusMoney - Sistema de Tokens</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    /* Todos los estilos CSS anteriores permanecen igual */
     :root {
       --primary-color: #1abc9c;
       --primary-dark: #16a085;
@@ -246,7 +245,6 @@
       background-color: var(--danger-color);
     }
 
-    /* Estilos para alertas personalizadas */
     .custom-alert {
       position: fixed;
       top: 20px;
@@ -293,7 +291,6 @@
       cursor: pointer;
     }
 
-    /* Loader styles */
     .loader-overlay {
       position: fixed;
       top: 0;
@@ -329,7 +326,6 @@
       font-size: 1.1rem;
     }
 
-    /* Tooltip para el token */
     .tooltip {
       position: relative;
       display: inline-block;
@@ -359,7 +355,6 @@
       opacity: 1;
     }
 
-    /* Modal de confirmación */
     .confirmation-modal {
       position: fixed;
       top: 0;
@@ -396,6 +391,7 @@
   </style>
 </head>
 <body>
+  <!-- La estructura HTML permanece igual -->
   <div class="token-container">
     <h1><i class="fas fa-key"></i> Sistema de Tokens</h1>
     
@@ -433,7 +429,6 @@
     </div>
   </div>
 
-  <!-- Loader overlay -->
   <div class="loader-overlay" id="loaderOverlay">
     <div style="text-align: center;">
       <div class="loader"></div>
@@ -441,7 +436,6 @@
     </div>
   </div>
 
-  <!-- Modal de confirmación -->
   <div class="confirmation-modal" id="confirmationModal">
     <div class="confirmation-content">
       <div class="confirmation-message" id="confirmationMessage">¿Estás seguro que deseas desvincular este usuario?</div>
@@ -467,8 +461,7 @@
       arrayUnion,
       arrayRemove,
       serverTimestamp,
-      writeBatch,
-      deleteDoc
+      writeBatch
     } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
@@ -493,7 +486,6 @@
     let linkedUsers = [];
     let userToUnlink = null;
 
-    // Mostrar alerta personalizada
     function showAlert(message, type = 'success') {
       const alert = document.createElement('div');
       alert.className = `custom-alert alert-${type}`;
@@ -514,24 +506,20 @@
       
       document.body.appendChild(alert);
       
-      // Auto-remove after 5 seconds
       setTimeout(() => {
         alert.remove();
       }, 5000);
     }
 
-    // Mostrar loader con mensaje
     function showLoader(message) {
       document.getElementById('loaderMessage').textContent = message;
       document.getElementById('loaderOverlay').style.display = 'flex';
     }
 
-    // Ocultar loader
     function hideLoader() {
       document.getElementById('loaderOverlay').style.display = 'none';
     }
 
-    // Mostrar modal de confirmación
     function showConfirmationModal(message) {
       document.getElementById('confirmationMessage').textContent = message;
       document.getElementById('confirmationModal').style.display = 'flex';
@@ -547,7 +535,6 @@
       });
     }
 
-    // Ocultar modal de confirmación
     function hideConfirmationModal() {
       document.getElementById('confirmationModal').style.display = 'none';
     }
@@ -602,7 +589,6 @@
       showLoader('Validando token y vinculando cuentas...');
       
       try {
-        // Buscar el token en la colección userTokens
         const tokensRef = collection(db, "userTokens");
         const q = query(tokensRef, where("token", "==", tokenInput));
         const querySnapshot = await getDocs(q);
@@ -630,7 +616,6 @@
           return;
         }
         
-        // Verificar si ya están vinculados
         const userRef = doc(db, "users", currentUser.uid);
         const userSnap = await getDoc(userRef);
         
@@ -640,7 +625,6 @@
           return;
         }
         
-        // Obtener datos del usuario que envió el token
         const tokenSenderRef = doc(db, "users", tokenData.userId);
         const tokenSenderSnap = await getDoc(tokenSenderRef);
         
@@ -652,8 +636,21 @@
         
         const batch = writeBatch(db);
         
-        // 1. Actualizar todos los documentos del usuario actual para usar el userID del token sender
-        // a. Actualizar préstamos
+        // 1. Actualizar el usuario actual para usar el userID del token sender
+        batch.update(userRef, {
+          userId: tokenData.userId, // Cambiar al userID del token sender
+          originalUserId: currentUser.uid, // Guardar el ID original
+          linkedUsers: arrayUnion(tokenData.userId),
+          lastActive: serverTimestamp()
+        });
+        
+        // 2. Actualizar el usuario que envió el token
+        batch.update(tokenSenderRef, {
+          linkedUsers: arrayUnion(currentUser.uid),
+          lastActive: serverTimestamp()
+        });
+        
+        // 3. Actualizar todos los préstamos del usuario actual
         const loansQuery = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
         const loansSnapshot = await getDocs(loansQuery);
         
@@ -663,33 +660,15 @@
           });
         });
         
-        // b. Actualizar tokens
+        // 4. Actualizar el token del usuario actual
         const userTokenRef = doc(db, "userTokens", currentUser.uid);
         batch.update(userTokenRef, {
           userId: tokenData.userId // Cambiar al userID del token sender
         });
         
-        // c. Actualizar el documento del usuario
-        batch.update(userRef, {
-          userId: tokenData.userId, // Cambiar al userID del token sender
-          linkedUsers: arrayUnion(tokenData.userId),
-          lastActive: serverTimestamp()
-        });
-        
-        // 2. Actualizar el usuario que envió el token para incluir al usuario actual
-        batch.update(tokenSenderRef, {
-          linkedUsers: arrayUnion(currentUser.uid),
-          lastActive: serverTimestamp()
-        });
-        
-        // 3. Eliminar el documento del usuario actual (ya que ahora usará el del token sender)
-        // Pero primero necesitamos asegurarnos de que todos los datos se han migrado
-        // batch.delete(userRef);
-        
-        // Ejecutar todas las operaciones en lote
         await batch.commit();
         
-        // 4. Actualizar los datos de la cuenta vinculada
+        // 5. Actualizar linkedAccounts en ambos usuarios
         await updateDoc(tokenSenderRef, {
           linkedAccounts: arrayUnion({
             userId: currentUser.uid,
@@ -699,17 +678,17 @@
           })
         });
         
-        // 5. Actualizar el currentUser para reflejar el nuevo userID
+        // 6. Actualizar currentUser para reflejar el nuevo userID
         currentUser = { ...currentUser, uid: tokenData.userId };
         
         hideLoader();
-        showAlert(`Vinculación exitosa con ${tokenData.displayName}. Ahora compartirán el mismo ID de usuario.`, 'success');
+        showAlert(`Vinculación exitosa. Ahora compartes el ID de usuario con ${tokenData.displayName}`, 'success');
         loadLinkedUsers();
         
       } catch (error) {
         console.error("Error validando token:", error);
         hideLoader();
-        showAlert('Error al validar el token: ' + error.message, 'error');
+        showAlert('Error al vincular usuarios: ' + error.message, 'error');
       }
     }
 
@@ -723,8 +702,42 @@
       try {
         const batch = writeBatch(db);
         
-        // 1. Eliminar la vinculación en el usuario actual
         const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (!userSnap.exists()) {
+          hideLoader();
+          showAlert('Error: Usuario no encontrado', 'error');
+          return;
+        }
+        
+        const userData = userSnap.data();
+        
+        // 1. Restaurar el userID original si existe
+        if (userData.originalUserId) {
+          batch.update(userRef, {
+            userId: userData.originalUserId,
+            originalUserId: null
+          });
+          
+          // Actualizar préstamos para volver al userID original
+          const loansQuery = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
+          const loansSnapshot = await getDocs(loansQuery);
+          
+          loansSnapshot.forEach((loanDoc) => {
+            batch.update(loanDoc.ref, {
+              userId: userData.originalUserId
+            });
+          });
+          
+          // Actualizar token para volver al userID original
+          const userTokenRef = doc(db, "userTokens", currentUser.uid);
+          batch.update(userTokenRef, {
+            userId: userData.originalUserId
+          });
+        }
+        
+        // 2. Eliminar la vinculación en ambos usuarios
         batch.update(userRef, {
           linkedUsers: arrayRemove(userId),
           linkedAccounts: arrayRemove({
@@ -732,7 +745,6 @@
           })
         });
         
-        // 2. Eliminar la vinculación en el otro usuario
         const otherUserRef = doc(db, "users", userId);
         batch.update(otherUserRef, {
           linkedUsers: arrayRemove(currentUser.uid),
@@ -743,6 +755,11 @@
         
         await batch.commit();
         
+        // 3. Actualizar currentUser si se restauró el ID original
+        if (userData.originalUserId) {
+          currentUser = { ...currentUser, uid: userData.originalUserId };
+        }
+        
         hideLoader();
         showAlert('Usuario desvinculado correctamente', 'success');
         loadLinkedUsers();
@@ -750,7 +767,7 @@
       } catch (error) {
         console.error("Error desvinculando usuario:", error);
         hideLoader();
-        showAlert('Error al desvincular usuario: ' + error.message, 'error');
+        showAlert('Error al desvincular: ' + error.message, 'error');
       }
     }
 
@@ -787,7 +804,7 @@
             userItem.className = 'user-item';
             
             const isActive = userData.lastActive && 
-                            (new Date() - userData.lastActive.toDate()) < 300000; // 5 minutos
+                            (new Date() - userData.lastActive.toDate()) < 300000;
             
             userItem.innerHTML = `
               <div class="user-info">
