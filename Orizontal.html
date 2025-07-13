@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demostración de Orientación de Pantalla</title>
+    <title>Demostración de Orientación de Pantalla (Mejorado)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,26 +15,52 @@
             margin: 0;
             background-color: #f0f0f0;
             text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
         }
         button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             margin: 10px;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             color: white;
+            transition: background-color 0.3s ease;
         }
         #lockButton {
             background-color: #28a745; /* Verde */
         }
+        #lockButton:hover {
+            background-color: #218838;
+        }
         #unlockButton {
             background-color: #dc3545; /* Rojo */
         }
+        #unlockButton:hover {
+            background-color: #c82333;
+        }
         #status {
-            margin-top: 20px;
+            margin-top: 30px;
             font-weight: bold;
             color: #333;
+            font-size: 1.1em;
+        }
+        .warning {
+            color: #ffc107;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -47,15 +73,16 @@
 
     <p id="status">Orientación actual: Cargando...</p>
 
-    <p>
-        <strong>Nota:</strong> El bloqueo de orientación puede requerir que la página esté en modo de pantalla completa en algunos navegadores (especialmente iOS)
-        y podría ser denegado por el dispositivo o el navegador por razones de seguridad o experiencia de usuario.
-    </p>
+    <div id="message" class="warning">
+        Haz clic en "Bloquear en Horizontal". Es posible que se te pida permiso para entrar en pantalla completa.
+        En iOS, el bloqueo es muy limitado y podría no funcionar a menos que la página sea una PWA.
+    </div>
 
     <script>
         const statusElement = document.getElementById('status');
         const lockButton = document.getElementById('lockButton');
         const unlockButton = document.getElementById('unlockButton');
+        const messageElement = document.getElementById('message');
 
         // Función para actualizar el estado de la orientación
         function updateOrientationStatus() {
@@ -67,44 +94,70 @@
         }
 
         // Bloquear en horizontal
-        lockButton.addEventListener('click', () => {
-            if (screen.orientation && screen.orientation.lock) {
-                // Opcional: Solicitar pantalla completa antes de bloquear la orientación
-                // document.documentElement.requestFullscreen()
-                //     .then(() => {
-                            screen.orientation.lock('landscape')
-                                .then(() => {
-                                    statusElement.textContent = "Orientación bloqueada en landscape.";
-                                    console.log("Orientación bloqueada en landscape.");
-                                })
-                                .catch((error) => {
-                                    statusElement.textContent = `Error al bloquear: ${error.message}`;
-                                    console.error("No se pudo bloquear la orientación:", error);
-                                });
-                //     })
-                //     .catch((error) => {
-                //         statusElement.textContent = `Error al entrar en pantalla completa: ${error.message}`;
-                //         console.error("No se pudo entrar en pantalla completa:", error);
-                //     });
-            } else {
-                statusElement.textContent = "Screen Orientation API o el método lock() no soportados.";
+        lockButton.addEventListener('click', async () => {
+            if (!screen.orientation || !screen.orientation.lock) {
+                messageElement.className = 'error';
+                messageElement.textContent = "Screen Orientation API o el método lock() no soportados en este navegador/dispositivo.";
                 console.warn("Screen Orientation API o el método lock() no soportados.");
+                return;
+            }
+
+            try {
+                // 1. Intentar entrar en pantalla completa
+                // Esto es crucial para iOS y algunos Android
+                if (!document.fullscreenElement) {
+                    await document.documentElement.requestFullscreen();
+                    messageElement.className = 'warning';
+                    messageElement.textContent = "Entrando en pantalla completa... Ahora intentando bloquear la orientación.";
+                }
+
+                // 2. Bloquear la orientación
+                await screen.orientation.lock('landscape');
+                statusElement.textContent = "Orientación bloqueada en landscape.";
+                messageElement.className = 'warning';
+                messageElement.textContent = "Pantalla bloqueada en horizontal (landscape).";
+                console.log("Orientación bloqueada en landscape.");
+
+            } catch (error) {
+                statusElement.textContent = `Error al bloquear: ${error.name} - ${error.message}`;
+                messageElement.className = 'error';
+                if (error.name === 'NotAllowedError' || error.name === 'SecurityError') {
+                    messageElement.textContent = "Permiso denegado por el usuario o el navegador. Asegúrate de permitir la pantalla completa y la rotación.";
+                } else if (error.name === 'NotSupportedError') {
+                    messageElement.textContent = "El bloqueo de orientación no es compatible en este contexto (ej. no en pantalla completa en iOS).";
+                } else {
+                    messageElement.textContent = `Error desconocido: ${error.message}`;
+                }
+                console.error("No se pudo bloquear la orientación:", error);
             }
         });
 
         // Desbloquear orientación
-        unlockButton.addEventListener('click', () => {
-            if (screen.orientation && screen.orientation.unlock) {
+        unlockButton.addEventListener('click', async () => {
+            if (!screen.orientation || !screen.orientation.unlock) {
+                messageElement.className = 'error';
+                messageElement.textContent = "Screen Orientation API o el método unlock() no soportados en este navegador/dispositivo.";
+                console.warn("Screen Orientation API o el método unlock() no soportados.");
+                return;
+            }
+
+            try {
                 screen.orientation.unlock();
                 statusElement.textContent = "Orientación desbloqueada.";
+                messageElement.className = 'warning';
+                messageElement.textContent = "Orientación desbloqueada. El dispositivo puede rotar libremente.";
                 console.log("Orientación desbloqueada.");
+
                 // Opcional: Salir de pantalla completa si se entró antes
-                // if (document.fullscreenElement) {
-                //     document.exitFullscreen();
-                // }
-            } else {
-                statusElement.textContent = "Screen Orientation API o el método unlock() no soportados.";
-                console.warn("Screen Orientation API o el método unlock() no soportados.");
+                if (document.fullscreenElement) {
+                    await document.exitFullscreen();
+                    messageElement.textContent += " Saliendo de pantalla completa.";
+                }
+            } catch (error) {
+                statusElement.textContent = `Error al desbloquear: ${error.message}`;
+                messageElement.className = 'error';
+                messageElement.textContent = `Error al desbloquear: ${error.message}`;
+                console.error("No se pudo desbloquear la orientación:", error);
             }
         });
 
