@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demostración de Orientación de Pantalla</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+        #lockButton {
+            background-color: #28a745; /* Verde */
+        }
+        #unlockButton {
+            background-color: #dc3545; /* Rojo */
+        }
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Control de Orientación de Pantalla</h1>
+
+    <button id="lockButton">Bloquear en Horizontal (Landscape)</button>
+    <button id="unlockButton">Desbloquear Orientación</button>
+
+    <p id="status">Orientación actual: Cargando...</p>
+
+    <p>
+        <strong>Nota:</strong> El bloqueo de orientación puede requerir que la página esté en modo de pantalla completa en algunos navegadores (especialmente iOS)
+        y podría ser denegado por el dispositivo o el navegador por razones de seguridad o experiencia de usuario.
+    </p>
+
+    <script>
+        const statusElement = document.getElementById('status');
+        const lockButton = document.getElementById('lockButton');
+        const unlockButton = document.getElementById('unlockButton');
+
+        // Función para actualizar el estado de la orientación
+        function updateOrientationStatus() {
+            if (screen.orientation && screen.orientation.type) {
+                statusElement.textContent = `Orientación actual: ${screen.orientation.type}`;
+            } else {
+                statusElement.textContent = `Orientación actual: No soportado o desconocido.`;
+            }
+        }
+
+        // Bloquear en horizontal
+        lockButton.addEventListener('click', () => {
+            if (screen.orientation && screen.orientation.lock) {
+                // Opcional: Solicitar pantalla completa antes de bloquear la orientación
+                // document.documentElement.requestFullscreen()
+                //     .then(() => {
+                            screen.orientation.lock('landscape')
+                                .then(() => {
+                                    statusElement.textContent = "Orientación bloqueada en landscape.";
+                                    console.log("Orientación bloqueada en landscape.");
+                                })
+                                .catch((error) => {
+                                    statusElement.textContent = `Error al bloquear: ${error.message}`;
+                                    console.error("No se pudo bloquear la orientación:", error);
+                                });
+                //     })
+                //     .catch((error) => {
+                //         statusElement.textContent = `Error al entrar en pantalla completa: ${error.message}`;
+                //         console.error("No se pudo entrar en pantalla completa:", error);
+                //     });
+            } else {
+                statusElement.textContent = "Screen Orientation API o el método lock() no soportados.";
+                console.warn("Screen Orientation API o el método lock() no soportados.");
+            }
+        });
+
+        // Desbloquear orientación
+        unlockButton.addEventListener('click', () => {
+            if (screen.orientation && screen.orientation.unlock) {
+                screen.orientation.unlock();
+                statusElement.textContent = "Orientación desbloqueada.";
+                console.log("Orientación desbloqueada.");
+                // Opcional: Salir de pantalla completa si se entró antes
+                // if (document.fullscreenElement) {
+                //     document.exitFullscreen();
+                // }
+            } else {
+                statusElement.textContent = "Screen Orientation API o el método unlock() no soportados.";
+                console.warn("Screen Orientation API o el método unlock() no soportados.");
+            }
+        });
+
+        // Escuchar cambios en la orientación para actualizar el estado
+        if (screen.orientation) {
+            screen.orientation.addEventListener('change', updateOrientationStatus);
+        }
+
+        // Actualizar el estado inicial al cargar la página
+        document.addEventListener('DOMContentLoaded', updateOrientationStatus);
+    </script>
+
+</body>
+</html>
