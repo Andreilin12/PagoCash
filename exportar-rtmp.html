@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exportar Datos - PlusMoney Retom</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #1abc9c;
+      --primary-dark: #16a085;
+      --secondary-color: #2a2a3f;
+      --background-color: #2c3e50;
+      --text-color: #ffffff;
+      --text-light: #a8a8a8;
+      --border-color: #444;
+      --card-bg: #34495e;
+      --danger-color: #e74c3c;
+      --success-color: #2ecc71;
+      --warning-color: #f39c12;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    /* Estilos para alertas */
+    .alert-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .alert-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .alert-box {
+      background-color: var(--secondary-color);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    .alert-overlay.active .alert-box {
+      transform: translateY(0);
+    }
+
+    .alert-title {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .alert-title i {
+      margin-right: 10px;
+    }
+
+    .alert-message {
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .alert-btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alert-btn i {
+      margin-right: 8px;
+    }
+
+    .alert-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .alert-success .alert-title {
+      color: var(--success-color);
+    }
+
+    .alert-error .alert-title {
+      color: var(--danger-color);
+    }
+
+    .alert-warning .alert-title {
+      color: var(--warning-color);
+    }
+
+    /* Resto de estilos... */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    .file-list {
+      margin-top: 2rem;
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .file-info {
+      flex: 1;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .progress-container {
+      width: 100%;
+      background-color: var(--background-color);
+      border-radius: 8px;
+      margin-top: 1rem;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 20px;
+      background-color: var(--primary-color);
+      width: 0%;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Exportar Datos a Archivo .rtmp</h1>
+      
+      <div class="form-group">
+        <label for="collectionSelect">Seleccionar Colección</label>
+        <select id="collectionSelect" class="form-control">
+          <option value="">-- Seleccione una colección --</option>
+          <option value="Loans">Préstamos</option>
+          <option value="Users">Usuarios</option>
+          <option value="Payments">Pagos</option>
+          <option value="Clients">Clientes</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="exportName">Nombre del Archivo (sin extensión)</label>
+        <input type="text" id="exportName" class="form-control" placeholder="mis_datos_exportados">
+      </div>
+      
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="includeDocuments"> Incluir documentos adjuntos
+        </label>
+      </div>
+      
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="includeImages"> Incluir imágenes
+        </label>
+      </div>
+      
+      <button id="exportBtn" class="btn">
+        <i class="fas fa-file-export"></i> Exportar Datos
+      </button>
+      
+      <div id="progressContainer" class="progress-container" style="display: none;">
+        <div id="progressBar" class="progress-bar">0%</div>
+      </div>
+    </div>
+    
+    <div class="card file-list">
+      <h1>Archivos Exportados Recientemente</h1>
+      <div id="exportedFilesList"></div>
+    </div>
+  </div>
+  
+  <!-- Overlay de carga -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+  </div>
+  
+  <!-- Alertas personalizadas -->
+  <div class="alert-overlay" id="alertOverlay">
+    <div class="alert-box" id="alertBox">
+      <h3 class="alert-title" id="alertTitle"><i class="fas fa-check-circle"></i> Título</h3>
+      <p class="alert-message" id="alertMessage">Mensaje de la alerta</p>
+      <button class="alert-btn" id="alertBtn"><i class="fas fa-check"></i> Aceptar</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      getDocs,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { 
+      getStorage, 
+      ref, 
+      getDownloadURL,
+      uploadBytes
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+    
+    let currentUser = null;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          loadExportedFiles();
+        } else {
+          window.location.href = 'index.html';
+        }
+      });
+      
+      // Configurar eventos
+      document.getElementById('exportBtn').addEventListener('click', exportData);
+      document.getElementById('alertBtn').addEventListener('click', () => {
+        document.getElementById('alertOverlay').classList.remove('active');
+      });
+    });
+    
+    async function exportData() {
+      const collectionName = document.getElementById('collectionSelect').value;
+      const exportName = document.getElementById('exportName').value.trim();
+      const includeDocuments = document.getElementById('includeDocuments').checked;
+      const includeImages = document.getElementById('includeImages').checked;
+      
+      if (!collectionName) {
+        showAlert('Error', 'Por favor seleccione una colección', 'error');
+        return;
+      }
+      
+      if (!exportName) {
+        showAlert('Error', 'Por favor ingrese un nombre para el archivo', 'error');
+        return;
+      }
+      
+      try {
+        showLoading();
+        document.getElementById('progressContainer').style.display = 'block';
+        updateProgress(0, 'Preparando exportación...');
+        
+        // Obtener datos de la colección
+        updateProgress(10, 'Obteniendo datos de Firebase...');
+        const querySnapshot = await getDocs(collection(db, collectionName));
+        const documents = [];
+        
+        querySnapshot.forEach((doc) => {
+          documents.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Procesar documentos adjuntos si es necesario
+        if (includeDocuments || includeImages) {
+          updateProgress(30, 'Procesando archivos adjuntos...');
+          await processAttachments(documents, includeDocuments, includeImages);
+        }
+        
+        // Crear estructura RTMP
+        updateProgress(70, 'Creando archivo .rtmp...');
+        const rtmpData = {
+          metadata: {
+            version: "1.0",
+            collection: collectionName,
+            exportedAt: new Date().toISOString(),
+            exportedBy: currentUser.uid,
+            documentCount: documents.length
+          },
+          documents: documents
+        };
+        
+        // Convertir a Blob
+        const blob = new Blob([JSON.stringify(rtmpData, null, 2)], { type: 'application/rtmp' });
+        
+        // Guardar en Firebase Storage
+        updateProgress(90, 'Guardando archivo...');
+        const storageRef = ref(storage, `exports/${currentUser.uid}/${exportName}.rtmp`);
+        await uploadBytes(storageRef, blob);
+        
+        // Descargar localmente
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${exportName}.rtmp`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        updateProgress(100, 'Exportación completada!');
+        showAlert('Éxito', `Datos exportados correctamente a ${exportName}.rtmp`, 'success');
+        
+        // Actualizar lista de archivos exportados
+        loadExportedFiles();
+      } catch (error) {
+        console.error("Error exporting data: ", error);
+        showAlert('Error', 'Ocurrió un error al exportar los datos: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+        setTimeout(() => {
+          document.getElementById('progressContainer').style.display = 'none';
+        }, 2000);
+      }
+    }
+    
+    async function processAttachments(documents, includeDocuments, includeImages) {
+      for (const doc of documents) {
+        if (doc.documents && includeDocuments) {
+          for (const attachment of doc.documents) {
+            try {
+              const fileRef = ref(storage, attachment.url);
+              const downloadURL = await getDownloadURL(fileRef);
+              attachment.downloadURL = downloadURL;
+            } catch (error) {
+              console.warn(`No se pudo obtener el documento adjunto: ${attachment.name}`, error);
+              attachment.downloadError = true;
+            }
+          }
+        }
+        
+        if (doc.client?.photoURL && includeImages) {
+          try {
+            const photoRef = ref(storage, doc.client.photoURL);
+            const downloadURL = await getDownloadURL(photoRef);
+            doc.client.photoDownloadURL = downloadURL;
+          } catch (error) {
+            console.warn('No se pudo obtener la foto del cliente', error);
+          }
+        }
+      }
+    }
+    
+    async function loadExportedFiles() {
+      try {
+        const listRef = ref(storage, `exports/${currentUser.uid}`);
+        // Nota: Necesitarías implementar una Cloud Function para listar archivos
+        // ya que Firebase Storage no permite listar archivos directamente desde el cliente
+        
+        // Esta es una implementación simulada
+        const exportedFilesList = document.getElementById('exportedFilesList');
+        exportedFilesList.innerHTML = '<p>No hay archivos exportados recientemente.</p>';
+        
+        // En una implementación real, usarías una Cloud Function para obtener la lista
+        // y luego mostrarías cada archivo con opciones para descargar o importar
+        
+      } catch (error) {
+        console.error("Error loading exported files: ", error);
+      }
+    }
+    
+    function updateProgress(percent, message) {
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.width = `${percent}%`;
+      progressBar.textContent = message;
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+    
+    function showAlert(title, message, type = 'info') {
+      const alertBox = document.getElementById('alertBox');
+      const alertTitle = document.getElementById('alertTitle');
+      const alertMessage = document.getElementById('alertMessage');
+      
+      // Configurar según el tipo
+      alertBox.className = 'alert-box';
+      alertTitle.innerHTML = '';
+      
+      let icon = 'fa-info-circle';
+      if (type === 'error') {
+        alertBox.classList.add('alert-error');
+        icon = 'fa-exclamation-circle';
+      } else if (type === 'success') {
+        alertBox.classList.add('alert-success');
+        icon = 'fa-check-circle';
+      } else if (type === 'warning') {
+        alertBox.classList.add('alert-warning');
+        icon = 'fa-exclamation-triangle';
+      }
+      
+      alertTitle.innerHTML = `<i class="fas ${icon}"></i> ${title}`;
+      alertMessage.textContent = message;
+      
+      document.getElementById('alertOverlay').classList.add('active');
+    }
+  </script>
+</body>
+</html>
