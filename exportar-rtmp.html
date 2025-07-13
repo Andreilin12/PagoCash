@@ -271,45 +271,27 @@
       <h1>Exportar Datos a Archivo .rtmp</h1>
       
       <div class="form-group">
-        <label for="collectionSelect">Seleccionar Colección</label>
-        <select id="collectionSelect" class="form-control">
-          <option value="">-- Seleccione una colección --</option>
-          <option value="Loans">Préstamos</option>
-          <option value="Users">Usuarios</option>
-          <option value="Payments">Pagos</option>
-          <option value="Clients">Clientes</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
         <label for="exportName">Nombre del Archivo (sin extensión)</label>
         <input type="text" id="exportName" class="form-control" placeholder="mis_datos_exportados">
       </div>
       
       <div class="form-group">
         <label>
-          <input type="checkbox" id="includeDocuments"> Incluir documentos adjuntos
+          <input type="checkbox" id="includeAttachments"> Incluir documentos/imágenes adjuntos
         </label>
       </div>
       
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="includeImages"> Incluir imágenes
-        </label>
-      </div>
+      <button id="exportSingleBtn" class="btn">
+        <i class="fas fa-file-export"></i> Exportar Préstamo Actual
+      </button>
       
-      <button id="exportBtn" class="btn">
-        <i class="fas fa-file-export"></i> Exportar Datos
+      <button id="exportAllBtn" class="btn" style="margin-top: 1rem;">
+        <i class="fas fa-file-archive"></i> Exportar Todos los Préstamos
       </button>
       
       <div id="progressContainer" class="progress-container" style="display: none;">
         <div id="progressBar" class="progress-bar">0%</div>
       </div>
-    </div>
-    
-    <div class="card file-list">
-      <h1>Archivos Exportados Recientemente</h1>
-      <div id="exportedFilesList"></div>
     </div>
   </div>
   
@@ -360,58 +342,72 @@
     const storage = getStorage(app);
     
     let currentUser = null;
+    let currentLoanData = null;
     
     document.addEventListener('DOMContentLoaded', () => {
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user;
-          loadExportedFiles();
+          // Obtener el préstamo actual de la URL o de sessionStorage
+          const urlParams = new URLSearchParams(window.location.search);
+          const loanId = urlParams.get('loanId') || sessionStorage.getItem('currentLoanId');
+          if (loanId) {
+            getLoanData(loanId);
+          }
         } else {
           window.location.href = 'index.html';
         }
       });
       
       // Configurar eventos
-      document.getElementById('exportBtn').addEventListener('click', exportData);
+      document.getElementById('exportSingleBtn').addEventListener('click', exportCurrentLoan);
+      document.getElementById('exportAllBtn').addEventListener('click', exportAllLoans);
       document.getElementById('alertBtn').addEventListener('click', () => {
         document.getElementById('alertOverlay').classList.remove('active');
       });
     });
     
-    async function exportData() {
-      const collectionName = document.getElementById('collectionSelect').value;
-      const exportName = document.getElementById('exportName').value.trim();
-      const includeDocuments = document.getElementById('includeDocuments').checked;
-      const includeImages = document.getElementById('includeImages').checked;
-      
-      if (!collectionName) {
-        showAlert('Error', 'Por favor seleccione una colección', 'error');
+    async function getLoanData(loanId) {
+      try {
+        showLoading();
+        const loanRef = doc(db, "Loans", loanId);
+        const loanSnap = await getDoc(loanRef);
+        
+        if (loanSnap.exists()) {
+          currentLoanData = { id: loanSnap.id, ...loanSnap.data() };
+        } else {
+          showAlert('Error', 'No se encontró el préstamo especificado', 'error');
+        }
+      } catch (error) {
+        console.error("Error getting loan data: ", error);
+        showAlert('Error', 'Error al obtener datos del préstamo', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    async function exportCurrentLoan() {
+      if (!currentLoanData) {
+        showAlert('Error', 'No hay datos de préstamo para exportar', 'error');
         return;
       }
       
-      if (!exportName) {
-        showAlert('Error', 'Por favor ingrese un nombre para el archivo', 'error');
-        return;
-      }
+      const exportName = document.getElementById('exportName').value.trim() || `prestamo_${currentLoanData.id}`;
+      const includeAttachments = document.getElementById('includeAttachments').checked;
       
       try {
         showLoading();
         document.getElementById('progressContainer').style.display = 'block';
         updateProgress(0, 'Preparando exportación...');
         
-        // Obtener datos de la colección
-        updateProgress(10, 'Obteniendo datos de Firebase...');
-        const querySnapshot = await getDocs(collection(db, collectionName));
-        const documents = [];
-        
-        querySnapshot.forEach((doc) => {
-          documents.push({ id: doc.id, ...doc.data() });
-        });
+        // Procesar datos del préstamo
+        updateProgress(20, 'Procesando datos del préstamo...');
+        const loanToExport = prepareLoanData(currentLoanData, includeAttachments);
         
         // Procesar documentos adjuntos si es necesario
-        if (includeDocuments || includeImages) {
-          updateProgress(30, 'Procesando archivos adjuntos...');
-          await processAttachments(documents, includeDocuments, includeImages);
+        if (includeAttachments) {
+          updateProgress(40, 'Procesando archivos adjuntos...');
+          await processAttachments([loanToExport]);
         }
         
         // Crear estructura RTMP
@@ -419,12 +415,11 @@
         const rtmpData = {
           metadata: {
             version: "1.0",
-            collection: collectionName,
+            type: "single_loan",
             exportedAt: new Date().toISOString(),
-            exportedBy: currentUser.uid,
-            documentCount: documents.length
+            exportedBy: currentUser.uid
           },
-          documents: documents
+          loanData: loanToExport
         };
         
         // Convertir a Blob
@@ -446,13 +441,10 @@
         URL.revokeObjectURL(url);
         
         updateProgress(100, 'Exportación completada!');
-        showAlert('Éxito', `Datos exportados correctamente a ${exportName}.rtmp`, 'success');
-        
-        // Actualizar lista de archivos exportados
-        loadExportedFiles();
+        showAlert('Éxito', `Préstamo exportado correctamente a ${exportName}.rtmp`, 'success');
       } catch (error) {
-        console.error("Error exporting data: ", error);
-        showAlert('Error', 'Ocurrió un error al exportar los datos: ' + error.message, 'error');
+        console.error("Error exporting loan: ", error);
+        showAlert('Error', 'Ocurrió un error al exportar el préstamo: ' + error.message, 'error');
       } finally {
         hideLoading();
         setTimeout(() => {
@@ -461,10 +453,125 @@
       }
     }
     
-    async function processAttachments(documents, includeDocuments, includeImages) {
-      for (const doc of documents) {
-        if (doc.documents && includeDocuments) {
-          for (const attachment of doc.documents) {
+    async function exportAllLoans() {
+      const exportName = document.getElementById('exportName').value.trim() || `todos_prestamos_${new Date().toISOString().split('T')[0]}`;
+      const includeAttachments = document.getElementById('includeAttachments').checked;
+      
+      try {
+        showLoading();
+        document.getElementById('progressContainer').style.display = 'block';
+        updateProgress(0, 'Preparando exportación...');
+        
+        // Obtener todos los préstamos del usuario actual
+        updateProgress(10, 'Obteniendo préstamos...');
+        const q = query(collection(db, "Loans"), where("userId", "==", currentUser.uid));
+        const querySnapshot = await getDocs(q);
+        
+        const loans = [];
+        querySnapshot.forEach((doc) => {
+          loans.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Procesar cada préstamo
+        updateProgress(30, 'Procesando préstamos...');
+        const loansToExport = loans.map(loan => prepareLoanData(loan, includeAttachments));
+        
+        // Procesar documentos adjuntos si es necesario
+        if (includeAttachments) {
+          updateProgress(50, 'Procesando archivos adjuntos...');
+          await processAttachments(loansToExport);
+        }
+        
+        // Crear estructura RTMP
+        updateProgress(80, 'Creando archivo .rtmp...');
+        const rtmpData = {
+          metadata: {
+            version: "1.0",
+            type: "all_loans",
+            exportedAt: new Date().toISOString(),
+            exportedBy: currentUser.uid,
+            loanCount: loans.length
+          },
+          loans: loansToExport
+        };
+        
+        // Convertir a Blob
+        const blob = new Blob([JSON.stringify(rtmpData, null, 2)], { type: 'application/rtmp' });
+        
+        // Guardar en Firebase Storage
+        updateProgress(90, 'Guardando archivo...');
+        const storageRef = ref(storage, `exports/${currentUser.uid}/${exportName}.rtmp`);
+        await uploadBytes(storageRef, blob);
+        
+        // Descargar localmente
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${exportName}.rtmp`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        updateProgress(100, 'Exportación completada!');
+        showAlert('Éxito', `Todos los préstamos exportados correctamente a ${exportName}.rtmp`, 'success');
+      } catch (error) {
+        console.error("Error exporting loans: ", error);
+        showAlert('Error', 'Ocurrió un error al exportar los préstamos: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+        setTimeout(() => {
+          document.getElementById('progressContainer').style.display = 'none';
+        }, 2000);
+      }
+    }
+    
+    function prepareLoanData(loanData, includeAttachments) {
+      // Extraer solo los datos necesarios del formulario de nuevo préstamo
+      const preparedData = {
+        clientInfo: {
+          name: loanData.client?.name || '',
+          id: loanData.client?.id || '',
+          address: loanData.client?.address || '',
+          phone: loanData.client?.phone || '',
+          nationality: loanData.client?.nationality || '',
+          company: loanData.client?.company || '',
+          companyTime: loanData.client?.companyTime || '',
+          reference: {
+            name: loanData.client?.reference?.name || '',
+            phone: loanData.client?.reference?.phone || '',
+            relation: loanData.client?.reference?.relation || ''
+          }
+        },
+        loanDetails: {
+          amount: loanData.amount || 0,
+          interestRate: loanData.interestRate || 0,
+          term: loanData.term || 0,
+          frequency: loanData.frequency || 'monthly',
+          startDate: loanData.startDate || '',
+          loanType: loanData.loanType || 'normal',
+          guarantee: loanData.guarantee || '',
+          paymentSchedule: loanData.paymentSchedule || [],
+          payments: loanData.payments || []
+        }
+      };
+      
+      // Incluir documentos adjuntos si está marcado
+      if (includeAttachments && loanData.documents) {
+        preparedData.attachments = loanData.documents.map(doc => ({
+          name: doc.name,
+          type: doc.type,
+          url: doc.url
+        }));
+      }
+      
+      return preparedData;
+    }
+    
+    async function processAttachments(loans) {
+      for (const loan of loans) {
+        if (loan.attachments) {
+          for (const attachment of loan.attachments) {
             try {
               const fileRef = ref(storage, attachment.url);
               const downloadURL = await getDownloadURL(fileRef);
@@ -475,34 +582,6 @@
             }
           }
         }
-        
-        if (doc.client?.photoURL && includeImages) {
-          try {
-            const photoRef = ref(storage, doc.client.photoURL);
-            const downloadURL = await getDownloadURL(photoRef);
-            doc.client.photoDownloadURL = downloadURL;
-          } catch (error) {
-            console.warn('No se pudo obtener la foto del cliente', error);
-          }
-        }
-      }
-    }
-    
-    async function loadExportedFiles() {
-      try {
-        const listRef = ref(storage, `exports/${currentUser.uid}`);
-        // Nota: Necesitarías implementar una Cloud Function para listar archivos
-        // ya que Firebase Storage no permite listar archivos directamente desde el cliente
-        
-        // Esta es una implementación simulada
-        const exportedFilesList = document.getElementById('exportedFilesList');
-        exportedFilesList.innerHTML = '<p>No hay archivos exportados recientemente.</p>';
-        
-        // En una implementación real, usarías una Cloud Function para obtener la lista
-        // y luego mostrarías cada archivo con opciones para descargar o importar
-        
-      } catch (error) {
-        console.error("Error loading exported files: ", error);
       }
     }
     
