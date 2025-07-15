@@ -1225,27 +1225,34 @@
             color: var(--primary-dark);
         }
 
-        /* Enlace a empresa en el login */
-        .company-lin {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 1rem;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s ease;
-        }
+        /* Enlace a empresa en el login - VERSIÓN CORREGIDA */
+.company-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+    cursor: pointer; /* Añadido */
+    pointer-events: auto; /* Añadido - ¡ESTO FALTA EN TU CSS ACTUAL! */
+    position: relative; /* Añadido para seguridad */
+    z-index: 1; /* Añadido para seguridad */
+}
 
-        .company-lin:hover {
-            color: var(--primary-dark);
-            text-decoration: underline;
-        }
+.company-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+    border: none;
+    border-radius: 5px;
+    padding: 1rem 0.1rem;
+    cursor: pointer;
+}
 
-        .company-lin i {
-            margin-right: 5px;
-        }
-        
+.company-link i {
+    margin-right: 5px;
+}
          
     </style>
 </head>
@@ -1277,14 +1284,13 @@
                     <i class="fas fa-sign-in-alt"></i> <span data-lang="login">Iniciar Sesión</span>
                 </button>
             </form>
-            <a href="empresa.html" class="btn btn-block btn-secondary" style="margin-top: 1rem; text-decoration: none; display: block;">
-    <i class="fas fa-building"></i> Iniciar sesión modo empresa
-</a>
+            <a href="index.html" class="company-link" id="companyLoginLink">
+    <i class="fas fa-building"></i> Iniciar sesión modo empresa </a>
             <div id="loginAlert" class="alert alert-danger" style="display: none;">
                 <i class="fas fa-exclamation-circle"></i>
                 <span id="loginAlertMessage"></span>
             </div>
-        </div>
+        </div> 
     </section>
 
     <!-- Sección del Cliente -->
