@@ -356,6 +356,25 @@
             letter-spacing: 1px;
             color: var(--primary);
             font-family: monospace;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .copy-code-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .copy-code-btn:hover {
+            color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .code-status {
@@ -555,6 +574,65 @@
             color: rgba(255, 255, 255, 0.5) !important;
         }
 
+        /* Modal de confirmación */
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .confirmation-content {
+            background-color: rgba(30, 40, 50, 0.95);
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--card-border);
+            text-align: center;
+        }
+
+        .confirmation-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .confirmation-icon.warning {
+            color: var(--warning);
+        }
+
+        .confirmation-icon.danger {
+            color: var(--danger);
+        }
+
+        .confirmation-icon.info {
+            color: var(--info);
+        }
+
+        .confirmation-message {
+            margin-bottom: 24px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .confirmation-buttons .btn {
+            min-width: 100px;
+        }
+
         /* Animaciones */
         @keyframes slideInRight {
             from {
@@ -616,6 +694,10 @@
             .code-actions {
                 width: 100%;
                 justify-content: space-between;
+            }
+
+            .confirmation-buttons {
+                flex-direction: column;
             }
         }
 
@@ -878,6 +960,22 @@
         </div>
     </div>
 
+    <!-- Modal de confirmación -->
+    <div class="confirmation-modal" id="confirmationModal">
+        <div class="confirmation-content">
+            <div class="confirmation-icon" id="confirmationIcon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="confirmation-message" id="confirmationMessage">
+                ¿Está seguro de que desea realizar esta acción?
+            </div>
+            <div class="confirmation-buttons">
+                <button class="btn btn-secondary" id="cancelActionBtn">Cancelar</button>
+                <button class="btn" id="confirmActionBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase App (initialization) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -900,6 +998,8 @@
         // Variables globales
         let currentEditCodeId = null;
         let countdownIntervals = {};
+        let currentAction = null;
+        let currentActionParams = null;
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -927,6 +1027,11 @@
             const manageCodeList = document.getElementById('manageCodeList');
             const manageStatusFilter = document.getElementById('manageStatusFilter');
             const manageSearchInput = document.getElementById('manageSearchInput');
+            const confirmationModal = document.getElementById('confirmationModal');
+            const confirmationIcon = document.getElementById('confirmationIcon');
+            const confirmationMessage = document.getElementById('confirmationMessage');
+            const cancelActionBtn = document.getElementById('cancelActionBtn');
+            const confirmActionBtn = document.getElementById('confirmActionBtn');
             
             // Navegación entre secciones
             navItems.forEach(item => {
@@ -1121,6 +1226,23 @@
                 }
             });
             
+            // Configurar modal de confirmación
+            cancelActionBtn.addEventListener('click', function() {
+                confirmationModal.style.display = 'none';
+            });
+            
+            confirmActionBtn.addEventListener('click', async function() {
+                confirmationModal.style.display = 'none';
+                
+                if (currentAction === 'deactivate') {
+                    await executeDeactivateCode(currentActionParams.codeId, currentActionParams.code, currentActionParams.name);
+                } else if (currentAction === 'activate') {
+                    await executeActivateCode(currentActionParams.codeId, currentActionParams.code, currentActionParams.name);
+                } else if (currentAction === 'delete') {
+                    await executeDeleteCode(currentActionParams.codeId, currentActionParams.code, currentActionParams.name);
+                }
+            });
+            
             // Función para cargar códigos desde Firebase
             async function loadCodes() {
                 codeList.innerHTML = `
@@ -1201,9 +1323,14 @@
                         }
                         
                         html += `
-                            <div class="code-item ${isExpired ? 'expired' : ''} ${codeData.duration === 'permanent' ? 'permanent' : ''}">
+                            <div class="code-item ${isExpired ? 'expired' : ''} ${codeData.duration === 'permanent' ? 'permanent' : ''}" id="code-${codeId}">
                                 <div class="code-header">
-                                    <span class="code-value">${codeData.code}</span>
+                                    <div class="code-value">
+                                        ${codeData.code}
+                                        <button class="copy-code-btn" onclick="copyToClipboard('${codeData.code}')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
                                     <span class="code-status ${statusClass}">${statusText}</span>
                                 </div>
                                 <div class="code-details">
@@ -1326,9 +1453,14 @@
                         }
                         
                         html += `
-                            <div class="code-item ${isExpired ? 'expired' : ''} ${codeData.duration === 'permanent' ? 'permanent' : ''}">
+                            <div class="code-item ${isExpired ? 'expired' : ''} ${codeData.duration === 'permanent' ? 'permanent' : ''}" id="manage-code-${codeId}">
                                 <div class="code-header">
-                                    <span class="code-value">${codeData.code}</span>
+                                    <div class="code-value">
+                                        ${codeData.code}
+                                        <button class="copy-code-btn" onclick="copyToClipboard('${codeData.code}')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
                                     <span class="code-status ${statusClass}">${statusText}</span>
                                 </div>
                                 <div class="code-details">
@@ -1345,15 +1477,15 @@
                                         </button>
                                     ` : ''}
                                     ${codeData.isActive ? `
-                                        <button class="btn btn-sm btn-danger" onclick="deactivateCode('${codeId}', '${codeData.code}', '${codeData.name}')">
+                                        <button class="btn btn-sm btn-danger" onclick="showConfirmation('deactivate', '${codeId}', '${codeData.code}', '${codeData.name}')">
                                             <i class="fas fa-ban"></i> Suspender
                                         </button>
                                     ` : `
-                                        <button class="btn btn-sm" onclick="activateCode('${codeId}', '${codeData.code}', '${codeData.name}')">
+                                        <button class="btn btn-sm" onclick="showConfirmation('activate', '${codeId}', '${codeData.code}', '${codeData.name}')">
                                             <i class="fas fa-check"></i> Activar
                                         </button>
                                     `}
-                                    <button class="btn btn-sm btn-danger" onclick="deleteCode('${codeId}', '${codeData.code}', '${codeData.name}')">
+                                    <button class="btn btn-sm btn-danger" onclick="showConfirmation('delete', '${codeId}', '${codeData.code}', '${codeData.name}')">
                                         <i class="fas fa-trash"></i> Eliminar
                                     </button>
                                 </div>
@@ -1640,22 +1772,61 @@
             loadCodes();
         });
         
-        // Funciones globales para los botones
-        function openEditModal(codeId) {
-            currentEditCodeId = codeId;
-            document.getElementById('editModal').style.display = 'flex';
+        // Función para copiar al portapapeles
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('Código copiado al portapapeles', 'success');
+            }).catch(err => {
+                showAlert('Error al copiar el código', 'error');
+            });
         }
         
-        async function deactivateCode(codeId, code, name) {
-            if (!confirm(`¿Está seguro de que desea suspender el código ${code}?`)) {
-                return;
+        // Función para mostrar confirmación
+        function showConfirmation(action, codeId, code, name) {
+            currentAction = action;
+            currentActionParams = { codeId, code, name };
+            
+            const confirmationModal = document.getElementById('confirmationModal');
+            const confirmationIcon = document.getElementById('confirmationIcon');
+            const confirmationMessage = document.getElementById('confirmationMessage');
+            const confirmActionBtn = document.getElementById('confirmActionBtn');
+            
+            if (action === 'deactivate') {
+                confirmationIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                confirmationIcon.className = 'confirmation-icon warning';
+                confirmationMessage.textContent = `¿Está seguro de que desea suspender el código ${code}?`;
+                confirmActionBtn.className = 'btn btn-warning';
+                confirmActionBtn.innerHTML = '<i class="fas fa-ban"></i> Suspender';
+            } else if (action === 'activate') {
+                confirmationIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                confirmationIcon.className = 'confirmation-icon info';
+                confirmationMessage.textContent = `¿Está seguro de que desea activar el código ${code}?`;
+                confirmActionBtn.className = 'btn';
+                confirmActionBtn.innerHTML = '<i class="fas fa-check"></i> Activar';
+            } else if (action === 'delete') {
+                confirmationIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+                confirmationIcon.className = 'confirmation-icon danger';
+                confirmationMessage.textContent = `¿Está seguro de que desea eliminar permanentemente el código ${code}? Esta acción no se puede deshacer.`;
+                confirmActionBtn.className = 'btn btn-danger';
+                confirmActionBtn.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
             }
             
+            confirmationModal.style.display = 'flex';
+        }
+        
+        // Función para ejecutar la desactivación
+        async function executeDeactivateCode(codeId, code, name) {
             try {
                 await db.collection("accessCodes").doc(codeId).update({
                     isActive: false,
                     deactivatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
+                
+                // Eliminar el código de la vista inmediatamente
+                const codeElement = document.getElementById(`manage-code-${codeId}`);
+                if (codeElement) {
+                    codeElement.remove();
+                }
                 
                 // Registrar en el historial
                 await db.collection("codeHistory").add({
@@ -1667,7 +1838,6 @@
                 });
                 
                 showAlert('Código suspendido con éxito', 'success');
-                loadManageCodes();
                 
             } catch (error) {
                 console.error('Error al suspender código:', error);
@@ -1675,12 +1845,32 @@
             }
         }
         
-        async function activateCode(codeId, code, name) {
+        // Función para ejecutar la activación
+        async function executeActivateCode(codeId, code, name) {
             try {
                 await db.collection("accessCodes").doc(codeId).update({
                     isActive: true,
                     activatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
+                
+                // Actualizar la vista inmediatamente
+                const codeElement = document.getElementById(`manage-code-${codeId}`);
+                if (codeElement) {
+                    const statusElement = codeElement.querySelector('.code-status');
+                    statusElement.textContent = 'Activo';
+                    statusElement.className = 'code-status status-active';
+                    
+                    const suspendButton = codeElement.querySelector('.btn-danger');
+                    if (suspendButton) {
+                        suspendButton.innerHTML = '<i class="fas fa-ban"></i> Suspender';
+                        suspendButton.setAttribute('onclick', `showConfirmation('deactivate', '${codeId}', '${code}', '${name}')`);
+                    }
+                    
+                    const activateButton = codeElement.querySelector('.btn:not(.btn-danger)');
+                    if (activateButton) {
+                        activateButton.remove();
+                    }
+                }
                 
                 // Registrar en el historial
                 await db.collection("codeHistory").add({
@@ -1692,7 +1882,6 @@
                 });
                 
                 showAlert('Código activado con éxito', 'success');
-                loadManageCodes();
                 
             } catch (error) {
                 console.error('Error al activar código:', error);
@@ -1700,13 +1889,16 @@
             }
         }
         
-        async function deleteCode(codeId, code, name) {
-            if (!confirm(`¿Está seguro de que desea eliminar permanentemente el código ${code}? Esta acción no se puede deshacer.`)) {
-                return;
-            }
-            
+        // Función para ejecutar la eliminación
+        async function executeDeleteCode(codeId, code, name) {
             try {
                 await db.collection("accessCodes").doc(codeId).delete();
+                
+                // Eliminar el código de la vista inmediatamente
+                const codeElement = document.getElementById(`manage-code-${codeId}`);
+                if (codeElement) {
+                    codeElement.remove();
+                }
                 
                 // Registrar en el historial
                 await db.collection("codeHistory").add({
@@ -1718,7 +1910,6 @@
                 });
                 
                 showAlert('Código eliminado con éxito', 'success');
-                loadManageCodes();
                 
             } catch (error) {
                 console.error('Error al eliminar código:', error);
@@ -1726,11 +1917,16 @@
             }
         }
         
+        // Funciones globales para los botones
+        function openEditModal(codeId) {
+            currentEditCodeId = codeId;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        
         // Hacer funciones globales
         window.openEditModal = openEditModal;
-        window.deactivateCode = deactivateCode;
-        window.activateCode = activateCode;
-        window.deleteCode = deleteCode;
+        window.copyToClipboard = copyToClipboard;
+        window.showConfirmation = showConfirmation;
     </script>
 </body>
 </html>
