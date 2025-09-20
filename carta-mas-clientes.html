@@ -95,6 +95,7 @@
     .accordion-button:focus {
       box-shadow: none;
       border-color: rgba(0,0,0,.125);
+
     }
 
     .client-item {
@@ -137,7 +138,7 @@
       font-size: 0.75rem;
       padding: 3px 8px;
       border-radius: 12px;
-      background-color: rgba(21, 160, 134, 0.2);
+      background-color: #fff;
       color: var(--primary-color);
     }
 
@@ -773,7 +774,7 @@
     .filter-btn {
       background-color: #3d5166;
       border: none;
-      color: #bdc3c7;
+      color: #fff;
       padding: 5px 15px;
       border-radius: 20px;
       cursor: pointer;
@@ -876,7 +877,73 @@
     .export-btn:hover {
       background-color: #2980b9;
     }
+/* TEXTOS BLANCOS - ALTO CONTRASTE */
+.client-id,
+.client-id *,
+.text-muted,
+.text-muted *,
+#loanProgressText,
+#clientDetailId,
+.detail-value,
+.detail-label,
+.client-name,
+.client-status,
+.client-info small,
+.client-info .text-muted {
+  color: #15a086 !important;
+}
 
+/* ESTADO COMPLETADO - VERDE */
+.loan-completed .detail-value#loanDetailBalance,
+.detail-value[data-status="completed"] {
+  color: #2ecc71 !important;
+  font-weight: bold;
+}
+
+/* ESTADO COMPLETADO ALTERNATIVO - TACHADO */
+.loan-completed .detail-value#loanDetailBalance.alternative {
+  color: #bdc3c7 !important;
+  text-decoration: line-through;
+  font-weight: normal;
+}
+
+/* BARRA DE PROGRESO - MEJORA VISUAL */
+.loan-progress {
+  background-color: #3d5166 !important;
+  border-radius: 10px;
+  height: 12px;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #15a086, #2ecc71) !important;
+  border-radius: 10px;
+  transition: width 1s ease-in-out;
+}
+
+/* TARJETAS Y CONTENEDORES */
+.card,
+.modal-content,
+.accordion-button {
+  background-color: #34495e !important;
+  color: #ffffff !important;
+}
+
+.accordion-blutton:not(.collapsed) {
+  background-color: rgba(21, 160, 134, 0.2) !important;
+  color: #ffffff !important;
+}
+
+/* BOTONES CON ESTILOS MEJORADOS */
+.btn-primary {
+  background-color: #15a086 !important;
+  border-color: #15a086 !important;
+  color: white !important;
+}
+
+.btn-primary:hover {
+  background-color: #0e8c74 !important;
+  border-color: #0e8c74 !important;
+}
   </style>
 </head>
 <body>
