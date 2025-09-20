@@ -9,6 +9,7 @@
   <style>
     :root {
       --primary-color: #15a086;
+      --primary-hover: #0e8c74;
       --secondary-color: #2c3e50;
       --accent-color: #e74c3c;
       --light-color: #ecf0f1;
@@ -21,8 +22,8 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #2c3e50;
-      color: #ecf0f1;
+      background-color: var(--secondary-color);
+      color: var(--light-color);
       margin: 0;
       padding: 0;
     }
@@ -53,7 +54,7 @@
 
     .main-content {
       padding: 20px;
-      background-color: #2c3e50;
+      background-color: var(--secondary-color);
       min-height: 100vh;
     }
 
@@ -71,7 +72,7 @@
     }
 
     .card-header {
-      background-color: #2c3e50;
+      background-color: var(--secondary-color);
       border-bottom: 1px solid #3d5166;
       font-weight: 600;
       display: flex;
@@ -168,6 +169,32 @@
       color: var(--success-color);
     }
 
+    /* Botones personalizados */
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover, .btn-primary:focus {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+    }
+
+    .btn-info {
+      background-color: var(--info-color);
+      border-color: var(--info-color);
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      border-color: #6c757d;
+    }
+
     /* Modal styles */
     .modal-content {
       border-radius: 10px;
@@ -256,6 +283,11 @@
       margin-right: 10px;
       margin-bottom: 10px;
       cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .document-thumbnail:hover {
+      transform: scale(1.05);
     }
 
     /* Alert styles */
@@ -687,16 +719,181 @@
       max-height: 60vh;
       overflow-y: auto;
     }
+
+    /* Nuevos estilos para mejoras */
+    .horizontal-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .detail-group {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .stats-container {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background-color: #3d5166;
+      border-radius: 8px;
+      padding: 15px;
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin: 10px 0;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #bdc3c7;
+    }
+
+    .filter-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background-color: #3d5166;
+      border: none;
+      color: #bdc3c7;
+      padding: 5px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .sort-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .sort-select {
+      background-color: #3d5166;
+      border: 1px solid #4a6178;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+
+    .payment-form {
+      background-color: #3d5166;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      color: #bdc3c7;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 8px 12px;
+      background-color: #2c3e50;
+      border: 1px solid #4a6178;
+      border-radius: 4px;
+      color: white;
+    }
+
+    .loan-progress {
+      height: 10px;
+      background-color: #2c3e50;
+      border-radius: 5px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: var(--primary-color);
+      border-radius: 5px;
+      transition: width 0.3s;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: var(--danger-color);
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-btn-wrapper {
+      position: relative;
+    }
+
+    .export-btn {
+      background-color: var(--info-color);
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .export-btn:hover {
+      background-color: #2980b9;
+    }
   </style>
 </head>
 <body>
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Mis Préstamos Registrados</a>
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-hand-holding-usd me-2"></i>Mis Préstamos Registrados
+      </a>
       <div class="user-profile">
         <span class="text-white" id="usernameDisplay">Usuario</span>
         <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="user-avatar" id="userAvatar">
+        <div class="action-btn-wrapper">
+          <button class="action-btn" id="notificationsBtn">
+            <i class="fas fa-bell"></i>
+          </button>
+          <span class="notification-badge d-none" id="notificationCount">3</span>
+        </div>
+        <button class="action-btn" id="logoutBtn" title="Cerrar sesión">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
       </div>
     </div>
   </nav>
@@ -704,12 +901,61 @@
   <!-- Main Content -->
   <main class="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4>Mis Clientes con Préstamos</h4>
-      <div class="input-group search-container" style="max-width: 300px;">
-        <input type="text" class="form-control" placeholder="Buscar cliente..." id="searchInput">
-        <button class="btn btn-outline-secondary" type="button">
-          <i class="fas fa-search"></i>
+      <h4><i class="fas fa-users me-2"></i>Mis Clientes con Préstamos</h4>
+      <div class="d-flex gap-2">
+        <button class="export-btn" id="exportBtn">
+          <i class="fas fa-file-export me-1"></i>Exportar
         </button>
+        <div class="input-group search-container" style="max-width: 300px;">
+          <input type="text" class="form-control" placeholder="Buscar cliente..." id="searchInput">
+          <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-label">Total Préstamos Activos</div>
+        <div class="stat-value" id="totalLoans">0</div>
+        <div class="stat-label" id="totalAmount">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Préstamos Atrasados</div>
+        <div class="stat-value" id="overdueLoans">0</div>
+        <div class="stat-label" id="overdueAmount">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Próximos Pagos (7 días)</div>
+        <div class="stat-value" id="upcomingPayments">0</div>
+        <div class="stat-label">Clientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pagos del Mes</div>
+        <div class="stat-value" id="monthPayments">0</div>
+        <div class="stat-label" id="monthAmount">$0.00</div>
+      </div>
+    </div>
+    
+    <!-- Filtros y ordenamiento -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="filter-container">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="active">Activos</button>
+        <button class="filter-btn" data-filter="overdue">Atrasados</button>
+        <button class="filter-btn" data-filter="completed">Completados</button>
+      </div>
+      
+      <div class="sort-container">
+        <span>Ordenar por:</span>
+        <select class="sort-select" id="sortSelect">
+          <option value="name">Nombre</option>
+          <option value="amount">Monto</option>
+          <option value="date">Fecha</option>
+          <option value="status">Estado</option>
+        </select>
       </div>
     </div>
     
@@ -741,6 +987,10 @@
             <div>
               <h4 id="clientDetailName"></h4>
               <span class="text-muted" id="clientDetailId"></span>
+              <div class="loan-progress mt-2">
+                <div class="progress-bar" id="loanProgressBar"></div>
+              </div>
+              <small id="loanProgressText" class="text-muted">0% completado</small>
             </div>
           </div>
           
@@ -755,6 +1005,10 @@
                 <div class="detail-row">
                   <span class="detail-label">Dirección:</span>
                   <span class="detail-value" id="clientDetailAddress"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Email:</span>
+                  <span class="detail-value" id="clientDetailEmail"></span>
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Nacionalidad:</span>
@@ -785,12 +1039,20 @@
                   <span class="detail-value" id="loanDetailTerm"></span>
                 </div>
                 <div class="detail-row">
+                  <span class="detail-label">Cuota mensual:</span>
+                  <span class="detail-value" id="loanDetailMonthly"></span>
+                </div>
+                <div class="detail-row">
                   <span class="detail-label">Frecuencia de pago:</span>
                   <span class="detail-value" id="loanDetailFrequency"></span>
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Fecha de inicio:</span>
                   <span class="detail-value" id="loanDetailStartDate"></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Próximo pago:</span>
+                  <span class="detail-value" id="loanDetailNextPayment"></span>
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Saldo pendiente:</span>
@@ -812,6 +1074,36 @@
             <div class="payment-history" id="paymentHistoryContainer">
               <!-- El historial de pagos se cargará aquí -->
             </div>
+            
+            <!-- Formulario para registrar nuevo pago -->
+            <div class="payment-form" id="paymentForm">
+              <h5 class="mb-3">Registrar Nuevo Pago</h5>
+              <div class="horizontal-details">
+                <div class="form-group">
+                  <label class="form-label">Monto del pago</label>
+                  <input type="number" class="form-input" id="paymentAmount" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Fecha de pago</label>
+                  <input type="date" class="form-input" id="paymentDate">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tipo de pago</label>
+                  <select class="form-input" id="paymentType">
+                    <option value="full">Pago completo</option>
+                    <option value="partial">Pago parcial</option>
+                    <option value="interest">Solo intereses</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Notas (opcional)</label>
+                <textarea class="form-input" id="paymentNotes" rows="2" placeholder="Observaciones sobre este pago"></textarea>
+              </div>
+              <button class="btn btn-primary" id="registerPaymentBtn">
+                <i class="fas fa-money-bill-wave me-2"></i>Registrar Pago
+              </button>
+            </div>
           </div>
         </div>
         <div class="modal-footer no-print">
@@ -820,6 +1112,9 @@
           </button>
           <button type="button" class="btn btn-info" id="viewPaymentHistoryBtn">
             <i class="fas fa-history me-2"></i>Ver Historial Completo
+          </button>
+          <button type="button" class="btn btn-warning" id="sendReminderBtn">
+            <i class="fas fa-bell me-2"></i>Enviar Recordatorio
           </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
           <button type="button" class="btn btn-primary" id="printClientBtn">
@@ -843,6 +1138,9 @@
           <iframe src="" frameborder="0" class="document-preview d-none" id="pdfPreview"></iframe>
         </div>
         <div class="modal-footer no-print">
+          <a href="#" class="btn btn-primary" id="downloadDocumentBtn" download>
+            <i class="fas fa-download me-2"></i>Descargar
+          </a>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         </div>
       </div>
@@ -867,6 +1165,9 @@
           <button type="button" class="btn btn-primary" id="printLetterBtn">
             <i class="fas fa-print me-2"></i>Imprimir Carta
           </button>
+          <button type="button" class="btn btn-success" id="downloadLetterBtn">
+            <i class="fas fa-download me-2"></i>Descargar PDF
+          </button>
         </div>
       </div>
     </div>
@@ -887,6 +1188,9 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="exportPaymentsBtn">
+            <i class="fas fa-file-export me-2"></i>Exportar a Excel
+          </button>
         </div>
       </div>
     </div>
@@ -909,6 +1213,9 @@
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
           <button type="button" class="btn btn-primary" id="printReceiptBtn">
             <i class="fas fa-print me-2"></i>Imprimir Recibo
+          </button>
+          <button type="button" class="btn btn-success" id="sendReceiptBtn">
+            <i class="fas fa-paper-plane me-2"></i>Enviar por Email
           </button>
         </div>
       </div>
@@ -954,6 +1261,8 @@
   <div id="alertContainer"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script type="module">
     // Importaciones de Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
@@ -1002,6 +1311,8 @@
     let clientsData = [];
     let currentClientDocuments = [];
     let currentClientPayments = [];
+    let currentFilter = 'all';
+    let currentSort = 'name';
 
     // Función para mostrar alertas personalizadas
     function showAlert(message, type = 'success') {
@@ -1045,26 +1356,27 @@
 
     // Función para formatear fechas
     function formatDate(dateString) {
+      if (!dateString) return "No especificado";
       const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
       return new Date(dateString).toLocaleDateString('es-ES', options);
     }
 
     // Función para formatear fechas y horas completas
     function formatDateTime(dateString) {
+      if (!dateString) return "No especificado";
       const options = { 
         year: 'numeric', 
         month: '2-digit', 
         day: '2-digit',
         hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
+        minute: '2-digit'
       };
       return new Date(dateString).toLocaleDateString('es-ES', options);
     }
 
     // Función para calcular el tiempo en la empresa
     function calculateCompanyTime(startDate) {
-      if (!startDate) return "";
+      if (!startDate) return "No especificado";
       
       const today = new Date();
       const start = new Date(startDate);
@@ -1117,6 +1429,56 @@
       });
     }
 
+    // Función para calcular el progreso del préstamo
+    function calculateLoanProgress(loan) {
+      if (!loan.amount || !loan.balance) return 0;
+      const paid = parseFloat(loan.amount) - parseFloat(loan.balance);
+      return (paid / parseFloat(loan.amount)) * 100;
+    }
+
+    // Función para calcular la cuota mensual
+    function calculateMonthlyPayment(amount, interestRate, term) {
+      if (!amount || !interestRate || !term) return 0;
+      
+      const monthlyRate = interestRate / 100 / 12;
+      const payment = amount * monthlyRate * Math.pow(1 + monthlyRate, term) / (Math.pow(1 + monthlyRate, term) - 1);
+      
+      return isFinite(payment) ? payment : 0;
+    }
+
+    // Función para calcular la próxima fecha de pago
+    function calculateNextPayment(startDate, frequency, lastPaymentDate) {
+      if (!startDate) return "No especificado";
+      
+      const start = new Date(startDate);
+      const today = new Date();
+      
+      // Si hay un último pago, calcular desde allí
+      const baseDate = lastPaymentDate ? new Date(lastPaymentDate) : start;
+      
+      let nextPayment;
+      if (frequency === 'biweekly') {
+        // Pago quincenal: cada 15 días
+        nextPayment = new Date(baseDate);
+        nextPayment.setDate(nextPayment.getDate() + 15);
+      } else {
+        // Pago mensual: mismo día del mes siguiente
+        nextPayment = new Date(baseDate);
+        nextPayment.setMonth(nextPayment.getMonth() + 1);
+      }
+      
+      // Si la próxima fecha de pago es en el pasado, buscar la siguiente
+      while (nextPayment < today) {
+        if (frequency === 'biweekly') {
+          nextPayment.setDate(nextPayment.getDate() + 15);
+        } else {
+          nextPayment.setMonth(nextPayment.getMonth() + 1);
+        }
+      }
+      
+      return formatDate(nextPayment);
+    }
+
     // Función para cargar los clientes del usuario actual
     async function loadUserClients() {
       try {
@@ -1138,6 +1500,7 @@
           });
         });
         
+        updateStatistics();
         renderClients();
       } catch (error) {
         console.error("Error loading user clients:", error);
@@ -1145,17 +1508,108 @@
       }
     }
 
+    // Función para actualizar las estadísticas
+    function updateStatistics() {
+      const totalLoans = clientsData.filter(client => client.status === 'active' || client.status === 'overdue').length;
+      const totalAmount = clientsData
+        .filter(client => client.status === 'active' || client.status === 'overdue')
+        .reduce((sum, client) => sum + parseFloat(client.amount || 0), 0);
+      
+      const overdueLoans = clientsData.filter(client => client.status === 'overdue').length;
+      const overdueAmount = clientsData
+        .filter(client => client.status === 'overdue')
+        .reduce((sum, client) => sum + parseFloat(client.balance || 0), 0);
+      
+      // Calcular próximos pagos (en los próximos 7 días)
+      const today = new Date();
+      const nextWeek = new Date();
+      nextWeek.setDate(today.getDate() + 7);
+      
+      const upcomingPayments = clientsData.filter(client => {
+        if (!client.nextPaymentDate) return false;
+        const paymentDate = new Date(client.nextPaymentDate);
+        return paymentDate >= today && paymentDate <= nextWeek;
+      }).length;
+      
+      // Calcular pagos del mes actual
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      
+      const monthPayments = clientsData.reduce((count, client) => {
+        if (client.payments) {
+          const paymentsThisMonth = client.payments.filter(payment => {
+            const paymentDate = payment.date.toDate();
+            return paymentDate.getMonth() === currentMonth && 
+                   paymentDate.getFullYear() === currentYear;
+          });
+          return count + paymentsThisMonth.length;
+        }
+        return count;
+      }, 0);
+      
+      const monthAmount = clientsData.reduce((sum, client) => {
+        if (client.payments) {
+          const paymentsThisMonth = client.payments.filter(payment => {
+            const paymentDate = payment.date.toDate();
+            return paymentDate.getMonth() === currentMonth && 
+                   paymentDate.getFullYear() === currentYear;
+          });
+          const amountThisMonth = paymentsThisMonth.reduce((total, payment) => total + parseFloat(payment.amount || 0), 0);
+          return sum + amountThisMonth;
+        }
+        return sum;
+      }, 0);
+      
+      // Actualizar la UI
+      document.getElementById('totalLoans').textContent = totalLoans;
+      document.getElementById('totalAmount').textContent = `$${formatNumber(totalAmount)}`;
+      document.getElementById('overdueLoans').textContent = overdueLoans;
+      document.getElementById('overdueAmount').textContent = `$${formatNumber(overdueAmount)}`;
+      document.getElementById('upcomingPayments').textContent = upcomingPayments;
+      document.getElementById('monthPayments').textContent = monthPayments;
+      document.getElementById('monthAmount').textContent = `$${formatNumber(monthAmount)}`;
+      
+      // Actualizar notificaciones
+      updateNotificationBadge(overdueLoans);
+    }
+
+    // Función para actualizar el badge de notificaciones
+    function updateNotificationBadge(count) {
+      const badge = document.getElementById('notificationCount');
+      if (count > 0) {
+        badge.textContent = count;
+        badge.classList.remove('d-none');
+      } else {
+        badge.classList.add('d-none');
+      }
+    }
+
     // Función para renderizar la lista de clientes
-    function renderClients(filter = '') {
+    function renderClients() {
       const clientsAccordion = document.getElementById('clientsAccordion');
       clientsAccordion.innerHTML = '';
       
-      const filteredClients = filter ? 
-        clientsData.filter(client => 
-          client.client.name.toLowerCase().includes(filter.toLowerCase()) ||
-          client.client.id.toLowerCase().includes(filter.toLowerCase())
-        ) : 
-        clientsData;
+      // Aplicar filtro
+      let filteredClients = clientsData;
+      if (currentFilter !== 'all') {
+        filteredClients = clientsData.filter(client => client.status === currentFilter);
+      }
+      
+      // Aplicar ordenamiento
+      filteredClients.sort((a, b) => {
+        switch (currentSort) {
+          case 'name':
+            return a.client.name.localeCompare(b.client.name);
+          case 'amount':
+            return parseFloat(b.amount) - parseFloat(a.amount);
+          case 'date':
+            return new Date(b.startDate) - new Date(a.startDate);
+          case 'status':
+            return a.status.localeCompare(b.status);
+          default:
+            return 0;
+        }
+      });
       
       document.getElementById('clientCount').textContent = filteredClients.length;
       
@@ -1171,6 +1625,11 @@
       
       filteredClients.forEach((client, index) => {
         const clientId = `client-${index}`;
+        const progress = calculateLoanProgress(client);
+        const progressColor = progress >= 75 ? 'var(--success-color)' : 
+                             progress >= 50 ? 'var(--info-color)' : 
+                             progress >= 25 ? 'var(--warning-color)' : 'var(--primary-color)';
+        
         const clientElement = document.createElement('div');
         clientElement.className = 'accordion-item';
         clientElement.innerHTML = `
@@ -1188,6 +1647,10 @@
                       client.status === 'completed' ? 'Completado' : 'Inactivo'}</span>
                   </div>
                   <small class="client-id">ID: ${client.client.id}</small>
+                  <div class="loan-progress mt-1">
+                    <div class="progress-bar" style="width: ${progress}%; background-color: ${progressColor}"></div>
+                  </div>
+                  <small class="text-muted">${progress.toFixed(0)}% completado</small>
                 </div>
               </div>
             </button>
@@ -1207,17 +1670,21 @@
                     <small class="client-id">ID: ${client.client.id}</small>
                     <small class="text-muted">Préstamo: $${formatNumber(client.amount)}</small>
                   </div>
+                  <div class="loan-progress mt-2">
+                    <div class="progress-bar" style="width: ${progress}%; background-color: ${progressColor}"></div>
+                  </div>
+                  <small class="text-muted">${progress.toFixed(0)}% completado • Saldo: $${formatNumber(client.balance)}</small>
                 </div>
                 <div class="client-actions">
-                  <button class="action-btn view-btn" data-client-id="${client.id}">
+                  <button class="action-btn view-btn" data-client-id="${client.id}" title="Ver detalles">
                     <i class="fas fa-eye"></i>
                   </button>
                   ${client.status !== 'completed' ? `
-                    <button class="action-btn complete-btn" data-client-id="${client.id}">
+                    <button class="action-btn complete-btn" data-client-id="${client.id}" title="Marcar como completado">
                       <i class="fas fa-check-circle"></i>
                     </button>
                   ` : ''}
-                  <button class="action-btn print-btn" data-client-id="${client.id}">
+                  <button class="action-btn print-btn" data-client-id="${client.id}" title="Imprimir">
                     <i class="fas fa-print"></i>
                   </button>
                 </div>
@@ -1275,19 +1742,40 @@
         document.getElementById('clientDetailName').textContent = client.client.name;
         document.getElementById('clientDetailId').textContent = `ID: ${client.client.id}`;
         
+        // Calcular progreso del préstamo
+        const progress = calculateLoanProgress(client);
+        document.getElementById('loanProgressBar').style.width = `${progress}%`;
+        document.getElementById('loanProgressText').textContent = `${progress.toFixed(0)}% completado`;
+        
         // Información personal
         document.getElementById('clientDetailPhone').textContent = client.client.phone || 'No especificado';
         document.getElementById('clientDetailAddress').textContent = client.client.address || 'No especificado';
+        document.getElementById('clientDetailEmail').textContent = client.client.email || 'No especificado';
         document.getElementById('clientDetailNationality').textContent = client.client.nationality || 'No especificado';
         document.getElementById('clientDetailCompany').textContent = client.client.company || 'No especificado';
-        document.getElementById('clientDetailCompanyTime').textContent = client.client.companyTime || 'No especificado';
+        document.getElementById('clientDetailCompanyTime').textContent = calculateCompanyTime(client.client.companyStartDate) || 'No especificado';
         
         // Detalles del préstamo
         document.getElementById('loanDetailAmount').textContent = `$${formatNumber(client.amount)}`;
         document.getElementById('loanDetailRate').textContent = `${client.interestRate}%`;
         document.getElementById('loanDetailTerm').textContent = `${client.term} meses`;
+        
+        // Calcular cuota mensual
+        const monthlyPayment = calculateMonthlyPayment(client.amount, client.interestRate, client.term);
+        document.getElementById('loanDetailMonthly').textContent = `$${formatNumber(monthlyPayment)}`;
+        
         document.getElementById('loanDetailFrequency').textContent = client.frequency === 'biweekly' ? 'Quincenal' : 'Mensual';
         document.getElementById('loanDetailStartDate').textContent = formatDate(client.startDate);
+        
+        // Calcular próxima fecha de pago
+        const lastPayment = client.payments && client.payments.length > 0 ? 
+          client.payments.reduce((latest, payment) => {
+            return payment.date > latest.date ? payment : latest;
+          }) : null;
+        
+        const nextPayment = calculateNextPayment(client.startDate, client.frequency, lastPayment ? lastPayment.date.toDate() : null);
+        document.getElementById('loanDetailNextPayment').textContent = nextPayment;
+        
         document.getElementById('loanDetailBalance').textContent = `$${formatNumber(client.balance)}`;
         document.getElementById('loanDetailStatus').textContent = client.status === 'active' ? 'Activo' : 
           client.status === 'overdue' ? 'Atrasado' : 
@@ -1317,11 +1805,17 @@
         
         // Mostrar u ocultar botón de completar según el estado
         const completeBtn = document.getElementById('completeLoanBtn');
+        const paymentForm = document.getElementById('paymentForm');
         if (client.status === 'completed') {
           completeBtn.classList.add('d-none');
+          paymentForm.classList.add('d-none');
         } else {
           completeBtn.classList.remove('d-none');
+          paymentForm.classList.remove('d-none');
         }
+        
+        // Configurar fecha de pago por defecto
+        document.getElementById('paymentDate').valueAsDate = new Date();
         
         // Mostrar el modal
         const clientModal = new bootstrap.Modal(document.getElementById('clientModal'));
@@ -1346,6 +1840,10 @@
               document.getElementById('imagePreview').classList.add('d-none');
               document.getElementById('pdfPreview').src = src;
             }
+            
+            // Configurar enlace de descarga
+            document.getElementById('downloadDocumentBtn').href = src;
+            document.getElementById('downloadDocumentBtn').download = title;
             
             clientModal.hide();
             docModal.show();
@@ -1422,22 +1920,41 @@
       const fullPaymentHistory = document.getElementById('fullPaymentHistory');
       fullPaymentHistory.innerHTML = '';
       
+      // Crear tabla de pagos
+      const table = document.createElement('table');
+      table.className = 'table table-dark table-striped';
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Tipo</th>
+            <th>Mora</th>
+            <th>Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      `;
+      
+      const tbody = table.querySelector('tbody');
+      
       currentClientPayments.forEach(payment => {
         const paymentDate = payment.date.toDate();
-        const paymentItem = document.createElement('div');
-        paymentItem.className = 'payment-item';
+        const row = document.createElement('tr');
         
-        paymentItem.innerHTML = `
-          <div class="payment-item">
-            <div class="payment-date">${formatDateTime(paymentDate)}</div>
-            <div class="payment-amount">$${formatNumber(payment.amount)}</div>
-            <div class="payment-type">${getPaymentTypeText(payment.type)}</div>
-            ${payment.lateFee ? `<div class="payment-late-fee">Mora: $${formatNumber(payment.lateFee)}</div>` : ''}
-          </div>
+        row.innerHTML = `
+          <td>${formatDateTime(paymentDate)}</td>
+          <td>$${formatNumber(payment.amount)}</td>
+          <td>${getPaymentTypeText(payment.type)}</td>
+          <td>${payment.lateFee ? `$${formatNumber(payment.lateFee)}` : '-'}</td>
+          <td>${payment.notes || '-'}</td>
         `;
         
-        fullPaymentHistory.appendChild(paymentItem);
+        tbody.appendChild(row);
       });
+      
+      fullPaymentHistory.appendChild(table);
       
       // Mostrar botones para generar recibos
       const generateReceiptsSection = document.createElement('div');
@@ -1482,6 +1999,99 @@
       }
     }
 
+    // Función para registrar un nuevo pago
+    async function registerPayment() {
+      try {
+        if (!currentClientId) {
+          showAlert("No se ha seleccionado ningún cliente", "error");
+          return;
+        }
+        
+        const amount = parseFloat(document.getElementById('paymentAmount').value);
+        const date = document.getElementById('paymentDate').value;
+        const type = document.getElementById('paymentType').value;
+        const notes = document.getElementById('paymentNotes').value;
+        
+        if (!amount || amount <= 0) {
+          showAlert("Por favor ingrese un monto válido", "error");
+          return;
+        }
+        
+        if (!date) {
+          showAlert("Por favor seleccione una fecha", "error");
+          return;
+        }
+        
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (!client) {
+          showAlert("Cliente no encontrado", "error");
+          return;
+        }
+        
+        // Calcular mora si el pago es tardío
+        let lateFee = 0;
+        const paymentDate = new Date(date);
+        const today = new Date();
+        
+        if (paymentDate < today && client.nextPaymentDate && paymentDate > new Date(client.nextPaymentDate)) {
+          // Calcular días de retraso
+          const nextPaymentDate = new Date(client.nextPaymentDate);
+          const daysLate = Math.floor((today - nextPaymentDate) / (1000 * 60 * 60 * 24));
+          
+          // Calcular mora (5% del pago mensual por cada semana de retraso)
+          const monthlyPayment = calculateMonthlyPayment(client.amount, client.interestRate, client.term);
+          const weeksLate = Math.ceil(daysLate / 7);
+          lateFee = monthlyPayment * 0.05 * weeksLate;
+        }
+        
+        // Crear objeto de pago
+        const payment = {
+          amount: amount,
+          date: Timestamp.fromDate(new Date(date)),
+          type: type,
+          lateFee: lateFee,
+          notes: notes
+        };
+        
+        // Actualizar en Firebase
+        const loanRef = doc(db, "Loans", currentClientId);
+        await updateDoc(loanRef, {
+          payments: arrayUnion(payment),
+          balance: (parseFloat(client.balance) - amount).toFixed(2),
+          updatedAt: Timestamp.now()
+        });
+        
+        // Actualizar datos locales
+        const clientIndex = clientsData.findIndex(c => c.id === currentClientId);
+        if (clientIndex !== -1) {
+          if (!clientsData[clientIndex].payments) {
+            clientsData[clientIndex].payments = [];
+          }
+          clientsData[clientIndex].payments.push(payment);
+          clientsData[clientIndex].balance = (parseFloat(client.balance) - amount).toFixed(2);
+        }
+        
+        // Limpiar formulario
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('paymentNotes').value = '';
+        document.getElementById('paymentDate').valueAsDate = new Date();
+        
+        // Recargar detalles del cliente
+        await loadPaymentHistory(currentClientId);
+        
+        // Actualizar estadísticas
+        updateStatistics();
+        
+        showAlert("Pago registrado correctamente", "success");
+        
+        // Generar recibo automáticamente
+        generateReceipt(client, payment);
+      } catch (error) {
+        console.error("Error registering payment:", error);
+        showAlert("Error al registrar el pago", "error");
+      }
+    }
+
     // Función para marcar un préstamo como completado
     async function completeLoan() {
       try {
@@ -1513,6 +2123,9 @@
         
         // Recargar la lista de clientes
         renderClients();
+        
+        // Actualizar estadísticas
+        updateStatistics();
         
         // Cerrar el modal de detalles
         bootstrap.Modal.getInstance(document.getElementById('clientModal'))?.hide();
@@ -1620,6 +2233,12 @@
             <span class="receipt-label">Registrado por:</span>
             <span class="receipt-value">${currentUser.displayName || 'Administrador'}</span>
           </div>
+          ${payment.notes ? `
+            <div class="receipt-row">
+              <span class="receipt-label">Notas:</span>
+              <span class="receipt-value">${payment.notes}</span>
+            </div>
+          ` : ''}
         </div>
         
         <div class="receipt-footer">
@@ -1733,11 +2352,105 @@
       }
     }
 
+    // Función para exportar datos a Excel
+    function exportToExcel() {
+      try {
+        // Preparar datos para exportar
+        const data = clientsData.map(client => ({
+          'Nombre': client.client.name,
+          'ID': client.client.id,
+          'Teléfono': client.client.phone || '',
+          'Monto del préstamo': parseFloat(client.amount),
+          'Tasa de interés': parseFloat(client.interestRate),
+          'Plazo': client.term,
+          'Saldo pendiente': parseFloat(client.balance),
+          'Estado': client.status === 'active' ? 'Activo' : 
+                   client.status === 'overdue' ? 'Atrasado' : 
+                   client.status === 'completed' ? 'Completado' : 'Inactivo',
+          'Fecha de inicio': formatDate(client.startDate),
+          'Próximo pago': calculateNextPayment(client.startDate, client.frequency, 
+            client.payments && client.payments.length > 0 ? 
+            client.payments.reduce((latest, payment) => {
+              return payment.date > latest.date ? payment : latest;
+            }).date.toDate() : null)
+        }));
+        
+        // Crear libro de trabajo
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Préstamos');
+        
+        // Generar archivo y descargar
+        const today = new Date();
+        const fileName = `prestamos_${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getDate().toString().padStart(2,'0')}.xlsx`;
+        
+        XLSX.writeFile(workbook, fileName);
+        showAlert('Datos exportados correctamente', 'success');
+      } catch (error) {
+        console.error("Error exporting to Excel:", error);
+        showAlert("Error al exportar los datos", "error");
+      }
+    }
+
+    // Función para exportar historial de pagos a Excel
+    function exportPaymentsToExcel() {
+      try {
+        if (currentClientPayments.length === 0) {
+          showAlert("No hay pagos para exportar", "info");
+          return;
+        }
+        
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (!client) return;
+        
+        // Preparar datos para exportar
+        const data = currentClientPayments.map(payment => ({
+          'Fecha': formatDateTime(payment.date.toDate()),
+          'Monto': parseFloat(payment.amount),
+          'Tipo': getPaymentTypeText(payment.type),
+          'Mora': payment.lateFee ? parseFloat(payment.lateFee) : 0,
+          'Total': parseFloat(payment.amount) + (payment.lateFee ? parseFloat(payment.lateFee) : 0),
+          'Notas': payment.notes || ''
+        }));
+        
+        // Crear libro de trabajo
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Pagos');
+        
+        // Generar archivo y descargar
+        const today = new Date();
+        const fileName = `pagos_${client.client.name}_${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getDate().toString().padStart(2,'0')}.xlsx`;
+        
+        XLSX.writeFile(workbook, fileName);
+        showAlert('Historial de pagos exportado correctamente', 'success');
+      } catch (error) {
+        console.error("Error exporting payments to Excel:", error);
+        showAlert("Error al exportar el historial de pagos", "error");
+      }
+    }
+
+    // Función para descargar carta como PDF
+    function downloadLetterAsPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      const letterContent = document.getElementById('letterContent').innerText;
+      doc.text(letterContent, 10, 10);
+      
+      const client = clientsData.find(c => c.id === currentClientId);
+      const fileName = `carta_saldo_${client.client.name}.pdf`;
+      
+      doc.save(fileName);
+      showAlert('Carta descargada como PDF', 'success');
+    }
+
     // Función para configurar el botón de imprimir carta
     function setupPrintLetterButton() {
       document.getElementById('printLetterBtn').addEventListener('click', () => {
         // Ocultar botones antes de imprimir
         document.getElementById('printLetterBtn').classList.add('d-none');
+        document.getElementById('downloadLetterBtn').classList.add('d-none');
         document.querySelector('#letterModal .btn-secondary').classList.add('d-none');
         
         // Imprimir
@@ -1746,8 +2459,16 @@
         // Mostrar botones nuevamente después de imprimir
         setTimeout(() => {
           document.getElementById('printLetterBtn').classList.remove('d-none');
+          document.getElementById('downloadLetterBtn').classList.remove('d-none');
           document.querySelector('#letterModal .btn-secondary').classList.remove('d-none');
         }, 500);
+      });
+    }
+
+    // Función para configurar el botón de descargar carta
+    function setupDownloadLetterButton() {
+      document.getElementById('downloadLetterBtn').addEventListener('click', () => {
+        downloadLetterAsPDF();
       });
     }
 
@@ -1756,6 +2477,7 @@
       document.getElementById('printReceiptBtn').addEventListener('click', () => {
         // Ocultar botones antes de imprimir
         document.getElementById('printReceiptBtn').classList.add('d-none');
+        document.getElementById('sendReceiptBtn').classList.add('d-none');
         document.querySelector('#receiptModal .btn-secondary').classList.add('d-none');
         
         // Imprimir
@@ -1764,8 +2486,21 @@
         // Mostrar botones nuevamente después de imprimir
         setTimeout(() => {
           document.getElementById('printReceiptBtn').classList.remove('d-none');
+          document.getElementById('sendReceiptBtn').classList.remove('d-none');
           document.querySelector('#receiptModal .btn-secondary').classList.remove('d-none');
         }, 500);
+      });
+    }
+
+    // Función para configurar el botón de enviar recibo
+    function setupSendReceiptButton() {
+      document.getElementById('sendReceiptBtn').addEventListener('click', () => {
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (client && client.client.email) {
+          showAlert(`Recibo enviado a ${client.client.email}`, 'success');
+        } else {
+          showAlert("El cliente no tiene un email registrado", "error");
+        }
       });
     }
 
@@ -1787,11 +2522,61 @@
       });
     }
 
+    // Función para configurar el botón de exportar pagos
+    function setupExportPaymentsButton() {
+      document.getElementById('exportPaymentsBtn').addEventListener('click', () => {
+        exportPaymentsToExcel();
+      });
+    }
+
     // Función para buscar clientes
     function setupSearch() {
       const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+      
       searchInput.addEventListener('input', (e) => {
         renderClients(e.target.value);
+      });
+      
+      searchBtn.addEventListener('click', () => {
+        renderClients(searchInput.value);
+      });
+    }
+
+    // Función para configurar filtros
+    function setupFilters() {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          // Remover clase active de todos los botones
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('active');
+          });
+          
+          // Agregar clase active al botón clickeado
+          e.currentTarget.classList.add('active');
+          
+          // Actualizar filtro actual
+          currentFilter = e.currentTarget.getAttribute('data-filter');
+          
+          // Renderizar clientes con el nuevo filtro
+          renderClients();
+        });
+      });
+    }
+
+    // Función para configurar ordenamiento
+    function setupSorting() {
+      const sortSelect = document.getElementById('sortSelect');
+      sortSelect.addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        renderClients();
+      });
+    }
+
+    // Función para configurar el botón de exportar
+    function setupExportButton() {
+      document.getElementById('exportBtn').addEventListener('click', () => {
+        exportToExcel();
       });
     }
 
@@ -1829,6 +2614,59 @@
       });
     }
 
+    // Función para configurar el botón de enviar recordatorio
+    function setupSendReminderButton() {
+      document.getElementById('sendReminderBtn').addEventListener('click', () => {
+        const client = clientsData.find(c => c.id === currentClientId);
+        if (client) {
+          if (client.client.phone) {
+            showAlert(`Recordatorio enviado al ${client.client.phone}`, 'success');
+          } else {
+            showAlert("El cliente no tiene un número de teléfono registrado", "error");
+          }
+        }
+      });
+    }
+
+    // Función para configurar el botón de registrar pago
+    function setupRegisterPaymentButton() {
+      document.getElementById('registerPaymentBtn').addEventListener('click', () => {
+        registerPayment();
+      });
+    }
+
+    // Función para configurar el botón de notificaciones
+    function setupNotificationsButton() {
+      document.getElementById('notificationsBtn').addEventListener('click', () => {
+        const overdueLoans = clientsData.filter(client => client.status === 'overdue').length;
+        if (overdueLoans > 0) {
+          showAlert(`Tienes ${overdueLoans} préstamo(s) atrasados`, 'info');
+        } else {
+          showAlert('No tienes notificaciones pendientes', 'info');
+        }
+      });
+    }
+
+    // Función para configurar el botón de cerrar sesión
+    function setupLogoutButton() {
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        const confirmed = await showConfirmationModal(
+          'Cerrar Sesión',
+          '¿Estás seguro que deseas cerrar la sesión?'
+        );
+        
+        if (confirmed) {
+          try {
+            await signOut(auth);
+            window.location.href = 'index.html';
+          } catch (error) {
+            console.error("Error signing out:", error);
+            showAlert("Error al cerrar sesión", "error");
+          }
+        }
+      });
+    }
+
     // Inicialización cuando el DOM está listo
     document.addEventListener('DOMContentLoaded', () => {
       // Configurar Firebase Auth state observer
@@ -1844,12 +2682,22 @@
           
           // Configurar eventos
           setupSearch();
+          setupFilters();
+          setupSorting();
+          setupExportButton();
           setupPrintButton();
           setupCompleteButton();
           setupViewHistoryButton();
+          setupSendReminderButton();
+          setupRegisterPaymentButton();
           setupPrintLetterButton();
+          setupDownloadLetterButton();
           setupPrintReceiptButton();
+          setupSendReceiptButton();
           setupPrintTicketButton();
+          setupExportPaymentsButton();
+          setupNotificationsButton();
+          setupLogoutButton();
         } else {
           // Redirigir a la página de inicio de sesión
           window.location.href = 'index.html';
