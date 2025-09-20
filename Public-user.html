@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Préstamos - Cliente</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         /* Variables CSS para el diseño general */
         :root {
@@ -23,6 +24,9 @@
             --warning-color: #f39c12;
             --success-color: #15b086;
             --info-color: #15a086;
+            --chat-bg: #1e1e2f;
+            --chat-user-bg: #15a086;
+            --chat-bot-bg: #2a2a3f;
             
             /* Variables para el menú de onda */
             --bar-bg-color: #2a2a3f;
@@ -39,6 +43,14 @@
             --wave-top-offset: 20px;
             --transition-speed: 0.35s;
             --menu-text-size: 0;
+            
+            /* Nuevas variables para mejoras visuales */
+            --text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            --smooth-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            --gradient-card: linear-gradient(135deg, var(--card-bg), #2c3e50);
+            --gradient-chat: linear-gradient(135deg, var(--chat-bg), #1a1a28);
         }
 
         * {
@@ -48,15 +60,30 @@
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Poppins', 'Roboto', sans-serif;
             background-color: var(--background-color);
             background-image: 
-            radial-gradient(circle at 10% 20%, rgba(21, 160, 134, 0.1) 0%, transparent 20%),
-            radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 20%);
+                radial-gradient(circle at 10% 20%, rgba(21, 160, 134, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 20%);
             color: var(--text-color);
             margin: 0;
             min-height: 100vh;
             line-height: 1.6;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Mejoras de texto con efectos y sombras */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-shadow: var(--text-shadow);
+        }
+
+        p, span, div, a, button, input, textarea, select, label {
+            text-shadow: var(--text-shadow);
+            transition: var(--smooth-transition);
         }
 
         /* Estilos mejorados para el login (estilo app móvil) */
@@ -67,18 +94,28 @@
             min-height: 100vh;
             padding: 20px;
             background-color: var(--dark-bg-color);
+            background-image: 
+                radial-gradient(circle at 75% 30%, rgba(26, 188, 156, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 25% 70%, rgba(243, 156, 18, 0.1) 0%, transparent 30%);
         }
 
         .login-container {
             width: 100%;
             max-width: 400px;
-            background-color: var(--secondary-color);
+            background: var(--gradient-card);
             border-radius: 20px;
             padding: 2.5rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--card-shadow);
             position: relative;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(0);
+            transition: var(--smooth-transition);
+        }
+
+        .login-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
         }
 
         .login-container::before {
@@ -90,6 +127,12 @@
             height: 200%;
             background: radial-gradient(circle, rgba(26, 188, 156, 0.1) 0%, transparent 70%);
             z-index: 0;
+            animation: rotateGradient 15s linear infinite;
+        }
+
+        @keyframes rotateGradient {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .login-logo {
@@ -97,9 +140,14 @@
             height: auto;
             margin: 0 auto 1.5rem;
             display: block;
-            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
             position: relative;
             z-index: 1;
+            transition: var(--smooth-transition);
+        }
+
+        .login-logo:hover {
+            transform: scale(1.05) rotate(5deg);
         }
 
         .login-title {
@@ -110,12 +158,14 @@
             font-size: 1.8rem;
             position: relative;
             z-index: 1;
+            animation: fadeInDown 0.8s ease;
         }
 
         .form-group {
             margin-bottom: 1.5rem;
             position: relative;
             z-index: 1;
+            animation: fadeInUp 0.8s ease;
         }
 
         .form-group label {
@@ -124,34 +174,38 @@
             color: var(--text-light);
             font-weight: 500;
             font-size: 0.9rem;
+            padding-left: 5px;
         }
 
         .form-control {
             width: 100%;
-            padding: 1rem;
+            padding: 1rem 1.2rem;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 12px;
             background-color: rgba(0, 0, 0, 0.2);
             color: var(--text-color);
             font-size: 1rem;
-            transition: all 0.3s ease;
+            transition: var(--smooth-transition);
+            font-family: 'Poppins', sans-serif;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.3);
+            box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.3), inset 0 2px 5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
         }
 
         .btn {
-            background-color: var(--primary-color);
+            background: var(--gradient-primary);
             color: var(--text-color);
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 1rem 1.5rem;
             cursor: pointer;
             font-size: 1rem;
-            transition: all 0.3s ease;
+            transition: var(--smooth-transition);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -160,6 +214,8 @@
             position: relative;
             overflow: hidden;
             z-index: 1;
+            box-shadow: 0 5px 15px rgba(26, 188, 156, 0.3);
+            font-family: 'Poppins', sans-serif;
         }
 
         .btn::after {
@@ -169,9 +225,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
             transform: translateX(-100%);
-            transition: transform 0.3s ease;
+            transition: transform 0.4s ease;
             z-index: -1;
         }
 
@@ -180,13 +236,13 @@
         }
 
         .btn:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(26, 188, 156, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(26, 188, 156, 0.4);
         }
 
         .btn:active {
-            transform: translateY(0);
+            transform: translateY(1px);
+            box-shadow: 0 3px 10px rgba(26, 188, 156, 0.4);
         }
 
         .btn i {
@@ -199,24 +255,26 @@
         }
 
         .btn-success {
-            background-color: var(--success-color);
+            background: linear-gradient(135deg, var(--success-color), #11946e);
         }
 
         .btn-danger {
-            background-color: var(--danger-color);
+            background: linear-gradient(135deg, var(--danger-color), #c0392b);
         }
 
         .btn-info {
-            background-color: var(--info-color);
+            background: linear-gradient(135deg, var(--info-color), #127c68);
         }
 
         .alert {
             padding: 0.75rem 1rem;
-            border-radius: 8px;
+            border-radius: 10px;
             display: none;
             align-items: center;
             margin-bottom: 1rem;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.5s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid transparent;
         }
 
         @keyframes fadeIn {
@@ -224,8 +282,19 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .alert i {
             margin-right: 0.5rem;
+            font-size: 1.2rem;
         }
 
         .alert-danger {
@@ -258,10 +327,12 @@
             align-items: center;
             border-radius: 12px;
             z-index: 100;
+            backdrop-filter: blur(5px);
         }
 
         .spinner.active {
             display: flex;
+            animation: fadeIn 0.3s ease;
         }
 
         .spinner-icon {
@@ -286,7 +357,7 @@
 
         /* Header mejorado y fijo */
         .header-client {
-            background-color: var(--secondary-color);
+            background: var(--gradient-card);
             padding: 1.2rem 1.5rem;
             display: flex;
             justify-content: space-between;
@@ -297,7 +368,14 @@
             left: 0;
             right: 0;
             z-index: 10;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
         }
 
         .main-container-client {
@@ -315,13 +393,20 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background-color: var(--background-color);
+            background: var(--gradient-primary);
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 1.5rem;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             flex-shrink: 0;
+            transition: var(--smooth-transition);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .client-avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
 
         .client-info {
@@ -332,7 +417,7 @@
         .client-name {
             font-size: 1.2rem;
             margin: 0;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-color);
             line-height: 1.3;
         }
@@ -345,7 +430,7 @@
 
         .section {
             display: none;
-            animation: fadeIn 0.4s ease;
+            animation: fadeIn 0.5s ease;
         }
 
         .section.active {
@@ -354,18 +439,19 @@
 
         /* Tarjetas mejoradas */
         .card {
-            background-color: var(--card-bg);
-            border-radius: 15px;
+            background: var(--gradient-card);
+            border-radius: 16px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--card-shadow);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: var(--smooth-transition);
+            overflow: hidden;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
         }
 
         .card-title {
@@ -391,23 +477,61 @@
             text-align: center;
             margin: 1.5rem 0;
             color: var(--primary-color);
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
         }
 
         .progress-bar {
-            height: 10px;
+            height: 12px;
             background-color: var(--background-color);
-            border-radius: 6px;
+            border-radius: 8px;
             margin: 1.5rem 0;
             overflow: hidden;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         .progress-fill {
             height: 100%;
-            background-color: var(--primary-color);
+            background: var(--gradient-primary);
             width: 0%;
-            transition: width 0.5s ease;
-            border-radius: 6px;
+            transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-image: linear-gradient(
+                -45deg,
+                rgba(255, 255, 255, 0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0.2) 75%,
+                transparent 75%,
+                transparent
+            );
+            z-index: 1;
+            background-size: 20px 20px;
+            animation: move 2s linear infinite;
+            overflow: hidden;
+        }
+
+        @keyframes move {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 20px; }
         }
 
         .loan-details-btn {
@@ -426,13 +550,22 @@
 
         .search-bar input {
             flex: 1;
-            padding: 0.75rem;
+            padding: 0.75rem 1rem;
             border: 1px solid var(--border-color);
             border-radius: 10px;
             background-color: var(--background-color);
             color: var(--text-color);
             font-size: 0.95rem;
             max-width: calc(100% - 130px);
+            font-family: 'Poppins', sans-serif;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: var(--smooth-transition);
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.3), inset 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .search-bar select {
@@ -443,6 +576,15 @@
             color: var(--text-color);
             font-size: 0.95rem;
             min-width: 120px;
+            font-family: 'Poppins', sans-serif;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: var(--smooth-transition);
+        }
+
+        .search-bar select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.3);
         }
 
         .payment-history {
@@ -456,7 +598,7 @@
         }
 
         .payment-history::-webkit-scrollbar-thumb {
-            background-color: var(--primary-color);
+            background: var(--gradient-primary);
             border-radius: 3px;
         }
 
@@ -471,11 +613,14 @@
             align-items: center;
             padding: 1rem;
             border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s ease;
+            transition: background-color 0.3s ease;
+            border-radius: 8px;
+            margin-bottom: 5px;
         }
 
         .payment-item:hover {
             background-color: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
         }
 
         .payment-amount {
@@ -526,6 +671,14 @@
             justify-content: space-between;
             padding: 0.75rem 0;
             border-bottom: 1px dashed var(--border-color);
+            transition: var(--smooth-transition);
+        }
+
+        .info-item:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 8px;
         }
 
         .info-label {
@@ -551,11 +704,13 @@
             padding: 1rem;
             background-color: var(--background-color);
             border-radius: 10px;
-            transition: transform 0.2s ease;
+            transition: var(--smooth-transition);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
         }
 
         .document-item:hover {
             transform: translateX(5px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
         }
 
         .document-icon {
@@ -574,11 +729,12 @@
             cursor: pointer;
             margin-left: 0.75rem;
             font-size: 1.2rem;
-            transition: color 0.2s ease;
+            transition: var(--smooth-transition);
         }
 
         .document-action:hover {
             color: var(--primary-dark);
+            transform: scale(1.2);
         }
 
         .settings-option {
@@ -605,7 +761,7 @@
             cursor: pointer;
             text-align: center;
             flex: 1;
-            transition: all 0.3s ease;
+            transition: var(--smooth-transition);
             border: 1px solid var(--border-color);
         }
 
@@ -615,7 +771,7 @@
         }
 
         .theme-option.selected {
-            background-color: var(--primary-color);
+            background: var(--gradient-primary);
             color: white;
             border-color: var(--primary-dark);
         }
@@ -668,6 +824,7 @@
             position: relative;
             z-index: 1;
             padding-bottom: 5px;
+            backdrop-filter: blur(10px);
         }
 
         .nav-item {
@@ -679,7 +836,7 @@
             color: var(--icon-inactive-color);
             flex: 1;
             padding: 10px 5px;
-            transition: all var(--transition-speed) ease;
+            transition: var(--smooth-transition);
             cursor: pointer;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
@@ -691,13 +848,13 @@
         .nav-item i {
             font-size: var(--icon-base-size);
             margin-bottom: 3px;
-            transition: all var(--transition-speed) ease;
+            transition: var(--smooth-transition);
         }
 
         .nav-item span {
             font-size: var(--menu-text-size);
             opacity: 0;
-            transition: all var(--transition-speed) ease;
+            transition: var(--smooth-transition);
             max-height: 0;
             overflow: hidden;
         }
@@ -729,7 +886,8 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
         }
 
         .modal.active {
@@ -737,21 +895,22 @@
         }
 
         .modal-content {
-            background-color: var(--secondary-color);
+            background: var(--gradient-card);
             padding: 2rem;
-            border-radius: 15px;
+            border-radius: 20px;
             width: 90%;
             max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: modalFadeIn 0.3s ease;
+            animation: modalFadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(0);
         }
 
         @keyframes modalFadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .modal-title {
@@ -799,7 +958,7 @@
             border-radius: 10px;
             cursor: pointer;
             font-size: 1.5rem;
-            transition: all 0.3s ease;
+            transition: var(--smooth-transition);
             flex-shrink: 0;
         }
 
@@ -808,7 +967,7 @@
         }
 
         .avatar-option.selected {
-            background-color: var(--primary-color);
+            background: var(--gradient-primary);
             color: white;
             transform: scale(1.1);
         }
@@ -822,7 +981,7 @@
             cursor: pointer;
             font-size: 1.8rem;
             margin-top: 0.75rem;
-            transition: all 0.3s ease;
+            transition: var(--smooth-transition);
             border: 2px dashed var(--border-color);
             width: 100%;
         }
@@ -830,6 +989,7 @@
         .file-upload-btn:hover {
             background-color: rgba(26, 188, 156, 0.1);
             border-color: var(--primary-color);
+            transform: translateY(-3px);
         }
 
         .file-upload-btn input {
@@ -861,6 +1021,7 @@
             object-fit: cover;
             margin-bottom: 0.5rem;
             border: 2px solid var(--primary-color);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .image-name {
@@ -991,6 +1152,9 @@
             --secondary-color: #f0f0f0;
             --bar-bg-color: #f0f0f0;
             --dark-bg-color: #e0e0e0;
+            --chat-bg: #ffffff;
+            --chat-user-bg: #15a086;
+            --chat-bot-bg: #e6e6e6;
         }
 
         /* Tamaños de fuente */
@@ -1014,6 +1178,11 @@
             font-size: 1.5rem;
             cursor: pointer;
             padding: 0.5rem;
+            transition: var(--smooth-transition);
+        }
+
+        .menu-btn:hover {
+            transform: rotate(90deg);
         }
 
         .micro-menu {
@@ -1022,9 +1191,9 @@
             right: -300px;
             width: 250px;
             height: 100%;
-            background-color: var(--secondary-color);
+            background: var(--gradient-card);
             box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
-            transition: right 0.3s ease;
+            transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 1001;
             padding: 1rem;
             overflow-y: auto;
@@ -1047,6 +1216,11 @@
             width: 80px;
             height: 80px;
             margin-bottom: 0.5rem;
+            transition: var(--smooth-transition);
+        }
+
+        .micro-menu-logo:hover {
+            transform: scale(1.1);
         }
 
         .micro-menu-title {
@@ -1063,11 +1237,12 @@
             border-bottom: 1px solid var(--border-color);
             color: var(--text-color);
             text-decoration: none;
-            transition: color 0.2s ease;
+            transition: var(--smooth-transition);
         }
 
         .micro-menu-item:hover {
             color: var(--primary-color);
+            padding-left: 10px;
         }
 
         .micro-menu-item i {
@@ -1086,6 +1261,7 @@
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             display: none;
+            backdrop-filter: blur(5px);
         }
 
         .overlay.active {
@@ -1099,6 +1275,14 @@
             margin-bottom: 0.75rem;
             padding-bottom: 0.75rem;
             border-bottom: 1px dashed var(--border-color);
+            transition: var(--smooth-transition);
+        }
+
+        .loan-detail-item:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 8px;
         }
 
         .loan-detail-label {
@@ -1123,7 +1307,7 @@
         }
 
         .company-info-container::-webkit-scrollbar-thumb {
-            background-color: var(--primary-color);
+            background: var(--gradient-primary);
             border-radius: 3px;
         }
 
@@ -1144,6 +1328,11 @@
             object-fit: contain;
             border: 2px solid var(--border-color);
             margin: 0 auto;
+            transition: var(--smooth-transition);
+        }
+
+        .company-logo:hover {
+            transform: scale(1.05);
         }
 
         .default-company-logo {
@@ -1166,6 +1355,12 @@
             padding: 1.2rem;
             margin-bottom: 1.2rem;
             border: 1px solid var(--border-color);
+            transition: var(--smooth-transition);
+        }
+
+        .bank-account-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .bank-logo-container {
@@ -1206,7 +1401,7 @@
             font-size: 1.2rem;
             cursor: pointer;
             margin-left: 10px;
-            transition: transform 0.2s ease;
+            transition: var(--smooth-transition);
         }
 
         .company-icon-btn:hover {
@@ -1221,42 +1416,530 @@
             cursor: pointer;
             margin-left: 5px;
             font-size: 0.9rem;
-            transition: color 0.2s ease;
+            transition: var(--smooth-transition);
         }
 
         .copy-btn:hover {
             color: var(--primary-dark);
+            transform: scale(1.2);
         }
 
         /* Enlace a empresa en el login - VERSIÓN CORREGIDA */
-.company-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1rem;
-    color: var(--primary-color);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.2s ease;
-    cursor: pointer; /* Añadido */
-    pointer-events: auto; /* Añadido - ¡ESTO FALTA EN TU CSS ACTUAL! */
-    position: relative; /* Añadido para seguridad */
-    z-index: 1; /* Añadido para seguridad */
-}
+        .company-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--smooth-transition);
+            cursor: pointer;
+            pointer-events: auto;
+            position: relative;
+            z-index: 1;
+        }
 
-.company-link:hover {
-    color: var(--primary-dark);
-    text-decoration: underline;
-    border: none;
-    border-radius: 5px;
-    padding: 1rem 0.1rem;
-    cursor: pointer;
-}
+        .company-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+            transform: translateY(-2px);
+        }
 
-.company-link i {
-    margin-right: 5px;
-}
-         
+        .company-link i {
+            margin-right: 5px;
+        }
+
+        /* Nuevos estilos para el chat de guía */
+        .chat-container {
+            position: fixed;
+            bottom: calc(var(--nav-height) + 30px);
+            right: 20px;
+            width: 320px;
+            height: 400px;
+            background: var(--gradient-chat);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            z-index: 999;
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--smooth-transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-container.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background: var(--gradient-primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--gradient-primary);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background-color: var(--background-color);
+            border-radius: 3px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background-color: var(--chat-bot-bg);
+            color: var(--text-color);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--gradient-primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-input-container {
+            padding: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 0.9rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .chat-send {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--smooth-transition);
+        }
+
+        .chat-send:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-button {
+            position: fixed;
+            bottom: calc(var(--nav-height) + 30px);
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 998;
+            transition: var(--smooth-transition);
+        }
+
+        .chat-button:hover {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        .chat-button i {
+            font-size: 1.5rem;
+        }
+
+        /* Nuevos estilos para el calendario de pagos */
+        .calendar-container {
+            margin-top: 1.5rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-nav {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--smooth-transition);
+        }
+
+        .calendar-nav:hover {
+            transform: scale(1.2);
+        }
+
+        .calendar-title {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-light);
+            padding: 0.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        .calendar-day {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--smooth-transition);
+            position: relative;
+            font-weight: 500;
+        }
+
+        .calendar-day:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.empty {
+            background-color: transparent;
+            cursor: default;
+        }
+
+        .calendar-day.empty:hover {
+            transform: none;
+        }
+
+        .calendar-day.today {
+            background: var(--gradient-primary);
+            color: white;
+            font-weight: 700;
+        }
+
+        .calendar-day.payment-due {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
+        }
+
+        .calendar-day.payment-overdue {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .calendar-day.payment-completed {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .calendar-day .payment-indicator {
+            position: absolute;
+            bottom: 2px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+
+        .calendar-day.payment-due .payment-indicator {
+            background-color: var(--warning-color);
+        }
+
+        .calendar-day.payment-overdue .payment-indicator {
+            background-color: var(--danger-color);
+        }
+
+        .calendar-day.payment-completed .payment-indicator {
+            background-color: var(--success-color);
+        }
+
+        .calendar-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .calendar-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .calendar-legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-today {
+            background: var(--gradient-primary);
+        }
+
+        .legend-due {
+            background-color: var(--warning-color);
+        }
+
+        .legend-overdue {
+            background-color: var(--danger-color);
+        }
+
+        .legend-completed {
+            background-color: var(--success-color);
+        }
+
+        /* Nueva sección de calendario */
+        #calendar-section {
+            display: none;
+        }
+
+        #calendar-section.active {
+            display: block;
+        }
+
+        /* Mejoras para la sección de resumen */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .summary-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .summary-card {
+            background: var(--gradient-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: var(--smooth-transition);
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .summary-card-title {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-card-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1rem 0;
+            color: var(--text-color);
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .summary-card-desc {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Efectos de texto mejorados */
+        .text-glow {
+            text-shadow: 0 0 10px rgba(26, 188, 156, 0.5);
+        }
+
+        .text-shadow {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .text-3d {
+            text-shadow: 0 1px 0 #ccc, 
+                         0 2px 0 #c9c9c9, 
+                         0 3px 0 #bbb, 
+                         0 4px 0 #b9b9b9, 
+                         0 5px 0 #aaa, 
+                         0 6px 1px rgba(0,0,0,.1), 
+                         0 0 5px rgba(0,0,0,.1), 
+                         0 1px 3px rgba(0,0,0,.3), 
+                         0 3px 5px rgba(0,0,0,.2), 
+                         0 5px 10px rgba(0,0,0,.25), 
+                         0 10px 10px rgba(0,0,0,.2), 
+                         0 20px 20px rgba(0,0,0,.15);
+        }
+
+        /* Animaciones adicionales */
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0,0,0);
+            }
+            40%, 43% {
+                transform: translate3d(0, -15px, 0);
+            }
+            70% {
+                transform: translate3d(0, -7px, 0);
+            }
+            90% {
+                transform: translate3d(0, -3px, 0);
+            }
+        }
+
+        .bounce {
+            animation: bounce 1s;
+        }
+
+        @keyframes flash {
+            0%, 50%, 100% {
+                opacity: 1;
+            }
+            25%, 75% {
+                opacity: 0.5;
+            }
+        }
+
+        .flash {
+            animation: flash 1s;
+        }
+
+        @keyframes rubberBand {
+            0% {transform: scale(1);}
+            30% {transform: scaleX(1.25) scaleY(0.75);}
+            40% {transform: scaleX(0.75) scaleY(1.25);}
+            60% {transform: scaleX(1.15) scaleY(0.85);}
+            100% {transform: scale(1);}
+        }
+
+        .rubberBand {
+            animation: rubberBand 1s;
+        }
+
+        @keyframes swing {
+            20% {transform: rotate(15deg);}
+            40% {transform: rotate(-10deg);}
+            60% {transform: rotate(5deg);}
+            80% {transform: rotate(-5deg);}
+            100% {transform: rotate(0deg);}
+        }
+
+        .swing {
+            transform-origin: top center;
+            animation: swing 1s;
+        }
+
+        @keyframes tada {
+            0% {transform: scale(1);}
+            10%, 20% {transform: scale(0.9) rotate(-3deg);}
+            30%, 50%, 70%, 90% {transform: scale(1.1) rotate(3deg);}
+            40%, 60%, 80% {transform: scale(1.1) rotate(-3deg);}
+            100% {transform: scale(1) rotate(0);}
+        }
+
+        .tada {
+            animation: tada 1s;
+        }
+
+        /* Efecto de máquina de escribir */
+        .typewriter {
+            overflow: hidden;
+            border-right: 0.15em solid var(--primary-color);
+            white-space: nowrap;
+            margin: 0 auto;
+            letter-spacing: 0.15em;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--primary-color); }
+        }
     </style>
 </head>
 <body>
@@ -1274,8 +1957,8 @@
                     <input type="text" id="loginUsername" class="form-control" required aria-label="Nombre de usuario" placeholder="Ingrese su usuario">
                 </div>
                 <div class="form-group">
-                    <label for="loginPin">PIN (4 dígitos)</label>
-                    <input type="password" id="loginPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required aria-label="PIN de 4 dígitos" placeholder="••••">
+                    <label for="loginPin">PIN (8 dígitos)</label>
+                    <input type="password" id="loginPin" class="form-control" minlength="8" maxlength="8" pattern="\d{8}" required aria-label="PIN de 8 dígitos" placeholder="••••••••">
                 </div>
                 <div class="form-group">
                     <div class="settings-toggle">
@@ -1288,7 +1971,8 @@
                 </button>
             </form>
             <a href="index.html" class="company-link" id="companyLoginLink">
-    <i class="fas fa-building"></i> Iniciar sesión modo empresa </a>
+                <i class="fas fa-building"></i> Iniciar sesión modo empresa 
+            </a>
             <div id="loginAlert" class="alert alert-danger" style="display: none;">
                 <i class="fas fa-exclamation-circle"></i>
                 <span id="loginAlertMessage"></span>
@@ -1317,25 +2001,35 @@
         <div class="main-container-client">
             <!-- Sección de Resumen -->
             <div id="summary-section" class="section active">
-                <div class="card">
-                    <div id="latePaymentAlert" class="alert alert-danger" style="display: none;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span id="latePaymentMessage"></span>
+                <div class="summary-cards">
+                    <div class="card summary-card">
+                        <div id="latePaymentAlert" class="alert alert-danger" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span id="latePaymentMessage"></span>
+                        </div>
+                        <h3 class="card-title"><i class="fas fa-chart-line"></i> <span data-lang="loan_balance">Saldo Pendiente</span></h3>
+                        <div class="loan-balance" id="loanBalance">$0.00</div>
+                        <div class="late-payment-message" id="latePaymentText" style="display: none;"></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                        </div>
+                        <button class="btn btn-info loan-details-btn" id="detailsBtn">
+                            <i class="fas fa-info-circle"></i> <span data-lang="view_details">Ver Detalles</span>
+                        </button>
                     </div>
-                    <h3 class="card-title"><i class="fas fa-chart-line"></i> <span data-lang="loan_balance">Saldo Pendiente</span></h3>
-                    <div class="loan-balance" id="loanBalance">$0.00</div>
-                    <div class="late-payment-message" id="latePaymentText" style="display: none;"></div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                    
+                    <div class="card summary-card">
+                        <h3 class="card-title"><i class="fas fa-tasks"></i> <span data-lang="loan_progress">Progreso del Préstamo</span></h3>
+                        <div id="loanProgress">
+                            <p id="progressText" data-lang="loading_progress">Cargando progreso...</p>
+                        </div>
                     </div>
-                    <button class="btn btn-info loan-details-btn" id="detailsBtn">
-                        <i class="fas fa-info-circle"></i> <span data-lang="view_details">Ver Detalles</span>
-                    </button>
                 </div>
+                
                 <div class="card">
-                    <h3 class="card-title"><i class="fas fa-tasks"></i> <span data-lang="loan_progress">Progreso del Préstamo</span></h3>
-                    <div id="loanProgress">
-                        <p id="progressText" data-lang="loading_progress">Cargando progreso...</p>
+                    <h3 class="card-title"><i class="fas fa-calendar-alt"></i> Próximos Pagos</h3>
+                    <div class="calendar-container" id="upcomingPaymentsCalendar">
+                        <!-- El calendario se generará dinámicamente -->
                     </div>
                 </div>
             </div>
@@ -1356,6 +2050,16 @@
                     </div>
                     <div class="payment-history" id="paymentHistory">
                         <p data-lang="loading_history">Cargando historial de pagos...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Calendario -->
+            <div id="calendar-section" class="section">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-calendar-days"></i> Calendario de Pagos</h3>
+                    <div class="calendar-container" id="fullCalendar">
+                        <!-- El calendario completo se generará dinámicamente -->
                     </div>
                 </div>
             </div>
@@ -1488,6 +2192,32 @@
             </div>
         </div>
 
+        <!-- Botón de chat flotante -->
+        <div class="chat-button" id="chatButton">
+            <i class="fas fa-comments"></i>
+        </div>
+
+        <!-- Contenedor de chat -->
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-header">
+                <div class="chat-title">Asistente Virtual</div>
+                <button class="chat-close" id="chatClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    ¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu mensaje...">
+                <button class="chat-send" id="chatSend">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
         <!-- Menú de navegación inferior con efecto de onda -->
         <div class="bottom-nav-container">
             <nav class="bottom-nav">
@@ -1498,6 +2228,10 @@
                 <a href="#" class="nav-item" data-section="history" data-icon-class="fas fa-history">
                     <i class="fas fa-history"></i>
                     <span data-lang="history">Historial</span>
+                </a>
+                <a href="#" class="nav-item" data-section="calendar" data-icon-class="fas fa-calendar-days">
+                    <i class="fas fa-calendar-days"></i>
+                    <span>Calendario</span>
                 </a>
                 <a href="#" class="nav-item" data-section="profile" data-icon-class="fas fa-user">
                     <i class="fas fa-user"></i>
@@ -1595,15 +2329,15 @@
             <form id="passwordForm">
                 <div class="form-group">
                     <label for="currentPin" data-lang="current_pin">PIN Actual</label>
-                    <input type="password" id="currentPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required aria-label="PIN actual">
+                    <input type="password" id="currentPin" class="form-control" minlength="8" maxlength="8" pattern="\d{8}" required aria-label="PIN actual">
                 </div>
                 <div class="form-group">
                     <label for="newPin" data-lang="new_pin">Nuevo PIN</label>
-                    <input type="password" id="newPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required aria-label="Nuevo PIN">
+                    <input type="password" id="newPin" class="form-control" minlength="8" maxlength="8" pattern="\d{8}" required aria-label="Nuevo PIN">
                 </div>
                 <div class="form-group">
                     <label for="confirmPin" data-lang="confirm_pin">Confirmar Nuevo PIN</label>
-                    <input type="password" id="confirmPin" class="form-control" minlength="4" maxlength="4" pattern="\d{4}" required aria-label="Confirmar nuevo PIN">
+                    <input type="password" id="confirmPin" class="form-control" minlength="8" maxlength="8" pattern="\d{8}" required aria-label="Confirmar nuevo PIN">
                 </div>
                 <div id="passwordAlert" class="alert alert-danger" style="display: none;">
                     <i class="fas fa-exclamation-circle"></i>
@@ -1900,6 +2634,7 @@
         showLoading();
         checkRememberedSession();
         setupEventListeners();
+        initializeChat();
     });
 
     // Verificar sesión recordada
@@ -1980,6 +2715,99 @@
         document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
     }
 
+    // Inicializar chat
+    function initializeChat() {
+        const chatButton = document.getElementById('chatButton');
+        const chatContainer = document.getElementById('chatContainer');
+        const chatClose = document.getElementById('chatClose');
+        const chatSend = document.getElementById('chatSend');
+        const chatInput = document.getElementById('chatInput');
+
+        chatButton.addEventListener('click', () => {
+            chatContainer.classList.toggle('active');
+        });
+
+        chatClose.addEventListener('click', () => {
+            chatContainer.classList.remove('active');
+        });
+
+        chatSend.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+    }
+
+    // Enviar mensaje de chat
+    function sendChatMessage() {
+        const chatInput = document.getElementById('chatInput');
+        const chatMessages = document.getElementById('chatMessages');
+        const message = chatInput.value.trim();
+        
+        if (!message) return;
+        
+        // Agregar mensaje del usuario
+        const userMessage = document.createElement('div');
+        userMessage.className = 'message user';
+        userMessage.textContent = message;
+        chatMessages.appendChild(userMessage);
+        
+        // Limpiar input
+        chatInput.value = '';
+        
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Simular respuesta del bot después de un breve retraso
+        setTimeout(() => {
+            const botResponse = getBotResponse(message);
+            const botMessage = document.createElement('div');
+            botMessage.className = 'message bot';
+            botMessage.textContent = botResponse;
+            chatMessages.appendChild(botMessage);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 1000);
+    }
+
+    // Obtener respuesta del bot
+    function getBotResponse(message) {
+        const lowerMessage = message.toLowerCase();
+        
+        if (lowerMessage.includes('hola') || lowerMessage.includes('buenos días') || lowerMessage.includes('buenas tardes')) {
+            return '¡Hola! ¿En qué puedo ayudarte hoy?';
+        } else if (lowerMessage.includes('pago') || lowerMessage.includes('cuota')) {
+            return 'Puedo ayudarte con información sobre tus pagos. ¿Necesitas saber la fecha de tu próximo pago, el monto o cómo realizar un pago?';
+        } else if (lowerMessage.includes('próximo pago') || lowerMessage.includes('cuándo pagar')) {
+            if (currentLoan && currentLoan.paymentSchedule) {
+                const nextPayment = currentLoan.paymentSchedule.find(p => p.status === 'pending');
+                if (nextPayment) {
+                    const dueDate = new Date(nextPayment.dueDate);
+                    return `Tu próximo pago vence el ${dueDate.toLocaleDateString()}.`;
+                }
+            }
+            return 'No tengo información sobre tu próximo pago en este momento.';
+        } else if (lowerMessage.includes('monto') || lowerMessage.includes('cuánto debo')) {
+            if (currentLoan) {
+                const currencySymbol = userSettings.currency === 'USD' ? '$' : 'RD$';
+                return `Tu saldo actual es de ${currencySymbol}${formatCurrency(currentLoan.balance)}.`;
+            }
+            return 'No tengo información sobre tu saldo actual en este momento.';
+        } else if (lowerMessage.includes('historial') || lowerMessage.includes('pagos anteriores')) {
+            return 'Puedes ver tu historial de pagos en la sección "Historial" de la aplicación.';
+        } else if (lowerMessage.includes('documento') || lowerMessage.includes('recibo')) {
+            return 'Puedes ver y descargar tus recibos de pago en la sección "Documentos".';
+        } else if (lowerMessage.includes('gracias') || lowerMessage.includes('agradezco')) {
+            return '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?';
+        } else if (lowerMessage.includes('adiós') || lowerMessage.includes('chao') || lowerMessage.includes('nos vemos')) {
+            return '¡Hasta luego! Que tengas un excelente día.';
+        } else {
+            return 'Lo siento, no entendí tu pregunta. ¿Puedes intentar reformularla? Puedo ayudarte con información sobre pagos, saldos, documentos y más.';
+        }
+    }
+
     // Toggle micro menu
     function toggleMicroMenu() {
         document.getElementById('microMenu').classList.toggle('active');
@@ -1993,7 +2821,7 @@
         const pin = document.getElementById('loginPin').value.trim();
         const rememberSession = document.getElementById('rememberSession').checked;
         
-        if (!username || !pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+        if (!username || !pin || pin.length !== 8 || !/^\d{8}$/.test(pin)) {
             showAlert(translate('Credenciales inválidas o PIN no válido'), 'danger', 'loginAlert');
             return;
         }
@@ -2069,6 +2897,7 @@
 
             showClientSection();
             loadClientData();
+            generatePaymentCalendar();
         } catch (error) {
             console.error("Error al iniciar sesión: ", error);
             showAlert(translate('Ocurrió un error al iniciar sesión'), 'danger', 'loginAlert');
@@ -2122,6 +2951,192 @@
                 bankAccounts: []
             };
         }
+    }
+
+    // Generar calendario de pagos
+    function generatePaymentCalendar() {
+        const upcomingCalendar = document.getElementById('upcomingPaymentsCalendar');
+        const fullCalendar = document.getElementById('fullCalendar');
+        
+        if (!currentLoan || !currentLoan.paymentSchedule) {
+            upcomingCalendar.innerHTML = '<p>No hay información de pagos disponible.</p>';
+            fullCalendar.innerHTML = '<p>No hay información de pagos disponible.</p>';
+            return;
+        }
+        
+        // Generar calendario para próximos pagos (próximos 30 días)
+        generateMiniCalendar(upcomingCalendar, 30);
+        
+        // Generar calendario completo
+        generateFullCalendar(fullCalendar);
+    }
+
+    // Generar mini calendario para próximos pagos
+    function generateMiniCalendar(container, daysToShow) {
+        const today = new Date();
+        const endDate = new Date();
+        endDate.setDate(today.getDate() + daysToShow);
+        
+        // Obtener pagos dentro del rango de fechas
+        const upcomingPayments = currentLoan.paymentSchedule.filter(payment => {
+            const dueDate = new Date(payment.dueDate);
+            return dueDate >= today && dueDate <= endDate;
+        });
+        
+        if (upcomingPayments.length === 0) {
+            container.innerHTML = '<p>No hay pagos programados para los próximos 30 días.</p>';
+            return;
+        }
+        
+        let html = '<div class="payment-list">';
+        
+        upcomingPayments.forEach(payment => {
+            const dueDate = new Date(payment.dueDate);
+            const daysUntilDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+            const statusClass = payment.status === 'paid' ? 'payment-completed' : 
+                              daysUntilDue < 0 ? 'payment-overdue' : 'payment-due';
+            
+            html += `
+                <div class="payment-item ${statusClass}">
+                    <div class="payment-date">${dueDate.toLocaleDateString()}</div>
+                    <div class="payment-amount">${formatCurrency(payment.amount)}</div>
+                    <div class="payment-status">${payment.status === 'paid' ? 'Pagado' : daysUntilDue < 0 ? 'Vencido' : 'Pendiente'}</div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    // Generar calendario completo
+    function generateFullCalendar(container) {
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        
+        // Obtener el primer día del mes
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        // Obtener el último día del mes
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        
+        // Obtener el día de la semana del primer día (0 = Domingo, 1 = Lunes, etc.)
+        const firstDayIndex = firstDay.getDay();
+        // Obtener el día de la semana del último día
+        const lastDayIndex = lastDay.getDay();
+        // Obtener el número de días en el mes
+        const daysInMonth = lastDay.getDate();
+        
+        // Array de nombres de meses
+        const monthNames = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+        
+        // Array de nombres de días de la semana
+        const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        
+        let html = `
+            <div class="calendar-header">
+                <button class="calendar-nav" id="prevMonth">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="calendar-title">${monthNames[currentMonth]} ${currentYear}</div>
+                <button class="calendar-nav" id="nextMonth">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="calendar-grid">
+        `;
+        
+        // Agregar los días de la semana
+        for (let i = 0; i < 7; i++) {
+            html += `<div class="calendar-weekday">${dayNames[i]}</div>`;
+        }
+        
+        // Agregar días vacíos antes del primer día del mes
+        for (let i = 0; i < firstDayIndex; i++) {
+            html += '<div class="calendar-day empty"></div>';
+        }
+        
+        // Agregar los días del mes
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dayDate = new Date(currentYear, currentMonth, i);
+            let dayClass = 'calendar-day';
+            let paymentIndicator = '';
+            
+            // Verificar si es hoy
+            if (i === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+                dayClass += ' today';
+            }
+            
+            // Verificar si hay un pago programado para este día
+            const paymentOnThisDay = currentLoan.paymentSchedule.find(payment => {
+                const paymentDate = new Date(payment.dueDate);
+                return paymentDate.getDate() === i && 
+                       paymentDate.getMonth() === currentMonth && 
+                       paymentDate.getFullYear() === currentYear;
+            });
+            
+            if (paymentOnThisDay) {
+                if (paymentOnThisDay.status === 'paid') {
+                    dayClass += ' payment-completed';
+                } else if (dayDate < today) {
+                    dayClass += ' payment-overdue';
+                } else {
+                    dayClass += ' payment-due';
+                }
+                
+                paymentIndicator = '<div class="payment-indicator"></div>';
+            }
+            
+            html += `
+                <div class="${dayClass}">
+                    ${i}
+                    ${paymentIndicator}
+                </div>
+            `;
+        }
+        
+        // Agregar días vacíos después del último día del mes
+        for (let i = lastDayIndex; i < 6; i++) {
+            html += '<div class="calendar-day empty"></div>';
+        }
+        
+        html += `
+            </div>
+            <div class="calendar-legend">
+                <div class="calendar-legend-item">
+                    <div class="calendar-legend-color legend-today"></div>
+                    <span>Hoy</span>
+                </div>
+                <div class="calendar-legend-item">
+                    <div class="calendar-legend-color legend-due"></div>
+                    <span>Pago Pendiente</span>
+                </div>
+                <div class="calendar-legend-item">
+                    <div class="calendar-legend-color legend-overdue"></div>
+                    <span>Pago Vencido</span>
+                </div>
+                <div class="calendar-legend-item">
+                    <div class="calendar-legend-color legend-completed"></div>
+                    <span>Pago Realizado</span>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        
+        // Agregar event listeners para navegación del calendario
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            // Lógica para mes anterior
+            console.log('Mes anterior');
+        });
+        
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            // Lógica para mes siguiente
+            console.log('Mes siguiente');
+        });
     }
 
     // Mostrar modal de información de la empresa
@@ -2685,8 +3700,8 @@
         const newPin = document.getElementById('newPin').value.trim();
         const confirmPin = document.getElementById('confirmPin').value.trim();
 
-        if (!currentPin || !newPin || !confirmPin || newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
-            showAlert(translate('Por favor, ingrese un PIN válido de 4 dígitos'), 'danger', 'passwordAlert');
+        if (!currentPin || !newPin || !confirmPin || newPin.length !== 8 || !/^\d{8}$/.test(newPin)) {
+            showAlert(translate('Por favor, ingrese un PIN válido de 8 dígitos'), 'danger', 'passwordAlert');
             return;
         }
 
