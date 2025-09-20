@@ -50,6 +50,9 @@
         body {
             font-family: 'Roboto', sans-serif;
             background-color: var(--background-color);
+            background-image: 
+            radial-gradient(circle at 10% 20%, rgba(21, 160, 134, 0.1) 0%, transparent 20%),
+            radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 20%);
             color: var(--text-color);
             margin: 0;
             min-height: 100vh;
@@ -281,7 +284,7 @@
             padding-bottom: calc(var(--wave-top-offset) + var(--wave-size) + 20px);
         }
 
-        /* Header mejorado */
+        /* Header mejorado y fijo */
         .header-client {
             background-color: var(--secondary-color);
             padding: 1.2rem 1.5rem;
@@ -289,9 +292,17 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 10;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-container-client {
+            padding: 1.5rem;
+            margin-top: 80px; /* Para que el contenido no quede detrás del header fijo */
         }
 
         .client-profile {
@@ -330,10 +341,6 @@
             font-size: 0.8rem;
             color: var(--text-light);
             opacity: 0.8;
-        }
-
-        .main-container-client {
-            padding: 1.5rem;
         }
 
         .section {
@@ -1205,6 +1212,51 @@
         .company-icon-btn:hover {
             transform: scale(1.1);
         }
+
+        /* Estilo para el botón de copiar */
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            margin-left: 5px;
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            color: var(--primary-dark);
+        }
+
+        /* Enlace a empresa en el login - VERSIÓN CORREGIDA */
+.company-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+    cursor: pointer; /* Añadido */
+    pointer-events: auto; /* Añadido - ¡ESTO FALTA EN TU CSS ACTUAL! */
+    position: relative; /* Añadido para seguridad */
+    z-index: 1; /* Añadido para seguridad */
+}
+
+.company-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+    border: none;
+    border-radius: 5px;
+    padding: 1rem 0.1rem;
+    cursor: pointer;
+}
+
+.company-link i {
+    margin-right: 5px;
+}
+         
     </style>
 </head>
 <body>
@@ -1235,11 +1287,13 @@
                     <i class="fas fa-sign-in-alt"></i> <span data-lang="login">Iniciar Sesión</span>
                 </button>
             </form>
+            <a href="index.html" class="company-link" id="companyLoginLink">
+    <i class="fas fa-building"></i> Iniciar sesión modo empresa </a>
             <div id="loginAlert" class="alert alert-danger" style="display: none;">
                 <i class="fas fa-exclamation-circle"></i>
                 <span id="loginAlertMessage"></span>
             </div>
-        </div>
+        </div> 
     </section>
 
     <!-- Sección del Cliente -->
@@ -1635,12 +1689,12 @@
     let currentLoan = null;
     let paymentReceipts = [];
     let companyInfo = {
-        nombreEmpresa: "Empresa de Préstamos",
-        rnc: "123-456789-1",
+        nombreEmpresa: "PlusMoney Retom",
+        rnc: "132-0000000-0",
         telefono: "809-555-5555",
         direccion: "Calle Principal #123, Santo Domingo",
         fotoURL: "logo.png",
-        showToClients: false,
+        showToClients: true, // Cambiado a true para mostrar siempre la info de la empresa
         bankAccounts: []
     };
     let userSettings = {
@@ -2029,12 +2083,12 @@
             // Verificar si el préstamo tiene información de empresa asociada
             if (currentLoan.companyInfo) {
                 companyInfo = {
-                    nombreEmpresa: currentLoan.companyInfo.nombreEmpresa || "Empresa de Préstamos",
-                    rnc: currentLoan.companyInfo.rnc || "123-456789-1",
+                    nombreEmpresa: currentLoan.companyInfo.nombreEmpresa || "PlusMoney Retom",
+                    rnc: currentLoan.companyInfo.rnc || "132-0000000-0",
                     telefono: currentLoan.companyInfo.telefono || "809-555-5555",
                     direccion: currentLoan.companyInfo.direccion || "Calle Principal #123, Santo Domingo",
                     fotoURL: currentLoan.companyInfo.fotoURL || "logo.png",
-                    showToClients: currentLoan.companyInfo.showToClients || false,
+                    showToClients: true, // Forzar a mostrar siempre la info de la empresa
                     bankAccounts: currentLoan.companyInfo.bankAccounts || []
                 };
             } else {
@@ -2045,12 +2099,12 @@
                 if (!querySnapshot.empty) {
                     const companyData = querySnapshot.docs[0].data();
                     companyInfo = {
-                        nombreEmpresa: companyData.nombreEmpresa || "Empresa de Préstamos",
-                        rnc: companyData.rnc || "123-456789-1",
+                        nombreEmpresa: companyData.nombreEmpresa || "PlusMoney Retom",
+                        rnc: companyData.rnc || "132-0000000-0",
                         telefono: companyData.telefono || "809-555-5555",
                         direccion: companyData.direccion || "Calle Principal #123, Santo Domingo",
                         fotoURL: companyData.fotoURL || "logo.png",
-                        showToClients: companyData.showToClients || false,
+                        showToClients: true, // Forzar a mostrar siempre la info de la empresa
                         bankAccounts: companyData.bankAccounts || []
                     };
                 }
@@ -2059,12 +2113,12 @@
             console.error("Error al cargar información de la empresa:", error);
             // Mantener los valores por defecto si hay un error
             companyInfo = {
-                nombreEmpresa: "Empresa de Préstamos",
-                rnc: "123-456789-1",
+                nombreEmpresa: "PlusMoney Retom",
+                rnc: "132-0000000-0",
                 telefono: "809-555-5555",
                 direccion: "Calle Principal #123, Santo Domingo",
                 fotoURL: "logo.png",
-                showToClients: false,
+                showToClients: true, // Forzar a mostrar siempre la info de la empresa
                 bankAccounts: []
             };
         }
@@ -2139,13 +2193,17 @@
                         </div>
                         <div>
                             <h4>${account.bankName || 'Banco no especificado'}</h4>
-                            <p>${account.accountNumber || 'Número no especificado'}</p>
+                            <p>${account.accountNumber || 'Número no especificado'}
+                                <button class="copy-btn" onclick="copyToClipboard('${account.accountNumber}')" title="Copiar número de cuenta">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </p>
                         </div>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Tipo de Cuenta:</span>
                         <span class="info-value">${account.accountType === 'ahorro' ? 'Ahorro' : account.accountType === 'corriente' ? 'Corriente' : 'No especificado'}</span>
-                        </div>
+                    </div>
                     <div class="info-item">
                         <span class="info-label">Titular:</span>
                         <span class="info-value">${account.accountHolder || 'No especificado'}</span>
@@ -2164,6 +2222,16 @@
         
         document.getElementById('companyInfoModal').classList.add('active');
     }
+
+    // Función para copiar al portapapeles
+    window.copyToClipboard = function(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showInfoModal(translate('info'), 'Número de cuenta copiado al portapapeles');
+        }).catch(err => {
+            console.error('Error al copiar al portapapeles:', err);
+            showInfoModal(translate('info'), 'Error al copiar el número de cuenta');
+        });
+    };
 
     // Formatear números con comas y puntos (ejemplo: 20,550.00)
     function formatCurrency(amount) {
@@ -2705,14 +2773,12 @@
                 const content = `
                     <div class="receipt-preview" id="receiptPreview_${receiptId}">
                         <div style="text-align: center; margin-bottom: 15px;">
-                            ${receipt.companyInfo.showToClients && receipt.companyInfo.fotoURL ? 
+                            ${receipt.companyInfo.fotoURL ? 
                                 `<img src="${receipt.companyInfo.fotoURL}" alt="Logo" style="max-width: 120px; max-height: 60px;">` : 
                                 `<i class="fas fa-building" style="font-size: 3rem; color: #15a086;"></i>`}
-                            <h3>${receipt.companyInfo.showToClients ? (receipt.companyInfo.nombreEmpresa || 'Empresa de Préstamos') : 'Empresa de Préstamos'}</h3>
-                            ${receipt.companyInfo.showToClients ? `
-                                <p>RNC: ${receipt.companyInfo.rnc || '123-456789-1'}</p>
-                                <p>${receipt.companyInfo.telefono || '809-555-5555'} - ${receipt.companyInfo.direccion || 'Calle Principal #123, Santo Domingo'}</p>
-                            ` : ''}
+                            <h3>${receipt.companyInfo.nombreEmpresa || 'PlusMoney Retom'}</h3>
+                            <p>RNC: ${receipt.companyInfo.rnc || '132-0000000-0'}</p>
+                            <p>${receipt.companyInfo.telefono || '809-555-5555'} - ${receipt.companyInfo.direccion || 'Calle Principal #123, Santo Domingo'}</p>
                         </div>
                         <hr>
                         <h3 style="text-align: center;">RECIBO DE PAGO</h3>
