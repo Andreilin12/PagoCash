@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Seguridad - PlusMoney Retom</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1abc9c;
+            --primary-dark: #16a085;
+            --secondary-color: #2a2a3f;
+            --background-color: #2c3e50;
+            --text-color: #ffffff;
+            --text-light: #a8a8a8;
+            --border-color: #444;
+            --card-bg: #34495e;
+            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            --gradient-card: linear-gradient(135deg, var(--card-bg), #2c3e50);
+            --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(21, 160, 134, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 20%);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--gradient-card);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            width: 100px;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateX(-5px);
+        }
+
+        .back-button i {
+            margin-right: 8px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin: 1.5rem 0 1rem;
+            font-size: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .security-badge {
+            background: rgba(26, 188, 156, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .last-updated {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">
+            <i class="fas fa-arrow-left"></i> Volver al Inicio
+        </a>
+        
+        <div class="header">
+            <h1><i class="fas fa-lock"></i> Política de Seguridad</h1>
+            <p>Protegiendo su información con los más altos estándares</p>
+        </div>
+
+        <h2>Compromiso con la Seguridad</h2>
+        <p>En PlusMoney Retom, la seguridad de su información personal y financiera es nuestra máxima prioridad. Implementamos múltiples capas de protección para garantizar que sus datos estén seguros en todo momento.</p>
+
+        <div class="security-badge">
+            <p><i class="fas fa-shield-alt"></i> <strong>Certificación de Seguridad:</strong> Nuestros sistemas cumplen con los estándares de la industria para la protección de datos financieros.</p>
+        </div>
+
+        <h2>Medidas de Protección de Datos</h2>
+        <p>Hemos implementado las siguientes medidas de seguridad:</p>
+        <ul>
+            <li><strong>Encriptación de datos:</strong> Toda la información sensible se encripta utilizando protocolos SSL/TLS de 256 bits</li>
+            <li><strong>Autenticación multifactor:</strong> Para acceder a sistemas críticos y realizar operaciones sensibles</li>
+            <li><strong>Firewalls avanzados:</strong> Protección perimetral para prevenir accesos no autorizados</li>
+            <li><strong>Monitoreo continuo:</strong> Sistemas de detección de intrusiones y actividades sospechosas</li>
+            <li><strong>Copias de seguridad:</strong> Respaldo regular de datos en ubicaciones seguras</li>
+        </ul>
+
+        <h2>Protección de Transacciones</h2>
+        <p>Todas las transacciones financieras están protegidas mediante:</p>
+        <ul>
+            <li>Verificación de identidad en cada transacción importante</li>
+            <li>Límites de transacción según el perfil de riesgo</li>
+            <li>Notificaciones inmediatas por SMS/email para transacciones</li>
+            <li>Tokenización de datos de pago para evitar exposición</li>
+        </ul>
+
+        <h2>Seguridad de Cuenta de Usuario</h2>
+        <p>Para proteger su cuenta, recomendamos:</p>
+        <ul>
+            <li>Utilizar una contraseña fuerte y única</li>
+            <li>No compartir sus credenciales de acceso</li>
+            <li>Actualizar regularmente su PIN de acceso</li>
+            <li>Cerrar sesión después de cada uso, especialmente en dispositivos compartidos</li>
+            <li>Habilitar notificaciones de seguridad si están disponibles</li>
+        </ul>
+
+        <h2>Protección Contra Fraude</h2>
+        <p>Contamos con sistemas avanzados para detectar y prevenir actividades fraudulentas:</p>
+        <ul>
+            <li>Análisis de comportamiento para detectar patrones inusuales</li>
+            <li>Verificación de identidad mediante múltiples factores</li>
+            <li>Monitoreo de transacciones en tiempo real</li>
+            <li>Colaboración con autoridades para combatir el fraude</li>
+        </ul>
+
+        <h2>Respuesta a Incidentes</h2>
+        <p>Contamos con un protocolo de respuesta a incidentes que incluye:</p>
+        <ul>
+            <li>Detección y análisis inmediato de posibles brechas de seguridad</li>
+            <li>Contención y erradicación de amenazas</li>
+            <li>Recuperación de sistemas y datos afectados</li>
+            <li>Notificación a clientes afectados según requerimientos legales</li>
+            <li>Revisión post-incidente para mejorar medidas de seguridad</li>
+        </ul>
+
+        <h2>Educación y Concienciación</h2>
+        <p>Capacitamos continuamente a nuestro personal en:</p>
+        <ul>
+            <li>Prácticas de seguridad de la información</li>
+            <li>Identificación de intentos de phishing y ingeniería social</li>
+            <li>Manejo adecuado de información confidencial</li>
+            <li>Protocolos de respuesta a incidentes de seguridad</li>
+        </ul>
+
+        <h2>Auditorías y Cumplimiento</h2>
+        <p>Nuestras medidas de seguridad son evaluadas regularmente mediante:</p>
+        <ul>
+            <li>Auditorías internas y externas de seguridad</li>
+            <li>Pruebas de penetración realizadas por expertos independientes</li>
+            <li>Cumplimiento de regulaciones locales e internacionales</li>
+            <li>Certificaciones de industry best practices</li>
+        </ul>
+
+        <h2>Reportar Problemas de Seguridad</h2>
+        <p>Si descubre alguna vulnerabilidad o incidente de seguridad, por favor repórtelo inmediatamente:</p>
+        <ul>
+            <li>Email: infor@retomrt.com</li>
+            <li>Teléfono: (849) 515-8440</li>
+            <li>Horario: 24/7 para emergencias de seguridad</li>
+        </ul>
+
+        <div class="last-updated">
+            <p>© 2025 Retom. Todos los derechos reservados.</p>
+            <p>Última actualización: 11 de Julio, 2025</p>
+        </div>
+    </div>
+</body>
+</html>
