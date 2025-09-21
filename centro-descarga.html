@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Elegante de Descargas</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        :root {
+            --fondo-color: #2c3e50;
+            --botones-color: #15a086;
+            --texto-color: #ecf0f1;
+            --sombra-color: rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--fondo-color);
+            color: var(--texto-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            animation: fadeInUp 1s ease-out 0.3s backwards;
+        }
+
+        .iconos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 30px;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .icono-boton {
+            background-color: transparent;
+            border: 2px solid var(--botones-color);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--texto-color);
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px var(--sombra-color);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .icono-boton:hover {
+            transform: translateY(-10px) scale(1.05);
+            background-color: var(--botones-color);
+            box-shadow: 0 8px 25px var(--sombra-color);
+        }
+
+        .icono-boton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.4s ease;
+        }
+
+        .icono-boton:hover::before {
+            left: 0;
+        }
+
+        .icono-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            position: relative;
+        }
+
+        .icono-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Icono de carga */
+        .icono-container::before {
+            content: '🔗'; /* Aquí puedes poner un emoji o un icono de carga temporal */
+            font-size: 3rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #bdc3c7;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .icono-img[src]:not([src=""]) {
+            opacity: 1;
+        }
+
+        .icono-boton:hover .icono-img {
+            opacity: 1;
+        }
+        
+        .icono-boton:hover .icono-container::before {
+            opacity: 0;
+        }
+
+        .icono-titulo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin: 0;
+            transition: color 0.3s;
+        }
+
+        .icono-boton:hover .icono-titulo {
+            color: var(--fondo-color);
+        }
+        
+        /* Animaciones */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Bienvenido a la Sección de Descargas</h1>
+            <p></p>
+        </div>
+
+        <div class="iconos-grid">
+            <a href="money.apk" class="icono-boton">
+                <div class="icono-container">
+                    <img class="icono-img" src="money-cliente.html" alt="ApplusMoney">
+                </div>
+                <h3 class="icono-titulo">PlusMoney Clientes</h3>
+            </a>
+   <!--
+            <a href="centro-descargas.html" class="icono-boton">
+                <div class="icono-container">
+                    <img class="icono-img" src="https://via.placeholder.com/80/15a086/FFFFFF?text=IMG" alt="Imágenes">
+                </div>
+                <h3 class="icono-titulo">Imágenes</h3>
+            </a>
+            
+            <a href="centro-descargas.html" class="icono-boton">
+                <div class="icono-container">
+                    <img class="icono-img" src="https://via.placeholder.com/80/15a086/FFFFFF?text=APP" alt="Software">
+                </div>
+                <h3 class="icono-titulo">Software</h3>
+            </a>
+
+            <a href="centro-descargas.html" class="icono-boton">
+                <div class="icono-container">
+                    <img class="icono-img" src="https://via.placeholder.com/80/15a086/FFFFFF?text=VIDEO" alt="Videos">
+                </div>
+                <h3 class="icono-titulo">Videos</h3>
+            </a> -->
+        </div>
+    </div>
+
+</body>
+</html>
