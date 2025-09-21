@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acerca de - PlusMoney Retom</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1abc9c;
+            --primary-dark: #16a085;
+            --secondary-color: #2a2a3f;
+            --background-color: #2c3e50;
+            --text-color: #ffffff;
+            --text-light: #a8a8a8;
+            --border-color: #444;
+            --card-bg: #34495e;
+            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            --gradient-card: linear-gradient(135deg, var(--card-bg), #2c3e50);
+            --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(21, 160, 134, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 20%);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--gradient-card);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            width: 120px;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateX(-5px);
+        }
+
+        .back-button i {
+            margin-right: 8px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin: 1.5rem 0 1rem;
+            font-size: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .value-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .value-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .team-section {
+            margin: 2rem 0;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .team-member {
+            text-align: center;
+        }
+
+        .member-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 3px solid var(--primary-color);
+        }
+
+        .contact-info {
+            background: rgba(26, 188, 156, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+
+        .last-updated {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+            
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">
+            <i class="fas fa-arrow-left"></i> Volver al Inicio
+        </a>
+        
+        <div class="header">
+            <h1><i class="fas fa-info-circle"></i> Acerca de PlusMoney Retom</h1>
+            <p>Tu socio confiable en soluciones financieras</p>
+        </div>
+
+        <h2>Nuestra Historia</h2>
+        <p>PlusMoney Retom nació en 2025 con la visión de democratizar el acceso a servicios financieros en República Dominicana. Desde nuestros humildes comienzos, hemos crecido hasta convertirnos en una institución de confianza para miles de clientes que buscan soluciones de préstamos transparentes y accesibles.</p>
+
+        <p>Fundada por un grupo de emprendedores dominicanos, nuestra empresa ha mantenido el compromiso de ofrecer servicios financieros éticos, con tasas justas y un trato personalizado a cada cliente.</p>
+
+        <h2>Nuestra Misión</h2>
+        <p>Proporcionar soluciones financieras inclusivas y accesibles que empoderen a las personas y negocios para alcanzar sus metas, mediante un servicio excepcional y productos diseñados para las necesidades específicas de la comunidad dominicana.</p>
+
+        <h2>Nuestra Visión</h2>
+        <p>Ser la institución financiera de referencia en República Dominicana, reconocida por nuestra innovación, compromiso social y excelencia en el servicio al cliente.</p>
+
+        <h2>Nuestros Valores</h2>
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-hand-holding-heart"></i>
+                </div>
+                <h3>Confianza</h3>
+                <p>Construimos relaciones basadas en la transparencia y honestidad con nuestros clientes.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h3>Innovación</h3>
+                <p>Buscamos constantemente mejorar nuestros servicios mediante tecnología y procesos innovadores.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Compromiso Social</h3>
+                <p>Contribuimos al desarrollo de nuestras comunidades mediante prácticas empresariales responsables.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-award"></i>
+                </div>
+                <h3>Excelencia</h3>
+                <p>Nos esforzamos por superar las expectativas en cada interacción con nuestros clientes.</p>
+            </div>
+        </div>
+
+        <h2>¿Por Qué Elegirnos?</h2>
+        <ul>
+            <li><strong>Experiencia:</strong> Más de 10 años sirviendo a la comunidad dominicana</li>
+            <li><strong>Tasas competitivas:</strong> Ofrecemos algunas de las tasas de interés más justas del mercado</li>
+            <li><strong>Procesos ágiles:</strong> Aprobación rápida de préstamos con documentación mínima</li>
+            <li><strong>Atención personalizada:</strong> Asesores dedicados que comprenden tus necesidades específicas</li>
+            <li><strong>Transparencia:</strong> Sin cargos ocultos ni condiciones engañosas</li>
+            <li><strong>Tecnología segura:</strong> Plataformas digitales protegidas para tu comodidad y seguridad</li>
+        </ul>
+
+        <h2>Nuestros Servicios</h2>
+        <p>Ofrecemos una variedad de productos financieros diseñados para diferentes necesidades:</p>
+        <ul>
+            <li>Préstamos personales</li>
+            <li>Préstamos comerciales para pequeñas y medianas empresas</li>
+            <li>Préstamos de emergencia</li>
+            <li>Préstamos con garantía vehicular</li>
+            <li>Asesoría financiera personalizada</li>
+        </ul>
+
+        <div class="team-section">
+            <h2>Nuestro Equipo</h2>
+            <p>Contamos con un equipo de profesionales experimentados en el sector financiero, comprometidos con brindarte el mejor servicio:</p>
+            
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="value-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h3>Roberto Sánchez</h3>
+                    <p>Director General</p>
+                </div>
+                
+                <div class="team-member">
+                    <div class="value-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>María González</h3>
+                    <p>Gerente de Operaciones</p>
+                </div>
+                
+                <div class="team-member">
+                    <div class="value-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Carlos Rodríguez</h3>
+                    <p>Jefe de Riesgos</p>
+                </div>
+                
+                <div class="team-member">
+                    <div class="value-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>Laura Martínez</h3>
+                    <p>Supervisora de Servicio al Cliente</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <h2>Contacto</h2>
+            <p>Estamos aquí para ayudarte. Contáctanos através de los siguientes medios:</p>
+            <ul>
+                <li><i class="fas fa-phone"></i> Teléfono: (849) 515-8440</li>
+                <li><i class="fas fa-envelope"></i> Email: infor@retomrt.com</li>
+                <li><i class="fas fa-map-marker-alt"></i> Dirección: Santo Domingo, República Dominicana</li>
+                <li><i class="fas fa-clock"></i> Horario: Lunes a Viernes 8:00 AM - 6:00 PM, Sábados 9:00 AM - 1:00 PM</li>
+            </ul>
+        </div>
+
+        <div class="last-updated">
+            <p>© 2025 Retom. Todos los derechos reservados.</p>
+            <p>Superintendencia de Bancos de la República Dominicana - Licencia No. 123456</p>
+        </div>
+    </div>
+</body>
+</html>
