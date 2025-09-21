@@ -319,7 +319,8 @@
                 boton.addEventListener('click', function(e) {
                     // No activar si se hizo clic en el área de copiar
                     if (!e.target.closest('.copy-url')) {
-                        window.location.href = url;
+                        // Abrir en nueva ventana externa
+                        window.open(url, '_blank');
                     }
                 });
                 
